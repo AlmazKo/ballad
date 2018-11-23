@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs"               : true,
+    "outDir"                : "./static/js",
+    "preserveConstEnums"    : true,
+    "sourceMap"             : true,
+    "inlineSourceMap"       : true,
+    "noImplicitAny"         : true,
+    "pretty"                : true,
+    "strict"                : false,
+    "module"                : "commonjs",
+    "skipLibCheck"          : true,
+    "traceResolution"       : true,
+    "target"                : "es2016",
+    "baseUrl"               : "./src"
+  },
+  "include"        : ["./src/**/*"],
+  "exclude"        : ["./node_modules"]
+}

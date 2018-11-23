@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "outDir": "./static/js",
+    "noImplicitAny": true,
+    "pretty": true,
+    "strict": false,
+    "module": "commonjs",
+    "skipLibCheck": true,
+    "traceResolution": true,
+    "removeComments": true,
+    "jsx": "react",
+    "baseUrl": "./src",
+    "target": "es2016",
+    "lib": [ "es6", "dom"]
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./node_modules"]
+}
