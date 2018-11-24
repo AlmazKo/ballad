@@ -1,4 +1,4 @@
-import { float, index, px } from '../types';
+import { float, index, px, uint } from '../types';
 import { Dir, HCELL } from './types';
 import { BasePainter } from '../draw/BasePainter';
 import { style } from './styles';
@@ -6,6 +6,7 @@ import { Metrics } from './Metrics';
 
 
 export interface Creature {
+  id: uint;
   positionX: index;
   positionY: index;
   direction: Dir;

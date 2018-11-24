@@ -10,12 +10,13 @@ import { Fireball } from './game/effects/Fireball';
 import { FireShock } from './game/effects/FireShock';
 import { ViewMap } from './game/ViewMap';
 import { Drawable } from './game/Drawable';
-import { Creature } from './game/Creature';
 import { Npc } from './game/Npc';
 import { Resources } from './game/Resources';
 import { Metrics } from './game/Metrics';
 import { FireballSpell } from './game/actions/FireballSpell';
 import { Server } from './game/Server';
+import { Appear } from './game/actions/Appear';
+import { Step } from './game/actions/Step';
 
 
 let INC: uint = 0;
@@ -51,29 +52,48 @@ class Spells implements Drawable {
 
 class Creatures implements Drawable {
 
-  private data = [] as Array<Creature & Drawable>;
+  private data = new Map<uint, Npc>();//fixme change to more abstract
 
-  add(creature: Creature & Drawable) {
-    this.data.push(creature)
+  add(creature: Npc) {
+    this.data.set(creature.id, creature)
   }
 
   draw(time: DOMHighResTimeStamp, bp: BasePainter) {
     this.data.forEach(it => {
       it.draw(time, bp)
     });
+  }
 
+  onStep(action: Step) {
+    const c = this.data.get(action.source.id);
+    if (!c) return;
+
+    c.onStep(action)
   }
 }
 
+const map       = new ViewMap();
+const server    = new Server(map);
 const moving    = new Moving();
 const creatures = new Creatures();
 const spells    = new Spells(creatures);
-const server    = new Server();
+const player    = new Player(moving, map, new Metrics(100, "Player"), server);
 
-creatures.add(new Npc(new Metrics(50, "Boar"), 15, 19));
+server.subOnAction(action => {
+  switch (true) {
 
-const map    = new ViewMap();
-const player = new Player(moving, map, new Metrics(100, "Player"), server);
+    case action instanceof Appear:
+      creatures.add(action.source as Npc);
+      break;
+
+
+    case action instanceof Step:
+      creatures.onStep(action as Step);
+      break;
+
+  }
+});
+
 
 class GameCanvas implements CanvasComposer, Pressable {
 

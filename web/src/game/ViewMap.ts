@@ -2,7 +2,7 @@ import { index, int, px, uint } from '../types';
 import { ajax } from '../util/net';
 import { BasePainter } from '../draw/BasePainter';
 import { RES } from '../index';
-import { CELL } from './types';
+import { CELL, Dir } from './types';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 import { Creature } from './Creature';
@@ -98,6 +98,27 @@ export class ViewMap {
     if (tile.type === 'blocked') return false;
 
     return true;
+  }
+
+  canStep(from: [index, index], to: Dir, isFly: boolean = false): boolean {
+
+    let [x, y] = from;
+    switch (to) {
+      case Dir.UP:
+        y--;
+        break;
+      case Dir.DOWN:
+        y++;
+        break;
+      case Dir.LEFT:
+        x--;
+        break;
+      case Dir.RIGHT:
+        x++;
+        break;
+
+    }
+    return this.canMove(from, [x, y], isFly)
   }
 
 

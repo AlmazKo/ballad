@@ -1,6 +1,6 @@
 import { LoopAnimator } from '../anim/Animator';
 import { BasePainter } from '../draw/BasePainter';
-import { float, index, px } from '../types';
+import { float, index, px, uint } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
 import { style } from './styles';
 import { Moving } from './Moving';
@@ -13,6 +13,8 @@ import { Step } from './actions/Step';
 import { Server } from './Server';
 
 export class Player implements Creature, Drawable {
+
+  id: uint = 1;//fixme harcoded
   private readonly moving: Moving;
   private map: ViewMap;
   metrics: Metrics;

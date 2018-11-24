@@ -177,7 +177,7 @@ export class Ballad {
     if (this.stopped || this.destroyed) return;
 
     this.stopped = true;
-    this.log('Stop');
+    this.log('Appear');
   }
 
   /**
