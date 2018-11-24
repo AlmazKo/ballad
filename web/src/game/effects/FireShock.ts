@@ -1,9 +1,9 @@
-import { Spell } from './Spell';
-import { float, index, px } from '../types';
-import { LoopAnimator } from '../anim/Animator';
-import { BasePainter } from '../draw/BasePainter';
-import { CELL, QCELL } from './types';
-import { RES } from '../index';
+import { Spell } from '../Spell';
+import { float, index, px } from '../../types';
+import { LoopAnimator } from '../../anim/Animator';
+import { BasePainter } from '../../draw/BasePainter';
+import { CELL, QCELL } from '../types';
+import { RES } from '../..';
 
 export class FireShock implements Spell {
   private posX: index;
@@ -51,7 +51,6 @@ export class FireShock implements Spell {
     c.drawImage(fire1, sx, 48, 16, 16, x - s, y - CELL, 16, 16);
     c.drawImage(fire1, sx, 48, 16, 16, x - s, y, 16, 16);
     c.drawImage(fire1, sx, 48, 16, 16, x - s, y + CELL, 16, 16);
-
 
     c.drawImage(fire1, sx, 48, 16, 16, x + CELL, y + s, 16, 16);
     c.drawImage(fire1, sx, 48, 16, 16, x, y + s, 16, 16);

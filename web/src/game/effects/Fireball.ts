@@ -1,10 +1,11 @@
-import { Spell } from './Spell';
-import { float, index, px } from '../types';
-import { LoopAnimator } from '../anim/Animator';
-import { BasePainter } from '../draw/BasePainter';
-import { CELL, Dir } from './types';
-import { RES } from '../index';
-import { ViewMap } from './ViewMap';
+import { Spell } from '../Spell';
+import { float, index, px } from '../../types';
+import { LoopAnimator } from '../../anim/Animator';
+import { BasePainter } from '../../draw/BasePainter';
+import { CELL, Dir } from '../types';
+import { RES } from '../..';
+import { ViewMap } from '../ViewMap';
+import { FireballSpell } from '../actions/FireballSpell';
 
 export class Fireball implements Spell {
   private readonly posX: index;
@@ -18,12 +19,12 @@ export class Fireball implements Spell {
   private f: float;
   private map: ViewMap;
 
-  constructor(direction: Dir, posX: index, posY: index, map: ViewMap) {
-    this.direction = direction;
-    this.posX      = posX;
-    this.posY      = posY;
+  constructor(spec: FireballSpell, map: ViewMap) {
+    this.direction = spec.direction;
+    this.posX      = spec.posX;
+    this.posY      = spec.posY;
     this.map       = map;
-    this.anim      = new LoopAnimator(200, (f, i) => {
+    this.anim      = new LoopAnimator(spec.speed, (f, i) => {
 
         if (i > this.lastAnimIndex) {
           const from = this.getPosition(this.lastAnimIndex);
@@ -37,7 +38,7 @@ export class Fireball implements Spell {
           }
         }
 
-        if (i >= 15) {
+        if (i >= spec.distance) {
           this.anim.finish();
           this.isFinished = true;
         } else {
@@ -65,39 +66,24 @@ export class Fireball implements Spell {
 
     this.anim.run(time);
     let shiftX: px = 0, shiftY: px = 0;
-
+    let sx: px, sy: px;
     switch (this.direction) {
       case Dir.UP:
         shiftY = -this.shift;
+        sy     = 32 * 2;
         break;
       case Dir.DOWN:
         shiftY = this.shift;
+        sy     = 32 * 6;
         break;
       case Dir.LEFT:
         shiftX = -this.shift;
+        sy     = 0;
         break;
       case Dir.RIGHT:
         shiftX = this.shift;
+        sy     = 32 * 4;
         break;
-
-    }
-
-
-    let sx: px, sy: px;
-
-    switch (this.direction) {
-      case Dir.UP:
-        sy = 32 * 2;
-        break;
-      case Dir.DOWN:
-        sy = 32 * 6;
-        break;
-      case Dir.RIGHT:
-        sy = 32 * 4;
-        break;
-      case Dir.LEFT:
-        sy = 0;
-        break
     }
 
     sx = 32 * Math.floor(this.f / 0.25);

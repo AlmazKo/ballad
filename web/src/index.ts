@@ -6,15 +6,23 @@ import { Moving } from './game/Moving';
 import { Player } from './game/Player';
 import { Spell } from './game/Spell';
 import { Dir, FIRST, SECOND } from './game/types';
-import { Fireball } from './game/Fireball';
-import { FireShock } from './game/FireShock';
+import { Fireball } from './game/effects/Fireball';
+import { FireShock } from './game/effects/FireShock';
 import { ViewMap } from './game/ViewMap';
 import { Drawable } from './game/Drawable';
 import { Creature } from './game/Creature';
 import { Npc } from './game/Npc';
 import { Resources } from './game/Resources';
 import { Metrics } from './game/Metrics';
+import { FireballSpell } from './game/actions/FireballSpell';
+import { Server } from './game/Server';
 
+
+let INC: uint = 0;
+
+export function nextId(): uint {
+  return INC++;
+}
 
 class Spells implements Drawable {
 
@@ -60,11 +68,12 @@ class Creatures implements Drawable {
 const moving    = new Moving();
 const creatures = new Creatures();
 const spells    = new Spells(creatures);
+const server    = new Server();
 
 creatures.add(new Npc(new Metrics(50, "Boar"), 15, 19));
 
 const map    = new ViewMap();
-const player = new Player(moving, map, new Metrics(100, "Player"));
+const player = new Player(moving, map, new Metrics(100, "Player"), server);
 
 class GameCanvas implements CanvasComposer, Pressable {
 
@@ -152,7 +161,11 @@ class GameCanvas implements CanvasComposer, Pressable {
         player.onStep(Dir.DOWN);
         break;
       case FIRST:
-        spells.add(new Fireball(player.direction, player.positionX, player.positionY, this.map));
+
+        const fireball = new FireballSpell(player, 200, 15);
+        server.sendAction(fireball);
+
+        spells.add(new Fireball(fireball, this.map));
         break;
       case SECOND:
         spells.add(new FireShock(player.positionX, player.positionY));

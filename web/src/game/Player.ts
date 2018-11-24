@@ -9,16 +9,20 @@ import { Drawable } from './Drawable';
 import { Creature, drawLifeLine, drawName } from './Creature';
 import { RES } from '../index';
 import { Metrics } from './Metrics';
+import { Step } from './actions/Step';
+import { Server } from './Server';
 
 export class Player implements Creature, Drawable {
   private readonly moving: Moving;
   private map: ViewMap;
   metrics: Metrics;
+  private server: Server;
 
-  constructor(moving: Moving, map: ViewMap, metrics: Metrics) {
+  constructor(moving: Moving, map: ViewMap, metrics: Metrics, server: Server) {
     this.moving  = moving;
     this.map     = map;
     this.metrics = metrics;
+    this.server  = server;
   }
 
 
@@ -132,7 +136,10 @@ export class Player implements Creature, Drawable {
       return
     }
 
-    this.movement = new LoopAnimator(250, (f, i) => {
+    const step = new Step(this, 250);
+    this.server.sendAction(step);
+
+    this.movement = new LoopAnimator(step.speed, (f, i) => {
       let isActionContinue = true;
       let next             = 0;
       const isNewPos       = i > this.lastAnimIdx;

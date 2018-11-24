@@ -5,6 +5,7 @@ import { RES } from '../index';
 import { CELL } from './types';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
+import { Creature } from './Creature';
 
 
 // type TileType = 'water'| ''
@@ -63,6 +64,7 @@ const MAP_SIZE: uint   = 32;
 const TILE_SIZE: px    = 32;
 const TILESET_SIZE: px = 23;
 
+
 export class ViewMap {
   private tiles   = new Map<index, Tile>();
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
@@ -96,6 +98,19 @@ export class ViewMap {
     if (tile.type === 'blocked') return false;
 
     return true;
+  }
+
+
+  getBasic(posX: index, posY: index): Tile | undefined {
+    const tileId = this.basic[posX + posY * MAP_SIZE];
+    if (!tileId) return undefined;
+
+    return this.tiles.get(tileId);
+  }
+
+  getCreature(posX: index, posY: index): Creature | undefined {
+
+    return undefined;
   }
 
   draw(p: BasePainter) {
