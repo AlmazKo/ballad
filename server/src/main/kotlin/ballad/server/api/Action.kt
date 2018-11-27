@@ -4,7 +4,7 @@ import ballad.server.game.ActionType
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Action(
-    private val action: ActionType,
-    private val data: Any
+data class Action(
+     val action: ActionType,
+     val data: Any
 )

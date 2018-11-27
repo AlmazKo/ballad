@@ -1,7 +1,7 @@
 package ballad.server.api
 
-import ballad.server.UP
-import ballad.server.game.ActionType.ARRIVAL
+import ballad.server.game.Game
+import ballad.server.game.GameMap
 import ballad.server.map.Lands
 import ballad.server.toJson
 import io.vertx.core.Vertx
@@ -11,8 +11,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.StaticHandler
-import kotlinx.serialization.json.JSON
-import java.util.HashSet
+import java.util.*
 
 class App(vertx: Vertx) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -22,6 +21,11 @@ class App(vertx: Vertx) {
         val rawTiles = JsonObject(Lands::class.java.getResource("/tileset.json").readText())
         val layers = JsonObject(Lands::class.java.getResource("/map.json").readText())
         val lands = Lands.parse(layers, rawTiles)
+
+
+        val map = GameMap(lands.map, lands.tiles)
+        Game(vertx, map)
+
         val server = vertx.createHttpServer()
 
 
@@ -95,8 +99,8 @@ class App(vertx: Vertx) {
             log.info("Connected!")
 
 
-            val act = Action(ARRIVAL, Npc(2, 15, 8, UP, NpcMetrics("Boar", 50, 50)))
-            ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
+            //            val act = Action(ARRIVAL, Npc(2, 15, 8, UP, NpcMetrics("Boar", 50, 50)))
+            //            ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
 
         }
         server.listen {

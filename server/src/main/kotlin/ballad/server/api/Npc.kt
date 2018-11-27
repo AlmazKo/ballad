@@ -1,6 +1,6 @@
 package ballad.server.api
 
-import ballad.server.UP
+import UP
 import kotlinx.serialization.Serializable
 
 @Serializable
