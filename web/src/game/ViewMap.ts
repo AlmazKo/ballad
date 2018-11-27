@@ -35,34 +35,26 @@ class Tile {
 interface Chunk {
   data: int[],
   x: int,
-  y: int,
-  height: int,
-  width: int
+  y: int
 }
 
 let rawMap: any                = null;
 let tiles: Map<index, RawTile> = new Map();
 
-ajax("map.json", data => {
-  rawMap = data.layers
+ajax("http://localhost/map", data => {
+  rawMap = data.data
 });
 
-ajax("tileset.json", (data: any) => {
-  data.tiles.forEach((t: any) => {
-    const tile = {id: t.id} as any;
-
-    t.properties.forEach((p: any) => {
-      if (p.name === "type") {
-        tile['type'] = p.value;
-      }
-    });
+ajax("http://localhost/tiles", (data: any) => {
+  data.data.forEach((t: any) => {
+    const tile = {id: t.id, type: t.type.toLowerCase()} as any;
     tiles.set(t.id, tile);
   });
 });
 
 const MAP_SIZE: uint   = 32;
-const TILE_SIZE: px    = 32;
-const TILESET_SIZE: px = 23;
+const TILE_SIZE: px    = 32;//fixme remove. take from api
+const TILESET_SIZE: px = 23;//fixme remove. take from api
 
 
 export class ViewMap {
@@ -136,7 +128,7 @@ export class ViewMap {
 
   draw(p: BasePainter) {
 
-    if (!rawMap && !tiles.size) return;
+    if (!rawMap || !tiles.size) return;
 
     if (this.tiles.size === 0) {
       this.initData(rawMap, tiles);
@@ -169,50 +161,29 @@ export class ViewMap {
     p.ctx.drawImage(img, t.sx, t.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
   }
 
-  private initData(raw: any, tileProps: Map<index, RawTile>) {
+  private initData(raw: int[], tileProps: Map<index, RawTile>) {
 
     let posX = 16, posY = 16;
 
-    raw[0].chunks.forEach((c: Chunk) => {
 
-      posX = 16 + c.x;
-      posY = 9 + c.y;
-      c.data.forEach((v, idx) => {
-        if (v === 0) return;
+    posX = 0;
+    posY = 0;
+    raw.forEach((v, idx) => {
+      if (v === 0) return;
 
 
-        const t     = v - 1;
-        const tileX = t % TILESET_SIZE;
-        const tileY = Math.floor(t / TILESET_SIZE);
-        const sx    = TILE_SIZE * tileX;
-        const sy    = TILE_SIZE * tileY;
-        const props = tileProps.get(t);
-        const type  = !props ? null : props.type;
-        this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
+      const t     = v - 1;
+      const tileX = t % TILESET_SIZE;
+      const tileY = Math.floor(t / TILESET_SIZE);
+      const sx    = TILE_SIZE * tileX;
+      const sy    = TILE_SIZE * tileY;
+      const props = tileProps.get(t);
+      const type  = !props ? null : props.type;
+      this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
 
-        this.basic[posX + idx % c.width + (posY + Math.floor(idx / c.height)) * MAP_SIZE] = t;
+      this.basic[posX + idx % 32 + (posY + Math.floor(idx / 32)) * MAP_SIZE] = t;
 
-      });
     });
 
-    raw[1].chunks.forEach((c: Chunk) => {
-      posX = 16 + c.x;
-      posY = 9 + c.y;
-      c.data.forEach((v, idx) => {
-        if (v === 0) return;
-        const t = v - 1;
-
-        const tileX = t % TILESET_SIZE;
-        const tileY = Math.floor(t / TILESET_SIZE);
-        const sx    = TILE_SIZE * tileX;
-        const sy    = TILE_SIZE * tileY;
-        const props = tileProps.get(t);
-        const type  = !props ? null : props.type;
-
-        this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
-
-        this.objects[posX + idx % c.width + (posY + Math.floor(idx / c.height)) * MAP_SIZE] = t;
-      })
-    });
   }
 }

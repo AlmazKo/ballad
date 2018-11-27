@@ -13,7 +13,7 @@ export class Resources {
 
   private load(name: string, onLoaded: () => void) {
     let img    = new Image();
-    img.src    = `resources/${name}.png`;
+    img.src    = `http://localhost/res/${name}.png`;
     img.onload = () => {
       this.data[name] = img;
       onLoaded();

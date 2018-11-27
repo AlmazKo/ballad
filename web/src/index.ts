@@ -15,7 +15,7 @@ import { Resources } from './game/Resources';
 import { Metrics } from './game/Metrics';
 import { FireballSpell } from './game/actions/FireballSpell';
 import { Server } from './game/Server';
-import { Appear } from './game/actions/Appear';
+import { Arrival } from './game/actions/Arrival';
 import { Step } from './game/actions/Step';
 
 
@@ -82,7 +82,7 @@ const player    = new Player(moving, map, new Metrics(100, "Player"), server);
 server.subOnAction(action => {
   switch (true) {
 
-    case action instanceof Appear:
+    case action instanceof Arrival:
       creatures.add(action.source as Npc);
       break;
 

@@ -1,4 +1,5 @@
 .idea
+*/.iml
 web/node_modules
 web/dist
-*.DS_Storegit
+*.DS_Store

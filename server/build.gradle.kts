@@ -13,10 +13,12 @@ plugins {
     application
     kotlin("jvm") version "1.3.10"
     id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("kotlinx-serialization") version "1.3.0"
 }
 
 repositories {
     jcenter()
+    maven(url = "https://kotlin.bintray.com/kotlinx")
 }
 
 val javaVersion: JavaVersion by extra { JavaVersion.VERSION_1_8 }
@@ -41,7 +43,9 @@ application {
 dependencies {
     compile("org.jetbrains:annotations:15.0")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.9.0")
     compile("io.vertx:vertx-core:3.5.4")
+    compile("io.vertx:vertx-web:3.5.4")
     compile("org.apache.logging.log4j:log4j-api:2.10.0")
     compile("org.apache.logging.log4j:log4j-core:2.10.0")
     compile("org.apache.logging.log4j:log4j-slf4j-impl:2.10.0")
