@@ -130,7 +130,7 @@ class GameCanvas implements CanvasComposer, Pressable {
     const p = this.p;
 
 
-    this.map.draw(p);
+    this.map.draw(p, player.positionX, player.positionY);
     creatures.draw(time, p);
     player.draw(time, p);
     spells.draw(time, p);

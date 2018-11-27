@@ -126,7 +126,7 @@ export class ViewMap {
     return undefined;
   }
 
-  draw(p: BasePainter) {
+  draw(p: BasePainter, playerX: index, playerY: index) {
 
     if (!rawMap || !tiles.size) return;
 
@@ -143,11 +143,24 @@ export class ViewMap {
       this.drawTile(p, tileId, idx);
     });
 
+    this.drawFog(playerX, playerY, p);
+
     for (let pos = 1; pos < MAP_SIZE; pos++) {
       p.vline(pos * CELL, 0, MAP_SIZE * CELL, style.grid as StrokeStyle);
       p.hline(0, MAP_SIZE * CELL, pos * CELL, style.grid as StrokeStyle);
     }
 
+  }
+
+  private drawFog(playerX: index, playerY: index, p: BasePainter) {
+    this.basic.forEach((_: uint, idx: index) => {
+      const x = (idx % MAP_SIZE);
+      const y = Math.floor(idx / MAP_SIZE);
+
+      if (x < playerX + 10 && x > playerX - 10 && y < playerY + 10 && y > playerY - 10) return;
+      //fixme performance; make 4 rectangles
+      p.fillRect(x * CELL, y * CELL, TILE_SIZE, TILE_SIZE, style.fog)
+    });
   }
 
   drawTile(p: BasePainter, tileId: uint, idx: index) {
