@@ -32,10 +32,10 @@ class NpcStrategy(
             //fixme infinity loop
             dir = Direction.values()[Random.nextInt(0, 3)]
             ++attemtps
-        } while (!canStep(dir) && attemtps < 4)
+        } while (!canStep(dir) && attemtps < 5)
 
-        if (attemtps >= 3) {
-            println("Fail get direction")
+        if (attemtps >= 5) {
+            println("Fail get direction" + npc.state)
             return null
         }
 

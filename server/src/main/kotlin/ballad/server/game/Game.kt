@@ -2,8 +2,9 @@ package ballad.server.game
 
 import ballad.server.tsm
 import io.vertx.core.Vertx
+import io.vertx.core.http.ServerWebSocket
 
-class Game(val vertx: Vertx,val map: GameMap) {
+class Game(vertx: Vertx,val map: GameMap) {
 
     var id = 0;
     init {

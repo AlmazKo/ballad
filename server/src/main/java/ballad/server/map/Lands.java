@@ -55,7 +55,7 @@ public class Lands {
             int id = tile.getInteger("id");
             String rawType = tile.getString("type");
 
-            int t = id - 1;
+            int t = id;
 
             TileType type = parseTileType(rawType);
 

@@ -1,6 +1,6 @@
 package ballad.server.game
 
-class NpcState(
+data class NpcState(
     var isPassive: Boolean,
     var life: Int,
     var x: Int,

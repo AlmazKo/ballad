@@ -1,5 +1,7 @@
 package ballad.server.api
 
+import UP
+import ballad.server.game.ActionType
 import ballad.server.game.Game
 import ballad.server.game.GameMap
 import ballad.server.map.Lands
@@ -11,6 +13,7 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.StaticHandler
+import kotlinx.serialization.json.JSON
 import java.util.*
 
 class App(vertx: Vertx) {
@@ -97,10 +100,12 @@ class App(vertx: Vertx) {
 
         server.websocketHandler { ws ->
             log.info("Connected!")
+            val act = Action(ActionType.ARRIVAL, Npc(2, 15, 8, UP, NpcMetrics("Boar", 50, 50)))
+            ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
 
-
-            //            val act = Action(ARRIVAL, Npc(2, 15, 8, UP, NpcMetrics("Boar", 50, 50)))
-            //            ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
+//            broadCasters.add {
+//
+//            }
 
         }
         server.listen {

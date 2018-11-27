@@ -1,6 +1,6 @@
 package ballad.server.game
 
-class Step(
+data class Step(
     val fromX: Int,
     val fromY: Int,
     val direction: Direction,
