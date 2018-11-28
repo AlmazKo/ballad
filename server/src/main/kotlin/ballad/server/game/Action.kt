@@ -1,4 +1,7 @@
 package ballad.server.game
 
 
-interface Action
+interface Action {
+    val x: Int
+    val y: Int
+}

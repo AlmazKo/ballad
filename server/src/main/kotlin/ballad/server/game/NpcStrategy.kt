@@ -6,6 +6,7 @@ import ballad.server.game.Direction.LEFT
 import ballad.server.game.Direction.RIGHT
 import ballad.server.game.Direction.UP
 import ballad.server.map.TileType
+import io.vertx.core.logging.LoggerFactory
 import kotlin.random.Random
 
 class NpcStrategy(
@@ -62,8 +63,17 @@ class NpcStrategy(
 
         val tile = map[toX, toY] ?: return false
 
-        return tile.type !== TileType.WALL && tile.type !== TileType.WATER
+        val can = tile.type !== TileType.WALL && tile.type !== TileType.WATER
 
+        if (can) {
+            log.info("Next move to $tile")
+        }
+
+        return can;
+    }
+
+    companion object {
+        val log = LoggerFactory.getLogger(javaClass)
     }
 
 }

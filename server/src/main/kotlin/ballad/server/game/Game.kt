@@ -16,37 +16,32 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         val actions = ActionConsumer()
 
-
         map.strategies.forEach { it.onTick(id++, tsm(), actions) }
+        val playerActions = HashMap<Int, MutableList<Action>>()
 
-        map.players.values.forEach { p ->
+        actions.data.forEach { a ->
+            map.players.values.forEach { p ->
 
-            val x = p.state.x
-            val y = p.state.x
-            map.npcs.values.forEach { n ->
-                val playerActions = ArrayList<Action>()
-                if (n.x < x + 10 && n.x > x - 10 && n.y < y + 10 && n.y > y - 10) {
-                    if (p.zone.put(n.id, n) == null) {
-
-                        val act = Arrival(n)
-                        actions.add(act)
-                        playerActions.add(act)
-
-
+                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+                when (a) {
+                    is Step -> {
+                        if (a.x < p.x + 10 && a.x > p.x - 10 && a.y < p.y + 10 && a.y > p.y - 10) {
+                            if (!p.zone.contains(a.creatureId)) {
+                                val loaded = map.npcs[a.creatureId]!!
+                                p.zone[a.creatureId] = loaded
+                                pActions.add(Arrival(a.x, a.y, loaded))
+                            }
+                            pActions.add(a)
+                        }
                     }
-                    //todo moving
-
-                } else {
-                    p.zone.remove(n.id)
-                }
-
-
-                if (this.playerHandler.contains(p.id)) {
-                    this.playerHandler[p.id]!!.invoke(playerActions)
                 }
             }
         }
+
+        //after tick process
+        playerActions.forEach { pId, acts -> playerHandler[pId]!!.invoke(acts) }
     }
+
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
         playerHandler[playerId] = handler
     }

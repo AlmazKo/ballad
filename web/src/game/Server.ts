@@ -1,10 +1,7 @@
 import { Action } from './actions/Action';
-import { Npc } from './Npc';
-import { Metrics } from './Metrics';
 import { Arrival } from './actions/Arrival';
-import { Step } from './actions/Step';
-import { Dir } from './types';
 import { ViewMap } from './ViewMap';
+import { Step } from './actions/Step';
 
 export class Server {
   private handler: (action: Action) => void;
@@ -12,8 +9,8 @@ export class Server {
   private ws: WebSocket;
 
   constructor(map: ViewMap) {
-    this.map = map;
-    this.ws = new WebSocket('ws://localhost')
+    this.map          = map;
+    this.ws           = new WebSocket('ws://localhost')
     this.ws.onmessage = (event) => this.onRawData(JSON.parse(event.data))
   }
 
@@ -23,6 +20,11 @@ export class Server {
       case "ARRIVAL":
         const a = new Arrival(data.data[0], data.data[1]);
         this.onAction(a);
+        break;
+
+      case "STEP":
+        // const s = new Step(data.data[0], data.data[1]);
+        // this.onAction(a);
     }
 
   }

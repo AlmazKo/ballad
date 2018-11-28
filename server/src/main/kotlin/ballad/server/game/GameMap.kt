@@ -8,7 +8,7 @@ import ballad.server.map.TileType.WALL
 import ballad.server.map.TileType.WATER
 
 class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
-    val npcs = HashMap<Long, Npc>()
+    val npcs = HashMap<Int, Npc>()
     val strategies = ArrayList<NpcStrategy>()
     val players = HashMap<Long, Player>()
 
@@ -16,8 +16,8 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     init {
         val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
 
-            val npc = Npc(2, type, 50, CreatureState(50, 15, 17, UP), 2)
-        npcs[1] = npc
+        val npc = Npc(2, type, 50, CreatureState(50, 15, 17, UP), 2)
+        npcs[2] = npc
 
 
         strategies.add(NpcStrategy(npc, this))
