@@ -1,16 +1,16 @@
-import { LoopAnimator } from '../anim/Animator';
-import { BasePainter } from '../draw/BasePainter';
-import { float, index, px, uint } from '../types';
-import { CELL, Dir, HCELL, QCELL } from './types';
-import { style } from './styles';
-import { Moving } from './Moving';
-import { ViewMap } from './ViewMap';
-import { Drawable } from './Drawable';
-import { Creature, drawLifeLine, drawName } from './Creature';
-import { RES } from '../index';
-import { Metrics } from './Metrics';
-import { Step } from './actions/Step';
-import { Server } from './Server';
+import {Animator, LoopAnimator} from '../anim/Animator';
+import {BasePainter} from '../draw/BasePainter';
+import {float, index, px, uint} from '../types';
+import {CELL, Dir, HCELL, QCELL} from './types';
+import {style} from './styles';
+import {Moving} from './Moving';
+import {ViewMap} from './ViewMap';
+import {Drawable} from './Drawable';
+import {Creature, drawLifeLine, drawName} from './Creature';
+import {RES} from '../index';
+import {Metrics} from './Metrics';
+import {Step} from './actions/Step';
+import {Server} from './Server';
 
 export class Player implements Creature, Drawable {
 
@@ -21,10 +21,10 @@ export class Player implements Creature, Drawable {
   private server: Server;
 
   constructor(moving: Moving, map: ViewMap, metrics: Metrics, server: Server) {
-    this.moving  = moving;
-    this.map     = map;
+    this.moving = moving;
+    this.map = map;
     this.metrics = metrics;
-    this.server  = server;
+    this.server = server;
   }
 
 
@@ -45,14 +45,14 @@ export class Player implements Creature, Drawable {
   direction = Dir.DOWN;
   positionX = 17;
   positionY = 10;
-  shiftX    = 0;
-  shiftY    = 0;
+  shiftX = 0;
+  shiftY = 0;
 
   private nextPosition: [index, index] | null = null;
-  private movement: LoopAnimator              = null;
-  private lastAnimIdx: index                  = 0;
-  private frozen: Dir                         = 0;
-  private rotated                             = false;
+  private movement: Animator = null;
+  private lastAnimIdx: index = 0;
+  private frozen: Dir = 0;
+  private rotated = false;
 
   draw(time: DOMHighResTimeStamp, bp: BasePainter) {
 
@@ -61,7 +61,7 @@ export class Player implements Creature, Drawable {
     }
 
     let x: px = this.positionX * CELL + this.shiftX,
-        y: px = this.positionY * CELL + this.shiftY;
+      y: px = this.positionY * CELL + this.shiftY;
 
 
     const actualCellX = this.shiftX < HCELL ? this.positionX * CELL : this.positionX * CELL + CELL;
@@ -73,22 +73,22 @@ export class Player implements Creature, Drawable {
     switch (this.direction) {
       case Dir.UP:
         sy = 64;
-        s  = -this.shiftY / CELL;
+        s = -this.shiftY / CELL;
         break;
 
       case Dir.DOWN:
         sy = 0;
-        s  = this.shiftY / CELL;
+        s = this.shiftY / CELL;
         break;
 
       case Dir.RIGHT:
         sy = 32;
-        s  = this.shiftX / CELL;
+        s = this.shiftX / CELL;
         break;
 
       case Dir.LEFT:
         sy = 96;
-        s  = -this.shiftX / CELL;
+        s = -this.shiftX / CELL;
         break
     }
 
@@ -128,7 +128,7 @@ export class Player implements Creature, Drawable {
   }
 
   mm(dr: Dir) {
-    const nextPs   = this.nextPos(dr);
+    const nextPs = this.nextPos(dr);
     this.direction = this.frozen ? this.frozen : dr;
 
     if (this.map.canMove([this.positionY, this.positionY], nextPs)) {
@@ -141,71 +141,46 @@ export class Player implements Creature, Drawable {
     const step = new Step(this, 250);
     this.server.sendAction(step);
 
-    this.movement = new LoopAnimator(step.speed, (f, i) => {
-      let isActionContinue = true;
-      let next             = 0;
-      const isNewPos       = i > this.lastAnimIdx;
+    this.movement = new Animator(step.speed, (f) => {
+      const isNewPos = f >= 1;
 
-      if (isNewPos) {
-        next = this.moving.next();
-        console.warn("NEXT " + next);
-
-        isActionContinue = dr === next;
-
-        switch (dr) {
-          case Dir.LEFT:
-            this.positionX--;
-            break;
-          case Dir.RIGHT:
-            this.positionX++;
-            break;
-          case Dir.UP:
-            this.positionY--;
-            break;
-          case Dir.DOWN:
-            this.positionY++;
-            break;
-        }
-
-
-        if (isActionContinue && !this.map.canMove([this.positionY, this.positionY], this.nextPos(next))) {
-          isActionContinue = false
-        }
-
-        console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);
+      if (!isNewPos) {
+        this.updMoving(dr, f);
+        return;
       }
 
-      this.updMoving(dr, f, isActionContinue);
-
-      if (isNewPos) {
-
-        if (isActionContinue) {
-          this.lastAnimIdx = i;
-        } else {
-          this.lastAnimIdx = 0;
-          this.movement.finish();
-          this.movement = null;
-
-          if (next) this.mm(next);
-        }
+      switch (dr) {
+        case Dir.LEFT:
+          this.positionX--;
+          break;
+        case Dir.RIGHT:
+          this.positionX++;
+          break;
+        case Dir.UP:
+          this.positionY--;
+          break;
+        case Dir.DOWN:
+          this.positionY++;
+          break;
       }
+      this.shiftX = 0;
+      this.shiftY = 0;
+      this.movement = null;
 
+      const next = this.moving.next();
+
+      if (next) this.mm(next);
+
+      console.warn("NEXT " + next);
     });
 
   }
 
-  updMoving(curr: Dir, f: float, isContinue: boolean) {
-
-    if (isContinue) {
-      if (curr == Dir.LEFT) this.shiftX = -f * CELL;
-      if (curr == Dir.RIGHT) this.shiftX = f * CELL;
-      if (curr == Dir.UP) this.shiftY = -f * CELL;
-      if (curr == Dir.DOWN) this.shiftY = f * CELL;
-
-    } else {
-      this.shiftX = 0;
-      this.shiftY = 0;
-    }
+  updMoving(curr: Dir, f: float) {
+    if (curr == Dir.LEFT) this.shiftX = -f * CELL;
+    if (curr == Dir.RIGHT) this.shiftX = f * CELL;
+    if (curr == Dir.UP) this.shiftY = -f * CELL;
+    if (curr == Dir.DOWN) this.shiftY = f * CELL;
   }
 
   onFreezeDirection(frozen: boolean) {
