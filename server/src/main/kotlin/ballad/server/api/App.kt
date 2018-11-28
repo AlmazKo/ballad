@@ -1,13 +1,16 @@
 package ballad.server.api
 
 import ballad.server.game.ActionType.ARRIVAL
+import ballad.server.game.ActionType.STEP
 import ballad.server.game.Arrival
 import ballad.server.game.Game
 import ballad.server.game.GameMap
+import ballad.server.game.Step
 import ballad.server.map.Lands
 import ballad.server.toJson
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
+import io.vertx.core.http.HttpServer
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
@@ -15,37 +18,48 @@ import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.StaticHandler
 import kotlinx.serialization.json.JSON
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class App(vertx: Vertx) {
     private val log = LoggerFactory.getLogger(javaClass)
+    private val playerInc = AtomicInteger(0)
 
     init {
-
-        val rawTiles = JsonObject(Lands::class.java.getResource("/tileset.json").readText())
-        val layers = JsonObject(Lands::class.java.getResource("/map.json").readText())
-        val lands = Lands.parse(layers, rawTiles)
-
-
+        val lands = loadLands()
         val map = GameMap(lands.map, lands.tiles)
         val game = Game(vertx, map)
-
         val server = vertx.createHttpServer()
 
+        initApi(vertx, lands, server)
+        initWsApi(server, map, game)
 
+        server.listen {
+            log.info("Started!")
+        }
+    }
+
+    private fun initWsApi(server: HttpServer, map: GameMap, game: Game) {
+        server.websocketHandler { ws ->
+            val id = playerInc.incrementAndGet()
+            log.info("Connected player: #$id")
+
+            map.addPlayer(id)
+            game.subscribe(id) { actions ->
+                actions.forEach {
+                    val act = when (it) {
+                        is Arrival -> Action(ARRIVAL, Npc(it))
+                        is Step -> Action(STEP, Step(it))
+                        else -> return@forEach
+                    }
+                    ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
+                }
+            }
+        }
+    }
+
+    private fun initApi(vertx: Vertx, lands: Lands, server: HttpServer) {
         val router = Router.router(vertx)
-
-        val cors = CorsHandler.create("*")
-        cors.allowedMethod(HttpMethod.GET)
-
-
-        val headers = HashSet<String>()
-        headers.add("content-type")
-        headers.add("origin")
-        headers.add("content-accept")
-        headers.add("x-client-time")
-        cors.maxAgeSeconds(600)
-        cors.allowedHeaders(headers)
-        router.route().handler(cors)
+        initCors(router)
 
         router.route("/res/*").handler(StaticHandler.create("../resources"))
 
@@ -71,64 +85,26 @@ class App(vertx: Vertx) {
                     .toString()
             )
         }
-        var ids = 0;
 
         server.requestHandler(router::accept)
-
-        var fs = vertx.fileSystem()
-
-        //        server.requestHandler { req ->
-        //            when (req.path()) {
-        //                "/map" -> {
-        //                    lands.map
-        //                    val vp = ViewMap(0, 0, lands.map)
-        //                    req.response().putHeader("content-type", "application/json")
-        //
-        //                    req.response().end("""{"x":${vp.x}, "y":${vp.y}, chunk:[${vp.chunk.joinToString(",")}]}""")
-        //                }
-        //
-        //                "/tiles" -> {
-        //
-        //                }
-        //                "/tileset" -> {
-        //                    req.response().putHeader("content-type", "image/png")
-        //
-        //                    req.query()
-        //                    req.response().end(tileset)
-        //                }
-        //            }
-        //        }
-
-        server.websocketHandler { ws ->
-            log.info("Connected!")
-
-
-            map.addPlayer(1)
-            game.subscribe(1) { actions ->
-
-
-                actions.forEach {
-                    val act = when (it) {
-                        is Arrival -> Action(ARRIVAL, Npc(it))
-                        else -> return@forEach
-                    }
-                    ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
-                }
-            }
-        }
-        server.listen {
-            log.info("Started!")
-        }
     }
 
-    companion object {
-        @JvmStatic
-        fun main(vararg args: String) {
+    private fun initCors(router: Router) {
+        val cors = CorsHandler.create("*")
+        cors.allowedMethod(HttpMethod.GET)
+        val headers = HashSet<String>()
+        headers.add("content-type")
+        headers.add("origin")
+        headers.add("content-accept")
+        headers.add("x-client-time")
+        cors.maxAgeSeconds(600)
+        cors.allowedHeaders(headers)
+        router.route().handler(cors)
+    }
 
-            System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.Log4j2LogDelegateFactory")
-            System.setProperty("user.timezone", "UTC")
-            App(Vertx.vertx())
-
-        }
+    private fun loadLands(): Lands {
+        val rawTiles = JsonObject(Lands::class.java.getResource("/tileset.json").readText())
+        val layers = JsonObject(Lands::class.java.getResource("/map.json").readText())
+        return Lands.parse(layers, rawTiles)
     }
 }

@@ -55,7 +55,7 @@ tasks.withType<ShadowJar> {
     archiveName = "server.jar"
     transform(de.sebastianboegl.gradle.plugins.shadow.transformers.Log4j2PluginsFileTransformer::class.java)
     manifest {
-        attributes(mapOf("Main-Class" to "ballad.server.api.App"))
+        attributes(mapOf("Main-Class" to "ballad.server.Main"))
 
     }
     mergeServiceFiles {
