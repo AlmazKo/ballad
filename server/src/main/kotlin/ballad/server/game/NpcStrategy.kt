@@ -30,7 +30,7 @@ class NpcStrategy(
         var attemtps = 0
         do {
             //fixme infinity loop
-            dir = Direction.values()[Random.nextInt(0, 3)]
+            dir = Direction.values()[Random.nextInt(0, 4)]
             ++attemtps
         } while (!canStep(dir) && attemtps < 5)
 

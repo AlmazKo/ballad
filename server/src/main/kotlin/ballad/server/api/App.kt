@@ -1,7 +1,7 @@
 package ballad.server.api
 
-import UP
-import ballad.server.game.ActionType
+import ballad.server.game.ActionType.ARRIVAL
+import ballad.server.game.Arrival
 import ballad.server.game.Game
 import ballad.server.game.GameMap
 import ballad.server.map.Lands
@@ -27,7 +27,7 @@ class App(vertx: Vertx) {
 
 
         val map = GameMap(lands.map, lands.tiles)
-        Game(vertx, map)
+        val game = Game(vertx, map)
 
         val server = vertx.createHttpServer()
 
@@ -71,6 +71,7 @@ class App(vertx: Vertx) {
                     .toString()
             )
         }
+        var ids = 0;
 
         server.requestHandler(router::accept)
 
@@ -100,13 +101,20 @@ class App(vertx: Vertx) {
 
         server.websocketHandler { ws ->
             log.info("Connected!")
-            val act = Action(ActionType.ARRIVAL, Npc(2, 15, 8, UP, NpcMetrics("Boar", 50, 50)))
-            ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
 
-//            broadCasters.add {
-//
-//            }
 
+            map.addPlayer(1)
+            game.subscribe(1) { actions ->
+
+
+                actions.forEach {
+                    val act = when (it) {
+                        is Arrival -> Action(ARRIVAL, Npc(it))
+                        else -> return@forEach
+                    }
+                    ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
+                }
+            }
         }
         server.listen {
             log.info("Started!")

@@ -5,13 +5,19 @@ import ballad.server.game.Direction.LEFT
 import ballad.server.game.Direction.RIGHT
 import ballad.server.game.Direction.UP
 
-open class Npc(
-    override val id: Long,
-    override val type: CreatureType,
-    override val life: Int,
-    val state: NpcState,
+data class Npc(
+    override val id: Int,
+    val type: CreatureType,
+    val life: Int,
+    override val state: CreatureState,
     val threatDistance: Int
 ) : Creature {
+
+
+    override val name get() = type.name
+    override val x get() = state.x
+    override val y get() = state.y
+
 
     fun step(direction: Direction) {
         state.direction = direction

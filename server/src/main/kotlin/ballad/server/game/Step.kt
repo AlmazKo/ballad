@@ -5,5 +5,5 @@ data class Step(
     val fromY: Int,
     val direction: Direction,
     val speed: Int,
-    val creatureId: Long
+    val creatureId: Int
 ) : Action
