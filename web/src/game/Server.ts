@@ -16,17 +16,20 @@ export class Server {
 
   private onRawData(data: any) {
     console.log("Raw data", data);
+    const d = data.data;
     switch (data.action) {
       case "ARRIVAL":
-        const a = new Arrival(data.data[0], data.data[1]);
-        this.map.creatures.set(a.source.id, a.source);
+        const a = new Arrival(d);
+        this.map.creatures.set(a.creature.id, a.creature);
         this.onAction(a);
         break;
 
       case "STEP":
-        const d        = data.data[1];
+        //ignore it
+        if(d.creatureId === 1) return;
         const creature = this.map.creatures.get(d.creatureId);
-        const s        = new Step(creature, d.speed, d.direction);
+        if (!creature) throw Error("Not found creature: " + d.creatureId);
+        const s = new Step(creature, d.duration, d.direction);
         this.onAction(s);
     }
 

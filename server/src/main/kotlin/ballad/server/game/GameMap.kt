@@ -10,7 +10,7 @@ import ballad.server.map.TileType.WATER
 class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     val npcs = HashMap<Int, Npc>()
     val strategies = ArrayList<NpcStrategy>()
-    val players = HashMap<Long, Player>()
+    val players = HashMap<Int, Player>()
 
 
     init {

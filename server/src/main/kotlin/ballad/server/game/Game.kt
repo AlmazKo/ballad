@@ -2,21 +2,59 @@ package ballad.server.game
 
 import ballad.server.tsm
 import io.vertx.core.Vertx
+import io.vertx.core.logging.LoggerFactory
 
 class Game(vertx: Vertx, val map: GameMap) {
 
+    private val log = LoggerFactory.getLogger(javaClass)
     private val playerHandler = HashMap<Int, (actions: List<Action>) -> Unit>()
-    var id = 0;
+    private val playerRequests = ArrayList<Action>()
+
+    var id = -1
+
+
+    private val steps = HashMap<Int, MutableList<Step>>()
 
     init {
-        vertx.setPeriodic(200) { onTick() }
+        vertx.setPeriodic(TICK_TIME.toLong()) { onTick() }
     }
 
     private fun onTick() {
 
+        id++
+
+        val time = tsm()
         val actions = ActionConsumer()
 
-        map.strategies.forEach { it.onTick(id++, tsm(), actions) }
+
+        val planned = steps.remove(id)
+
+        if (planned !== null) {
+            planned.forEach {
+                it.creature.step(it.direction)
+            }
+        }
+
+        playerRequests.forEach {
+            if (it is Step) {
+                //add validation
+                actions.add(it)
+            }
+        }
+
+        playerRequests.clear()
+
+
+        map.strategies.forEach { it.onTick(id, time, actions) }
+
+        actions.data.forEach {
+            if (it is Step) {
+                val plannedId = id + it.duration / TICK_TIME
+                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
+            }
+        }
+
+
         val playerActions = HashMap<Int, MutableList<Action>>()
 
         actions.data.forEach { a ->
@@ -26,11 +64,13 @@ class Game(vertx: Vertx, val map: GameMap) {
                 when (a) {
                     is Step -> {
                         if (a.x < p.x + 10 && a.x > p.x - 10 && a.y < p.y + 10 && a.y > p.y - 10) {
-                            if (!p.zone.contains(a.creatureId)) {
-                                val loaded = map.npcs[a.creatureId]!!
-                                p.zone[a.creatureId] = loaded
-                                pActions.add(Arrival(a.x, a.y, loaded))
+                            if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
+                                p.zone[a.creature.id] = a.creature
+                                val arr = Arrival(a.x, a.y, time, a.creature)
+                                log.info("New Player action: {}", arr)
+                                pActions.add(arr)
                             }
+                            log.info("New Player action: {}", a)
                             pActions.add(a)
                         }
                     }
@@ -39,7 +79,9 @@ class Game(vertx: Vertx, val map: GameMap) {
         }
 
         //after tick process
-        playerActions.forEach { pId, acts -> playerHandler[pId]!!.invoke(acts) }
+        playerActions.forEach { pId, acts ->
+            playerHandler[pId]?.invoke(acts)
+        }
     }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
@@ -47,7 +89,11 @@ class Game(vertx: Vertx, val map: GameMap) {
     }
 
     fun send(action: Action) {
+        playerRequests.add(action)
+    }
 
+    companion object {
+        const val TICK_TIME = 200
     }
 
 }

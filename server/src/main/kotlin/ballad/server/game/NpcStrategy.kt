@@ -18,14 +18,14 @@ class NpcStrategy(
     fun onTick(id: Int, time: Tsm, consumer: ActionConsumer) {
         if (time > nextPlannedTime) {
 
-            val step = passive() ?: return
+            val step = passive(time) ?: return
 
             consumer.add(step)
             nextPlannedTime = time + 1000
         }
     }
 
-    private fun passive(): Step? {
+    private fun passive(time: Tsm): Step? {
 
         var dir: Direction
         var attemtps = 0
@@ -39,10 +39,8 @@ class NpcStrategy(
             println("Fail get direction" + npc.state)
             return null
         }
-        val action = Step(npc.state.x, npc.state.y, dir, 800, npc.id)
 
-        npc.step(dir)
-        return action
+        return Step(npc.state.x, npc.state.y, time, dir, 800, npc)
     }
 
 
@@ -63,14 +61,11 @@ class NpcStrategy(
     private fun canMove(toX: Int, toY: Int): Boolean {
 
         val tile = map[toX, toY] ?: return false
-
-        log.info("Next to $tile")
         return tile.type !== TileType.WALL && tile.type !== TileType.WATER
-
     }
 
     companion object {
-        val log = LoggerFactory.getLogger(javaClass)
+        val log = LoggerFactory.getLogger(NpcStrategy::class.java)
     }
 
 }

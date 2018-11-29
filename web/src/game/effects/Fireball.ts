@@ -24,7 +24,7 @@ export class Fireball implements Spell {
     this.posX      = spec.posX;
     this.posY      = spec.posY;
     this.map       = map;
-    this.anim      = new LoopAnimator(spec.speed, (f, i) => {
+    this.anim      = new LoopAnimator(spec.duration, (f, i) => {
 
         if (i > this.lastAnimIndex) {
           const from = this.getPosition(this.lastAnimIndex);

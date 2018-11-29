@@ -1,28 +1,28 @@
 package ballad.server.api
 
-import ballad.server.game.Arrival
+import ballad.server.game.Creature
 import ballad.server.game.Direction
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Npc(
+data class Creature(
     val id: Int,
     val x: Int,
     val y: Int,
     val direction: Int = UP,
     val metrics: NpcMetrics
 ) {
-    constructor(id: Arrival) : this(
+    constructor(id: Creature) : this(
 
-        id.creature.id,
-        id.creature.x,
-        id.creature.y,
-        when(id.creature.state.direction){
+        id.id,
+        id.x,
+        id.y,
+        when (id.state.direction) {
             Direction.NORTH -> UP
             Direction.SOUTH -> DOWN
             Direction.WEST -> LEFT
             Direction.EAST -> RIGHT
         },
-        NpcMetrics(id.creature.name, id.creature.state.life, id.creature.state.life)
+        NpcMetrics(id.name, id.state.life, id.state.life)
     )
 }

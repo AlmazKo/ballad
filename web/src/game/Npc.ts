@@ -44,7 +44,7 @@ export class Npc implements Creature, Drawable {
   onStep(step: Step) {
     this.direction = step.direction;
 
-    this.movement = new Animator(step.speed, f => {
+    this.movement = new Animator(step.duration, f => {
 
       if (f >= 1) {
         switch (step.direction) {

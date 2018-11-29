@@ -65,7 +65,7 @@ class Creatures implements Drawable {
   }
 
   onStep(action: Step) {
-    const c = this.data.get(action.source.id);
+    const c = this.data.get(action.creature.id);
     if (!c) return;
 
     c.onStep(action)
@@ -83,7 +83,7 @@ server.subOnAction(action => {
   switch (true) {
 
     case action instanceof Arrival:
-      creatures.add(action.source as Npc);
+      creatures.add(action.creature as Npc);
       break;
 
 

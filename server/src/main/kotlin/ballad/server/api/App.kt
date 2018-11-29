@@ -1,13 +1,12 @@
 package ballad.server.api
 
-import ballad.server.game.ActionType.ARRIVAL
-import ballad.server.game.ActionType.STEP
 import ballad.server.game.Arrival
 import ballad.server.game.Game
 import ballad.server.game.GameMap
 import ballad.server.game.Step
 import ballad.server.map.Lands
 import ballad.server.toJson
+import ballad.server.tsm
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -40,22 +39,25 @@ class App(vertx: Vertx) {
 
     private fun initWsApi(server: HttpServer, map: GameMap, game: Game) {
         server.websocketHandler { ws ->
-            val id = playerInc.incrementAndGet()
+            val id = 1;//playerInc.incrementAndGet()
             log.info("Connected player: #$id")
 
             map.addPlayer(id)
 
+            val p = map.players[id]!!
+
+
             ws.textMessageHandler { msg ->
                 val raw = JsonObject(msg)
                 val data = raw.getJsonObject("data")
-
                 val act = when (raw.getString("action")) {
                     "STEP" -> {
                         Step(
                             x = data.getInteger("x"),
                             y = data.getInteger("y"),
-                            creatureId = id,
-                            speed = 300,
+                            time = tsm(), //fixme
+                            creature = p,
+                            duration = 300,
                             direction = mapToDirection[data.getInteger("direction")]!!
                         )
                     }
@@ -68,11 +70,11 @@ class App(vertx: Vertx) {
             game.subscribe(id) { actions ->
                 actions.forEach {
                     val act = when (it) {
-                        is Arrival -> Action(ARRIVAL, Npc(it))
-                        is Step -> Action(STEP, Step(it))
+                        is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
+                        is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
                         else -> return@forEach
                     }
-                    ws.writeFinalTextFrame(JSON.stringify(Action.serializer(), act))
+                    ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
                 }
             }
         }

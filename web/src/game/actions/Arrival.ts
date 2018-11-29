@@ -6,17 +6,14 @@ import { Metrics } from '../Metrics';
 
 export class Arrival implements Action {
   readonly id: uint;
-  readonly source: Creature;
+  readonly creature: Creature;
   readonly time: tsm;
 
-  constructor(type: String, data: any) {
+  constructor(data: any) {
 
-    switch (type) {
-      case "ballad.server.api.Npc":
-        const m     = new Metrics(data.metrics.life, data.metrics.name);
-        this.source = new Npc(m, data.x, data.y);
-        break;
-    }
+
+    const m     = new Metrics(data.creature.metrics.life, data.creature.metrics.name);
+    this.creature = new Npc(m, data.creature.x, data.creature.y);
 
 
   }

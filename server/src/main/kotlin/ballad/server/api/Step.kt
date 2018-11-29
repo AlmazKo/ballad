@@ -8,7 +8,7 @@ data class Step(
     val fromX: Int,
     val fromY: Int,
     val direction: Int,
-    val speed: Int,
+    val duration: Int,
     val creatureId: Int,
     val time: Long
 
@@ -23,8 +23,8 @@ data class Step(
             Direction.WEST -> LEFT
             Direction.EAST -> RIGHT
         },
-        id.speed,
-        id.creatureId,
+        id.duration,
+        id.creature.id,
         0
 
     )

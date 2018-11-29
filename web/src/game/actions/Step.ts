@@ -8,21 +8,21 @@ export class Step implements Action {
   readonly fromPosX: index;
   readonly fromPosY: index;
   readonly direction: Dir;
-  readonly speed: ms;
+  readonly duration: ms;
   readonly id: uint;
-  readonly source: Creature;
+  readonly creature: Creature;
   readonly time: tsm;
 
-  constructor(source: Creature, speed: uint, direction: Dir = source.direction) {
+  constructor(source: Creature, duration: uint, direction: Dir = source.direction) {
 
     this.id        = nextId();
     this.time      = Date.now();//fixme take it from performance*
-    this.source    = source;
+    this.creature  = source;
     this.fromPosX  = source.positionX;
     this.fromPosY  = source.positionY;
     this.direction = direction;
 
-    this.speed = speed;
+    this.duration = duration;
   }
 
 

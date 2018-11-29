@@ -141,7 +141,7 @@ export class Player implements Creature, Drawable {
     const step = new Step(this, 250);
     this.server.sendAction(step);
 
-    this.movement = new Animator(step.speed, (f) => {
+    this.movement = new Animator(step.duration, (f) => {
       const isNewPos = f >= 1;
 
       if (!isNewPos) {
