@@ -40,7 +40,7 @@ public class Lands {
                 int chnukX = i % width;
                 int chnukY = i / height;
                 int coord = posX + chnukX + (posY + chnukY) * WIDTH;
-                map[coord] = (short) v;
+                map[coord] = (short) (v - 1); //tile manager increments every tile id (I don't know why)
             }
 
         });
@@ -69,7 +69,7 @@ public class Lands {
     private static TileType parseTileType(@Nullable String raw) {
         if (raw == null) return TileType.NOTHING;
 
-        switch (raw) {
+        switch (raw.toLowerCase()) {
             case "water":
                 return TileType.WATER;
             case "wall":

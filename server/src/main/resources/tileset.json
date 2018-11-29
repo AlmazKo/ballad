@@ -25,7 +25,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":24,
@@ -35,7 +36,7 @@
                  "type":"string",
                  "value":"grass"
                 }],
-         "type":"grass"
+         "type":"Grass"
         }, 
         {
          "id":25,
@@ -44,7 +45,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":26,
@@ -109,7 +111,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":47,
@@ -119,7 +122,7 @@
                  "type":"string",
                  "value":"grass"
                 }],
-         "type":"grass"
+         "type":"Grass"
         }, 
         {
          "id":48,
@@ -128,7 +131,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":49,
@@ -193,7 +197,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":70,
@@ -202,7 +207,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":71,
@@ -211,7 +217,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":72,
@@ -272,7 +279,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":93,
@@ -281,7 +289,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":94,
@@ -290,7 +299,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":95,
@@ -339,7 +349,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":116,
@@ -348,7 +359,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":117,
@@ -357,7 +369,8 @@
                  "name":"type",
                  "type":"string",
                  "value":"grass"
-                }]
+                }],
+         "type":"Grass"
         }, 
         {
          "id":118,
@@ -447,6 +460,10 @@
                  "value":"blocked"
                 }],
          "type":"tree"
+        }, 
+        {
+         "id":139,
+         "type":"Grass"
         }, 
         {
          "id":140,
