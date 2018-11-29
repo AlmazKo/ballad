@@ -1,9 +1,9 @@
 package ballad.server.game
 
-import ballad.server.game.Direction.DOWN
-import ballad.server.game.Direction.LEFT
-import ballad.server.game.Direction.RIGHT
-import ballad.server.game.Direction.UP
+import ballad.server.game.Direction.SOUTH
+import ballad.server.game.Direction.WEST
+import ballad.server.game.Direction.EAST
+import ballad.server.game.Direction.NORTH
 
 data class Npc(
     override val id: Int,
@@ -23,10 +23,10 @@ data class Npc(
         state.direction = direction
 
         when (direction) {
-            UP -> state.y++
-            DOWN -> state.y--
-            LEFT -> state.x--
-            RIGHT -> state.x++
+            NORTH -> state.y--
+            SOUTH -> state.y++
+            WEST -> state.x--
+            EAST -> state.x++
         }
     }
 }

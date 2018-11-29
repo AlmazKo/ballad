@@ -1,10 +1,10 @@
 package ballad.server.game
 
 import ballad.server.Tsm
-import ballad.server.game.Direction.DOWN
-import ballad.server.game.Direction.LEFT
-import ballad.server.game.Direction.RIGHT
-import ballad.server.game.Direction.UP
+import ballad.server.game.Direction.EAST
+import ballad.server.game.Direction.NORTH
+import ballad.server.game.Direction.SOUTH
+import ballad.server.game.Direction.WEST
 import ballad.server.map.TileType
 import io.vertx.core.logging.LoggerFactory
 import kotlin.random.Random
@@ -21,7 +21,7 @@ class NpcStrategy(
             val step = passive() ?: return
 
             consumer.add(step)
-            nextPlannedTime = time + 400
+            nextPlannedTime = time + 1000
         }
     }
 
@@ -39,9 +39,10 @@ class NpcStrategy(
             println("Fail get direction" + npc.state)
             return null
         }
+        val action = Step(npc.state.x, npc.state.y, dir, 800, npc.id)
 
         npc.step(dir)
-        return Step(npc.state.x, npc.state.y, dir, 300, npc.id)
+        return action
     }
 
 
@@ -51,10 +52,10 @@ class NpcStrategy(
         val y = npc.state.y
 
         return when (dir) {
-            UP -> canMove(x, y - 1)
-            DOWN -> canMove(x, y + 1)
-            LEFT -> canMove(x - 1, y)
-            RIGHT -> canMove(x + 1, y)
+            NORTH -> canMove(x, y - 1)
+            SOUTH -> canMove(x, y + 1)
+            WEST -> canMove(x - 1, y)
+            EAST -> canMove(x + 1, y)
         }
 
     }
@@ -63,13 +64,9 @@ class NpcStrategy(
 
         val tile = map[toX, toY] ?: return false
 
-        val can = tile.type !== TileType.WALL && tile.type !== TileType.WATER
+        log.info("Next to $tile")
+        return tile.type !== TileType.WALL && tile.type !== TileType.WATER
 
-        if (can) {
-            log.info("Next move to $tile")
-        }
-
-        return can;
     }
 
     companion object {

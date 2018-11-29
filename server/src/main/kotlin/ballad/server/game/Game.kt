@@ -46,4 +46,8 @@ class Game(vertx: Vertx, val map: GameMap) {
         playerHandler[playerId] = handler
     }
 
+    fun send(action: Action) {
+
+    }
+
 }

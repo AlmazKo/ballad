@@ -1,6 +1,6 @@
 package ballad.server.game
 
-import ballad.server.game.Direction.UP
+import ballad.server.game.Direction.NORTH
 import ballad.server.map.Tile
 import ballad.server.map.TileType.BRIDGE
 import ballad.server.map.TileType.NOTHING
@@ -16,7 +16,7 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     init {
         val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
 
-        val npc = Npc(2, type, 50, CreatureState(50, 15, 17, UP), 2)
+        val npc = Npc(2, type, 50, CreatureState(50, 15, 17, NORTH), 2)
         npcs[2] = npc
 
 
@@ -63,7 +63,7 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     }
 
     fun addPlayer(id: Int) {
-        val player = Player(id, CreatureState(50, 15, 18, UP))
+        val player = Player(id, CreatureState(50, 15, 18, NORTH))
         players[1] = player
 
     }

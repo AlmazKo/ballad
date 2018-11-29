@@ -61,6 +61,7 @@ export class ViewMap {
   private tiles   = new Map<index, Tile>();
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
   private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
+  creatures       = new Map<int, Creature>();
 
   constructor() {
   }
@@ -150,6 +151,12 @@ export class ViewMap {
       p.hline(0, MAP_SIZE * CELL, pos * CELL, style.grid as StrokeStyle);
     }
 
+
+    for (let x = 0; x < MAP_SIZE; x++) {
+      for (let y = 0; y < MAP_SIZE; y++) {
+        p.text("" + x + "x" + y, x * CELL + 1, y * CELL, style.debugText)
+      }
+    }
   }
 
   private drawFog(playerX: index, playerY: index, p: BasePainter) {
@@ -181,11 +188,9 @@ export class ViewMap {
 
     posX = 0;
     posY = 0;
-    raw.forEach((v, idx) => {
-      if (v === 0) return;
+    raw.forEach((t, idx) => {
+      if (t === 0) return;
 
-
-      const t     = v - 1;
       const tileX = t % TILESET_SIZE;
       const tileY = Math.floor(t / TILESET_SIZE);
       const sx    = TILE_SIZE * tileX;

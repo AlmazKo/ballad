@@ -19,19 +19,31 @@ export class Server {
     switch (data.action) {
       case "ARRIVAL":
         const a = new Arrival(data.data[0], data.data[1]);
+        this.map.creatures.set(a.source.id, a.source);
         this.onAction(a);
         break;
 
       case "STEP":
-        // const s = new Step(data.data[0], data.data[1]);
-        // this.onAction(a);
+        const d        = data.data[1];
+        const creature = this.map.creatures.get(d.creatureId);
+        const s        = new Step(creature, d.speed, d.direction);
+        this.onAction(s);
     }
 
   }
 
   sendAction(action: Action) {
 
-    console.log("Action >", action)
+    console.log("Action >", action);
+
+    if (action instanceof Step) {
+      this.ws.send(JSON.stringify({
+        action: "STEP", data: {
+          x: action.fromPosX, y: action.fromPosY, direction: action.direction
+        }
+      }))
+    }
+
   }
 
   private onAction(action: Action) {

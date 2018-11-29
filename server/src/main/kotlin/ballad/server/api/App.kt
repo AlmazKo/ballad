@@ -44,6 +44,27 @@ class App(vertx: Vertx) {
             log.info("Connected player: #$id")
 
             map.addPlayer(id)
+
+            ws.textMessageHandler { msg ->
+                val raw = JsonObject(msg)
+                val data = raw.getJsonObject("data")
+
+                val act = when (raw.getString("action")) {
+                    "STEP" -> {
+                        Step(
+                            x = data.getInteger("x"),
+                            y = data.getInteger("y"),
+                            creatureId = id,
+                            speed = 300,
+                            direction = mapToDirection[data.getInteger("direction")]!!
+                        )
+                    }
+                    else -> return@textMessageHandler
+                }
+
+                game.send(act)
+            }
+
             game.subscribe(id) { actions ->
                 actions.forEach {
                     val act = when (it) {

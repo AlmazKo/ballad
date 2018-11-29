@@ -47,10 +47,15 @@ export const style = {
     font    : "bold 8px Regular"
   } as Partial<FontStyle>,
 
-  lifeText    : {
+  lifeText: {
     align   : "center",
     baseline: "bottom",
     style   : "blue",
     font    : "7px sans"
+  } as Partial<FontStyle>,
+
+  debugText: {
+    style: "#ff0000",
+    font : "8px sans"
   } as Partial<FontStyle>
 };
