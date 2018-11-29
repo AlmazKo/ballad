@@ -37,7 +37,7 @@ tasks.withType<KotlinCompile> {
 
 application {
     applicationName = rootProject.name
-    mainClassName = "ballad.server.api.App"
+    mainClassName = "ballad.server.Main"
 }
 
 dependencies {
