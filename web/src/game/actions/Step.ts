@@ -5,13 +5,13 @@ import { Dir } from '../types';
 import { nextId } from '../Game';
 
 export class Step implements Action {
-  readonly fromPosX: index;
-  readonly fromPosY: index;
-  readonly direction: Dir;
-  readonly duration: ms;
-  readonly id: uint;
-  readonly creature: Creature;
-  readonly time: tsm;
+  fromPosX: index;
+  fromPosY: index;
+  direction: Dir;
+  duration: ms;
+  id: uint;
+  creature: Creature;
+  time: tsm;
 
   constructor(source: Creature, duration: uint, direction: Dir = source.direction) {
 

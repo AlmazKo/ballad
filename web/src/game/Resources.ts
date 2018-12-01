@@ -5,7 +5,8 @@ export const RESOURCES = [
   'objects',
   'fireball_32',
   'map1',
-  'character'
+  'character',
+  'character_alien'
 ];
 
 

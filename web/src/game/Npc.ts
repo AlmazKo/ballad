@@ -17,7 +17,7 @@ export class Npc implements DrawableCreature {
   private shiftX = 0;
   private shiftY = 0;
   private movement: Animator | undefined;
-  private f      = 0;
+  private f      = 1;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
@@ -40,11 +40,22 @@ export class Npc implements DrawableCreature {
 
   onStep(step: Step) {
     this.direction = step.direction;
+    console.log("onStep " + this.id, step);
+
+    this.positionX = step.fromPosX;
+    this.positionY = step.fromPosY;
+
+    if (this.movement && !this.movement.isFinished()) {
+      this.movement.reset();
+      this.shiftY = 0;
+      this.shiftX = 0;
+      this.f      = 0;
+    }
 
     this.movement = new Animator(step.duration, f => {
       this.f = f;
-
       if (f >= 1) {
+
         switch (step.direction) {
           case Dir.WEST:
             this.positionX--;
@@ -59,8 +70,11 @@ export class Npc implements DrawableCreature {
             this.positionY++;
             break;
         }
+
+        this.f      = 0;
         this.shiftX = 0;
         this.shiftY = 0;
+        console.log("Finished", this);
       } else {
         if (step.direction === Dir.WEST) this.shiftX = -f * CELL;
         if (step.direction === Dir.EAST) this.shiftX = f * CELL;
@@ -103,7 +117,7 @@ export class Npc implements DrawableCreature {
 
     drawLifeLine(bp, this);
     const img = RES["NPC_test"];
-    const sx  = Math.floor(this.f * 3) * 16;
+    const sx  = Math.floor(this.f * 4) * 16;
     bp.ctx.drawImage(img, sx, sy, 16, 32, x + QCELL, y, 16, 32);
     drawName(bp, this);
   }

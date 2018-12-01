@@ -97,8 +97,11 @@ export class Game {
         a       = action as ApiStep;
         const c = this.creatures.get(a.creatureId);
         if (!c) return;
+        const s    = new Step(c, a.duration, a.direction);
+        s.fromPosX = a.fromX;
+        s.fromPosY = a.fromY;
 
-        c.onStep(new Step(c, a.duration, a.direction));
+        c.onStep(s);
         break;
     }
   }
@@ -120,6 +123,6 @@ export class Game {
         break;
 
     }
-   // new Fireball()
+    // new Fireball()
   }
 }

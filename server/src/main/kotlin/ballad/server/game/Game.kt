@@ -68,10 +68,10 @@ class Game(vertx: Vertx, val map: GameMap) {
                             if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
                                 p.zone[a.creature.id] = a.creature
                                 val arr = Arrival(a.x, a.y, time, a.creature)
-                                log.info("New Player action: {}", arr)
+//                                log.info("New Player action: {}", arr)
                                 pActions.add(arr)
                             }
-                            log.info("New Player action: {}", a)
+//                            log.info("New Player action: {}", a)
                             pActions.add(a)
                         } else {
                             p.zone.remove(a.creature.id)
@@ -96,7 +96,7 @@ class Game(vertx: Vertx, val map: GameMap) {
     }
 
     companion object {
-        const val TICK_TIME = 200
+        const val TICK_TIME = 50
     }
 
 }
