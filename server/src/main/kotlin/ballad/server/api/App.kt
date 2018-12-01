@@ -39,13 +39,20 @@ class App(vertx: Vertx) {
 
     private fun initWsApi(server: HttpServer, map: GameMap, game: Game) {
         server.websocketHandler { ws ->
-            val id = 1;//playerInc.incrementAndGet()
+            val id = playerInc.incrementAndGet()
             log.info("Connected player: #$id")
 
-            map.addPlayer(id)
+            val p = map.addPlayer(id)
 
-            val p = map.players[id]!!
+            val arr = ballad.server.game.Arrival(p.x, p.y, tsm(), p)
+            game.send(arr)
 
+
+            val act = JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(arr))
+            ws.writeFinalTextFrame("""{"action":"PROTAGONIST_ARRIVAL", "data": $act}""")
+            ws.closeHandler {
+                map.removePlayer(id)
+            }
 
             ws.textMessageHandler { msg ->
                 val raw = JsonObject(msg)

@@ -1,24 +1,23 @@
-import { Creature, drawLifeLine, drawName } from './Creature';
-import { Drawable } from './Drawable';
+import { DrawableCreature, drawLifeLine, drawName } from './Creature';
 import { BasePainter } from '../draw/BasePainter';
 import { CELL, Dir, QCELL } from './types';
 import { float, index, px, uint } from '../types';
-import { RES } from '../index';
+import { RES } from './GameCanvas';
 import { Metrics } from './Metrics';
 import { Step } from './actions/Step';
 import { Animator } from '../anim/Animator';
 
-export class Npc implements Creature, Drawable {
+export class Npc implements DrawableCreature {
 
-  id: uint  = 2; //fixme hardcoded
   positionX: index;
   positionY: index;
-  direction = Dir.DOWN;
+  direction: Dir;
   metrics: Metrics;
 
   private shiftX = 0;
   private shiftY = 0;
   private movement: Animator | undefined;
+  private f      = 0;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
@@ -32,9 +31,7 @@ export class Npc implements Creature, Drawable {
     return this.positionY * CELL + this.shiftY;
   }
 
-
-
-  constructor(metrics: Metrics, posX: index, posY: index) {
+  constructor(public id: uint, metrics: Metrics, posX: index, posY: index) {
     this.metrics   = metrics;
     this.positionX = posX;
     this.positionY = posY;
@@ -45,29 +42,30 @@ export class Npc implements Creature, Drawable {
     this.direction = step.direction;
 
     this.movement = new Animator(step.duration, f => {
+      this.f = f;
 
       if (f >= 1) {
         switch (step.direction) {
-          case Dir.LEFT:
+          case Dir.WEST:
             this.positionX--;
             break;
-          case Dir.RIGHT:
+          case Dir.EAST:
             this.positionX++;
             break;
-          case Dir.UP:
+          case Dir.NORTH:
             this.positionY--;
             break;
-          case Dir.DOWN:
+          case Dir.SOUTH:
             this.positionY++;
             break;
         }
         this.shiftX = 0;
         this.shiftY = 0;
       } else {
-        if (step.direction === Dir.LEFT) this.shiftX = -f * CELL;
-        if (step.direction === Dir.RIGHT) this.shiftX = f * CELL;
-        if (step.direction === Dir.UP) this.shiftY = -f * CELL;
-        if (step.direction === Dir.DOWN) this.shiftY = f * CELL;
+        if (step.direction === Dir.WEST) this.shiftX = -f * CELL;
+        if (step.direction === Dir.EAST) this.shiftX = f * CELL;
+        if (step.direction === Dir.NORTH) this.shiftY = -f * CELL;
+        if (step.direction === Dir.SOUTH) this.shiftY = f * CELL;
       }
 
 
@@ -85,26 +83,28 @@ export class Npc implements Creature, Drawable {
     let sy: px;
 
     switch (this.direction) {
-      case Dir.UP:
+      case Dir.NORTH:
         sy = 64;
         break;
 
-      case Dir.DOWN:
+      case Dir.SOUTH:
         sy = 0;
         break;
 
-      case Dir.RIGHT:
+      case Dir.EAST:
         sy = 32;
         break;
 
-      case Dir.LEFT:
+      case Dir.WEST:
         sy = 96;
         break
     }
 
+
     drawLifeLine(bp, this);
     const img = RES["NPC_test"];
-    bp.ctx.drawImage(img, 0, sy, 16, 32, x + QCELL, y, 16, 32);
+    const sx  = Math.floor(this.f * 3) * 16;
+    bp.ctx.drawImage(img, sx, sy, 16, 32, x + QCELL, y, 16, 32);
     drawName(bp, this);
   }
 

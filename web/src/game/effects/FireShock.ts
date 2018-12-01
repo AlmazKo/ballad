@@ -3,7 +3,7 @@ import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { BasePainter } from '../../draw/BasePainter';
 import { CELL, QCELL } from '../types';
-import { RES } from '../..';
+import { RES } from '../GameCanvas';
 
 export class FireShock implements Spell {
   private posX: index;

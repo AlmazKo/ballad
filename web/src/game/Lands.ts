@@ -1,11 +1,11 @@
 import { index, int, px, uint } from '../types';
 import { ajax } from '../util/net';
 import { BasePainter } from '../draw/BasePainter';
-import { RES } from '../index';
 import { CELL, Dir } from './types';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 import { Creature } from './Creature';
+import { RES } from './GameCanvas';
 
 
 // type TileType = 'water'| ''
@@ -41,11 +41,11 @@ interface Chunk {
 let rawMap: any                = null;
 let tiles: Map<index, RawTile> = new Map();
 
-ajax("http://localhost/map", data => {
+ajax("/map", data => {
   rawMap = data.data
 });
 
-ajax("http://localhost/tiles", (data: any) => {
+ajax("/tiles", (data: any) => {
   data.data.forEach((t: any) => {
     const tile = {id: t.id, type: t.type.toLowerCase()} as any;
     tiles.set(t.id, tile);
@@ -57,11 +57,10 @@ const TILE_SIZE: px    = 32;//fixme remove. take from api
 const TILESET_SIZE: px = 23;//fixme remove. take from api
 
 
-export class ViewMap {
+export class Lands {
   private tiles   = new Map<index, Tile>();
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
   private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
-  creatures       = new Map<int, Creature>();
 
   constructor() {
   }
@@ -97,16 +96,16 @@ export class ViewMap {
 
     let [x, y] = from;
     switch (to) {
-      case Dir.UP:
+      case Dir.NORTH:
         y--;
         break;
-      case Dir.DOWN:
+      case Dir.SOUTH:
         y++;
         break;
-      case Dir.LEFT:
+      case Dir.WEST:
         x--;
         break;
-      case Dir.RIGHT:
+      case Dir.EAST:
         x++;
         break;
 
@@ -122,10 +121,6 @@ export class ViewMap {
     return this.tiles.get(tileId);
   }
 
-  getCreature(posX: index, posY: index): Creature | undefined {
-
-    return undefined;
-  }
 
   draw(p: BasePainter, playerX: index, playerY: index) {
 
@@ -144,8 +139,6 @@ export class ViewMap {
       this.drawTile(p, tileId, idx);
     });
 
-    this.drawFog(playerX, playerY, p);
-
     for (let pos = 1; pos < MAP_SIZE; pos++) {
       p.vline(pos * CELL, 0, MAP_SIZE * CELL, style.grid as StrokeStyle);
       p.hline(0, MAP_SIZE * CELL, pos * CELL, style.grid as StrokeStyle);
@@ -159,16 +152,6 @@ export class ViewMap {
     }
   }
 
-  private drawFog(playerX: index, playerY: index, p: BasePainter) {
-    this.basic.forEach((_: uint, idx: index) => {
-      const x = (idx % MAP_SIZE);
-      const y = Math.floor(idx / MAP_SIZE);
-
-      if (x < playerX + 10 && x > playerX - 10 && y < playerY + 10 && y > playerY - 10) return;
-      //fixme performance; make 4 rectangles
-      p.fillRect(x * CELL, y * CELL, TILE_SIZE, TILE_SIZE, style.fog)
-    });
-  }
 
   drawTile(p: BasePainter, tileId: uint, idx: index) {
 

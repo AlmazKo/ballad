@@ -3,6 +3,8 @@ import { Dir, HCELL } from './types';
 import { BasePainter } from '../draw/BasePainter';
 import { style } from './styles';
 import { Metrics } from './Metrics';
+import { Step } from './actions/Step';
+import { Drawable } from './Drawable';
 
 
 export interface Creature {
@@ -12,15 +14,21 @@ export interface Creature {
   direction: Dir;
   metrics: Metrics;
 
-  getLifeShare(): float;
+  onStep(step: Step): void;
+}
+
+export interface DrawableCreature extends Creature, Drawable {
 
   getX(): px;
 
   getY(): px;
+
+  getLifeShare(): float
+
 }
 
 
-export function drawLifeLine(bp: BasePainter, c: Creature) {
+export function drawLifeLine(bp: BasePainter, c: DrawableCreature) {
   const s = c.getLifeShare();
   // if (s >= 1) return;
 
@@ -32,6 +40,6 @@ export function drawLifeLine(bp: BasePainter, c: Creature) {
   // bp.text(c.metrics.life + "", c.getX() + HCELL, c.getY() + CELL + 2, style.lifeText)
 }
 
-export function drawName(bp: BasePainter, c: Creature) {
+export function drawName(bp: BasePainter, c: DrawableCreature) {
   bp.text(c.metrics.name, c.getX() + HCELL, c.getY() - 2, style.creatureName)
 }

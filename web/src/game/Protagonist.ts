@@ -1,30 +1,49 @@
-import {Animator, LoopAnimator} from '../anim/Animator';
-import {BasePainter} from '../draw/BasePainter';
-import {float, index, px, uint} from '../types';
-import {CELL, Dir, HCELL, QCELL} from './types';
-import {style} from './styles';
-import {Moving} from './Moving';
-import {ViewMap} from './ViewMap';
-import {Drawable} from './Drawable';
-import {Creature, drawLifeLine, drawName} from './Creature';
-import {RES} from '../index';
-import {Metrics} from './Metrics';
-import {Step} from './actions/Step';
-import {Server} from './Server';
+import { Animator } from '../anim/Animator';
+import { BasePainter } from '../draw/BasePainter';
+import { float, index, int, px } from '../types';
+import { CELL, Dir, HCELL, QCELL } from './types';
+import { style } from './styles';
+import { DrawableCreature, drawLifeLine, drawName } from './Creature';
+import { Step } from './actions/Step';
+import { Metrics } from './Metrics';
+import { RES } from './GameCanvas';
+import { ApiCreature } from './api/ApiCreature';
+import { MovingKeys } from './MovingKeys';
+import { Lands } from './Lands';
+import { Server } from './api/Server';
 
-export class Player implements Creature, Drawable {
+export class Protagonist implements DrawableCreature {
 
-  id: uint = 1;//fixme harcoded
-  private readonly moving: Moving;
-  private map: ViewMap;
-  metrics: Metrics;
-  private server: Server;
 
-  constructor(moving: Moving, map: ViewMap, metrics: Metrics, server: Server) {
-    this.moving = moving;
-    this.map = map;
-    this.metrics = metrics;
-    this.server = server;
+  onStep(step: Step): void {
+
+    //add sync
+  }
+
+  readonly id: int;
+  readonly metrics: Metrics;
+  direction: Dir;
+  positionX: int;
+  positionY: int;
+
+  private shiftX = 0;
+  private shiftY = 0;
+
+  private movement: Animator = null;
+  private lastAnimIdx: index = 0;
+  private frozen: Dir        = 0;
+  private rotated            = false;
+
+
+  constructor(c: ApiCreature,
+              private moving: MovingKeys,
+              private map: Lands,
+              private server: Server) {
+    this.id        = c.id;
+    this.metrics   = c.metrics;
+    this.direction = c.direction;
+    this.positionX = c.x;
+    this.positionY = c.y;
   }
 
 
@@ -42,18 +61,6 @@ export class Player implements Creature, Drawable {
   }
 
 
-  direction = Dir.DOWN;
-  positionX = 17;
-  positionY = 10;
-  shiftX = 0;
-  shiftY = 0;
-
-  private nextPosition: [index, index] | null = null;
-  private movement: Animator = null;
-  private lastAnimIdx: index = 0;
-  private frozen: Dir = 0;
-  private rotated = false;
-
   draw(time: DOMHighResTimeStamp, bp: BasePainter) {
 
     if (this.movement) {
@@ -61,7 +68,7 @@ export class Player implements Creature, Drawable {
     }
 
     let x: px = this.positionX * CELL + this.shiftX,
-      y: px = this.positionY * CELL + this.shiftY;
+        y: px = this.positionY * CELL + this.shiftY;
 
 
     const actualCellX = this.shiftX < HCELL ? this.positionX * CELL : this.positionX * CELL + CELL;
@@ -71,24 +78,24 @@ export class Player implements Creature, Drawable {
     drawLifeLine(bp, this);
     let s: float, sx: px, sy: px;
     switch (this.direction) {
-      case Dir.UP:
+      case Dir.NORTH:
         sy = 64;
-        s = -this.shiftY / CELL;
+        s  = -this.shiftY / CELL;
         break;
 
-      case Dir.DOWN:
+      case Dir.SOUTH:
         sy = 0;
-        s = this.shiftY / CELL;
+        s  = this.shiftY / CELL;
         break;
 
-      case Dir.RIGHT:
+      case Dir.EAST:
         sy = 32;
-        s = this.shiftX / CELL;
+        s  = this.shiftX / CELL;
         break;
 
-      case Dir.LEFT:
+      case Dir.WEST:
         sy = 96;
-        s = -this.shiftX / CELL;
+        s  = -this.shiftX / CELL;
         break
     }
 
@@ -101,18 +108,18 @@ export class Player implements Creature, Drawable {
 
   nextPos(dr: Dir): [index, index] {
     switch (dr) {
-      case Dir.LEFT:
+      case Dir.WEST:
         return [this.positionX - 1, this.positionY];
-      case Dir.RIGHT:
+      case Dir.EAST:
         return [this.positionX + 1, this.positionY];
-      case Dir.UP:
+      case Dir.NORTH:
         return [this.positionX, this.positionY - 1];
-      case Dir.DOWN:
+      case Dir.SOUTH:
         return [this.positionX, this.positionY + 1];
     }
   }
 
-  onStep(direction: number) {
+  step(direction: number) {
 
     if (this.rotated) {
       this.direction = direction;
@@ -128,7 +135,7 @@ export class Player implements Creature, Drawable {
   }
 
   mm(dr: Dir) {
-    const nextPs = this.nextPos(dr);
+    const nextPs   = this.nextPos(dr);
     this.direction = this.frozen ? this.frozen : dr;
 
     if (this.map.canMove([this.positionY, this.positionY], nextPs)) {
@@ -150,21 +157,21 @@ export class Player implements Creature, Drawable {
       }
 
       switch (dr) {
-        case Dir.LEFT:
+        case Dir.WEST:
           this.positionX--;
           break;
-        case Dir.RIGHT:
+        case Dir.EAST:
           this.positionX++;
           break;
-        case Dir.UP:
+        case Dir.NORTH:
           this.positionY--;
           break;
-        case Dir.DOWN:
+        case Dir.SOUTH:
           this.positionY++;
           break;
       }
-      this.shiftX = 0;
-      this.shiftY = 0;
+      this.shiftX   = 0;
+      this.shiftY   = 0;
       this.movement = null;
 
       const next = this.moving.next();
@@ -177,10 +184,10 @@ export class Player implements Creature, Drawable {
   }
 
   updMoving(curr: Dir, f: float) {
-    if (curr == Dir.LEFT) this.shiftX = -f * CELL;
-    if (curr == Dir.RIGHT) this.shiftX = f * CELL;
-    if (curr == Dir.UP) this.shiftY = -f * CELL;
-    if (curr == Dir.DOWN) this.shiftY = f * CELL;
+    if (curr == Dir.WEST) this.shiftX = -f * CELL;
+    if (curr == Dir.EAST) this.shiftX = f * CELL;
+    if (curr == Dir.NORTH) this.shiftY = -f * CELL;
+    if (curr == Dir.SOUTH) this.shiftY = f * CELL;
   }
 
   onFreezeDirection(frozen: boolean) {

@@ -3,9 +3,9 @@ import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { BasePainter } from '../../draw/BasePainter';
 import { CELL, Dir } from '../types';
-import { RES } from '../..';
-import { ViewMap } from '../ViewMap';
+import { Lands } from '../Lands';
 import { FireballSpell } from '../actions/FireballSpell';
+import { RES } from '../GameCanvas';
 
 export class Fireball implements Spell {
   private readonly posX: index;
@@ -17,9 +17,9 @@ export class Fireball implements Spell {
   private anim: LoopAnimator;
   isFinished            = false;
   private f: float;
-  private map: ViewMap;
+  private map: Lands;
 
-  constructor(spec: FireballSpell, map: ViewMap) {
+  constructor(spec: FireballSpell, map: Lands) {
     this.direction = spec.direction;
     this.posX      = spec.posX;
     this.posY      = spec.posY;
@@ -51,13 +51,13 @@ export class Fireball implements Spell {
 
   getPosition(animIdx: index): [px, px] {
     switch (this.direction) {
-      case Dir.UP:
+      case Dir.NORTH:
         return [this.posX, this.posY - animIdx];
-      case Dir.DOWN:
+      case Dir.SOUTH:
         return [this.posX, this.posY + animIdx];
-      case Dir.LEFT:
+      case Dir.WEST:
         return [this.posX - animIdx, this.posY];
-      case Dir.RIGHT:
+      case Dir.EAST:
         return [this.posX + animIdx, this.posY];
     }
   }
@@ -68,19 +68,19 @@ export class Fireball implements Spell {
     let shiftX: px = 0, shiftY: px = 0;
     let sx: px, sy: px;
     switch (this.direction) {
-      case Dir.UP:
+      case Dir.NORTH:
         shiftY = -this.shift;
         sy     = 32 * 2;
         break;
-      case Dir.DOWN:
+      case Dir.SOUTH:
         shiftY = this.shift;
         sy     = 32 * 6;
         break;
-      case Dir.LEFT:
+      case Dir.WEST:
         shiftX = -this.shift;
         sy     = 0;
         break;
-      case Dir.RIGHT:
+      case Dir.EAST:
         shiftX = this.shift;
         sy     = 32 * 4;
         break;

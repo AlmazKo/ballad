@@ -1,14 +1,15 @@
 import { int } from '../types';
+import { ApiMetrics } from './api/ApiMetrics';
 
 export class Metrics {
   maxLife: int;
   life: int;
   readonly name: string;
 
-  constructor(life: int, name: string) {
-    this.maxLife = life;
-    this.life    = life;
-    this.name    = name;
+  constructor(m: ApiMetrics) {
+    this.maxLife = m.life;
+    this.life    = m.life;
+    this.name    = m.name;
   }
 
 }

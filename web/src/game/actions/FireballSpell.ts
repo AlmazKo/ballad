@@ -2,7 +2,7 @@ import { index, tsm, uint } from '../../types';
 import { Dir } from '../types';
 import { Action } from './Action';
 import { Creature } from '../Creature';
-import { nextId } from '../../index';
+import { nextId } from '../Game';
 
 export class FireballSpell implements Action {
   readonly posX: index;

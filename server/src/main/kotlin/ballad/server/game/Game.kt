@@ -60,10 +60,11 @@ class Game(vertx: Vertx, val map: GameMap) {
         actions.data.forEach { a ->
             map.players.values.forEach { p ->
 
+                val v = p.viewDistance
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
                 when (a) {
                     is Step -> {
-                        if (a.x < p.x + 10 && a.x > p.x - 10 && a.y < p.y + 10 && a.y > p.y - 10) {
+                        if (a.x <= p.x + v && a.x >= p.x - v && a.y <= p.y + v && a.y >= p.y - v) {
                             if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
                                 p.zone[a.creature.id] = a.creature
                                 val arr = Arrival(a.x, a.y, time, a.creature)
@@ -72,6 +73,8 @@ class Game(vertx: Vertx, val map: GameMap) {
                             }
                             log.info("New Player action: {}", a)
                             pActions.add(a)
+                        } else {
+                            p.zone.remove(a.creature.id)
                         }
                     }
                 }

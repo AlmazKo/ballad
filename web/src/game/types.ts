@@ -5,10 +5,10 @@ export const HCELL: px = CELL / 2;
 export const QCELL: px = CELL / 4;
 
 export enum Dir {
-  UP    = 38,
-  DOWN  = 40,
-  LEFT  = 37,
-  RIGHT = 39
+  NORTH = 1,
+  SOUTH = 2,
+  WEST  = 3,
+  EAST  = 4
 }
 
 export const FIRST  = 49;

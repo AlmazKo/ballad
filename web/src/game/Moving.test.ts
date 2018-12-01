@@ -1,7 +1,7 @@
-import { KeyQueue, Moving } from './Moving';
+import { KeyQueue, MovingKeys } from './MovingKeys';
 
-test('Moving Simple', () => {
-  const mv = new Moving();
+test('MovingKeys Simple', () => {
+  const mv = new MovingKeys();
 
   mv.add(10);
   mv.remove(10);
@@ -9,8 +9,8 @@ test('Moving Simple', () => {
   expect(mv.next()).toBe(0);
 });
 
-test('Moving 2', () => {
-  const mv = new Moving();
+test('MovingKeys 2', () => {
+  const mv = new MovingKeys();
 
   mv.add(10);
   mv.add(20);
@@ -21,8 +21,8 @@ test('Moving 2', () => {
   expect(mv.next()).toBe(0);
 });
 
-test('Moving 3', () => {
-  const mv = new Moving();
+test('MovingKeys 3', () => {
+  const mv = new MovingKeys();
 
   mv.add(10);
   expect(mv.next()).toBe(10);

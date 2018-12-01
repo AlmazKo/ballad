@@ -25,7 +25,7 @@ export class KeyQueue {
 
     if (el === 0) return false;
 
-    console.debug("Moving: add, data: ", q)
+    console.debug("MovingKeys: add, data: ", q)
   }
 
 
@@ -68,7 +68,7 @@ export class KeyQueue {
 
 }
 
-export class Moving {
+export class MovingKeys {
 
   private _next1: Dir = 0;
   private _next2: Dir = 0;

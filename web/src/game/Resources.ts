@@ -1,3 +1,5 @@
+import { HOST } from '../util/net';
+
 export const RESOURCES = [
   'NPC_test',
   'objects',
@@ -14,7 +16,7 @@ export class Resources {
   private load(name: string, onLoaded: () => void) {
     let img         = new Image();
     img.crossOrigin = "Anonymous";
-    img.src         = `http://localhost/res/${name}.png`;
+    img.src         = `${HOST}/res/${name}.png`;
     img.onload      = () => {
       this.data[name] = img;
       onLoaded();

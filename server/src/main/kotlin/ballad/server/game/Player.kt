@@ -9,4 +9,6 @@ class Player(
     override val name get() = "Player_$id"
     override val x get() = state.x
     override val y get() = state.y
+
+    val viewDistance = 8
 }
