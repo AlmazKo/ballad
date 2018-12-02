@@ -95,8 +95,9 @@ class App(vertx: Vertx) {
 
         router.get("/map").handler { req ->
             val vp = ViewMap(0, 0, lands.map)
+            val vp2 = ViewMap(0, 0, lands.mapObjects)
             req.response().putHeader("content-type", "application/json; charset=utf-8")
-            req.response().end("""{"x":${vp.x}, "y":${vp.y}, "data":[${vp.chunk.joinToString(",")}]}""")
+            req.response().end("""{"x":${vp.x}, "y":${vp.y}, "terrain":[${vp.chunk.joinToString(",")}], "objects1":[${vp2.chunk.joinToString(",")}]}""")
         }
 
         router.get("/tiles").handler { req ->

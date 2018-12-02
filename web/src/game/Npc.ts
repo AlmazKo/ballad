@@ -40,8 +40,6 @@ export class Npc implements DrawableCreature {
 
   onStep(step: Step) {
     this.direction = step.direction;
-    console.log("onStep " + this.id, step);
-
     this.positionX = step.fromPosX;
     this.positionY = step.fromPosY;
 
@@ -74,7 +72,6 @@ export class Npc implements DrawableCreature {
         this.f      = 0;
         this.shiftX = 0;
         this.shiftY = 0;
-        console.log("Finished", this);
       } else {
         if (step.direction === Dir.WEST) this.shiftX = -f * CELL;
         if (step.direction === Dir.EAST) this.shiftX = f * CELL;

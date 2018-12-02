@@ -4,7 +4,6 @@ import { BasePainter } from '../draw/BasePainter';
 import { CELL, Dir } from './types';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
-import { Creature } from './Creature';
 import { RES } from './GameCanvas';
 
 
@@ -42,7 +41,7 @@ let rawMap: any                = null;
 let tiles: Map<index, RawTile> = new Map();
 
 ajax("/map", data => {
-  rawMap = data.data
+  rawMap = data
 });
 
 ajax("/tiles", (data: any) => {
@@ -164,14 +163,14 @@ export class Lands {
     p.ctx.drawImage(img, t.sx, t.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
   }
 
-  private initData(raw: int[], tileProps: Map<index, RawTile>) {
+  private initData(raw: any, tileProps: Map<index, RawTile>) {
 
     let posX = 16, posY = 16;
 
 
     posX = 0;
     posY = 0;
-    raw.forEach((t, idx) => {
+    (raw.terrain as int[]).forEach((t, idx) => {
       if (t === 0) return;
 
       const tileX = t % TILESET_SIZE;
@@ -183,6 +182,21 @@ export class Lands {
       this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
 
       this.basic[posX + idx % 32 + (posY + Math.floor(idx / 32)) * MAP_SIZE] = t;
+
+    });
+
+    (raw.objects1 as int[]).forEach((t, idx) => {
+      if (t === 0) return;
+
+      const tileX = t % TILESET_SIZE;
+      const tileY = Math.floor(t / TILESET_SIZE);
+      const sx    = TILE_SIZE * tileX;
+      const sy    = TILE_SIZE * tileY;
+      const props = tileProps.get(t);
+      const type  = !props ? null : props.type;
+      this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
+
+      this.objects[posX + idx % 32 + (posY + Math.floor(idx / 32)) * MAP_SIZE] = t;
 
     });
 
