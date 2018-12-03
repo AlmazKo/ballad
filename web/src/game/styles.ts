@@ -47,6 +47,13 @@ export const style = {
     font    : "bold 8px Regular"
   } as Partial<FontStyle>,
 
+  creatureNameBg: {
+    align   : "center",
+    baseline: "top",
+    style   : "black",
+    font    : "bold 8px Regular"
+  } as Partial<FontStyle>,
+
   lifeText: {
     align   : "center",
     baseline: "bottom",

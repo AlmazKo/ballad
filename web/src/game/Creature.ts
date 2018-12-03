@@ -1,5 +1,5 @@
 import { float, index, px, uint } from '../types';
-import { CELL, Dir, HCELL, QCELL } from './types';
+import { Dir, HCELL, QCELL } from './types';
 import { style } from './styles';
 import { Metrics } from './Metrics';
 import { Step } from './actions/Step';
@@ -35,5 +35,6 @@ export function drawLifeLine(p: Painter, c: DrawableCreature) {
 }
 
 export function drawName(bp: Painter, c: Creature) {
+  bp.text(c.metrics.name, HCELL + 0.5, -1.5, style.creatureNameBg)
   bp.text(c.metrics.name, HCELL, -2, style.creatureName)
 }
