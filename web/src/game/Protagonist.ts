@@ -10,6 +10,7 @@ import { MovingKeys } from './MovingKeys';
 import { Lands } from './Lands';
 import { Server } from './api/Server';
 import { TilePainter, toX, toY } from './TilePainter';
+import { style } from './styles';
 
 export class Protagonist implements DrawableCreature {
 
@@ -64,10 +65,10 @@ export class Protagonist implements DrawableCreature {
       this.movement.run(time);
     }
 
-    const actualCellX = this.shiftX < HCELL ? this.positionX : this.positionX + 1;
-    const actualCellY = this.shiftY < HCELL ? this.positionY : this.positionY + 1;
+    const actualCellX = this.shiftX < -HCELL ? this.positionX - 1 : (this.shiftX < HCELL ? this.positionX : this.positionX + 1);
+    const actualCellY = this.shiftY < -HCELL ? this.positionY - 1 : (this.shiftY < HCELL ? this.positionY : this.positionY + 1);
 
-    // bp.fillRect(actualCellX, actualCellY, CELL, CELL, style.playerZone);
+    bp.fillRect(toX(actualCellX), toY(actualCellY), CELL, CELL, style.playerZone);
 
 
     let s: float, sx: px, sy: px;
