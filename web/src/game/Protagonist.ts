@@ -1,4 +1,4 @@
-import { Animator } from '../anim/Animator';
+import { LoopAnimator } from '../anim/Animator';
 import { float, index, int, px } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
@@ -28,10 +28,10 @@ export class Protagonist implements DrawableCreature {
   shiftX = 0;
   shiftY = 0;
 
-  private movement: Animator = null;
-  private lastAnimIdx: index = 0;
-  private frozen: Dir        = 0;
-  private rotated            = false;
+  private movement: LoopAnimator = null;
+  private lastAnimIdx: index     = 0;
+  private frozen: Dir            = 0;
+  private rotated                = false;
 
 
   constructor(c: ApiCreature,
@@ -128,10 +128,10 @@ export class Protagonist implements DrawableCreature {
     if (this.movement) return;
 
     const dr = this.moving.next();
-    this.mm(dr);
+    this.doStep(dr);
   }
 
-  mm(dr: Dir) {
+  doStep(dr: Dir) {
     const nextPs   = this.nextPos(dr);
     this.direction = this.frozen ? this.frozen : dr;
 
@@ -142,40 +142,67 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-    const step = new Step(this, 150);
+    const step = new Step(this, 400);
     this.server.sendAction(step);
 
-    this.movement = new Animator(step.duration, (f) => {
-      const isNewPos = f >= 1;
+    this.movement = new LoopAnimator(step.duration, (f, i) => {
+      let isActionContinue = true;
+      let next             = 0;
+      const isNewPos       = i > this.lastAnimIdx;
 
-      if (!isNewPos) {
-        this.updMoving(dr, f);
-        return;
+      if (isNewPos) {
+        next = this.moving.next();
+        console.warn("NEXT " + next);
+
+        isActionContinue = dr === next;
+
+        switch (dr) {
+          case Dir.WEST:
+            this.positionX--;
+            break;
+          case Dir.EAST:
+            this.positionX++;
+            break;
+          case Dir.NORTH:
+            this.positionY--;
+            break;
+          case Dir.SOUTH:
+            this.positionY++;
+            break;
+        }
+
+        if (isActionContinue && !this.map.canMove([this.positionY, this.positionY], this.nextPos(next))) {
+          isActionContinue = false
+        }
+
+        console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);
       }
 
-      switch (dr) {
-        case Dir.WEST:
-          this.positionX--;
-          break;
-        case Dir.EAST:
-          this.positionX++;
-          break;
-        case Dir.NORTH:
-          this.positionY--;
-          break;
-        case Dir.SOUTH:
-          this.positionY++;
-          break;
+
+      if (isActionContinue) {
+        if (dr == Dir.WEST) this.shiftX = -f * CELL;
+        if (dr == Dir.EAST) this.shiftX = f * CELL;
+        if (dr == Dir.NORTH) this.shiftY = -f * CELL;
+        if (dr == Dir.SOUTH) this.shiftY = f * CELL;
+      } else {
+        this.shiftX = 0;
+        this.shiftY = 0;
       }
-      this.shiftX   = 0;
-      this.shiftY   = 0;
-      this.movement = null;
 
-      const next = this.moving.next();
 
-      if (next) this.mm(next);
+      if (isNewPos) {
 
-      console.warn("NEXT " + next);
+        if (isActionContinue) {
+          this.lastAnimIdx = i;
+        } else {
+          this.lastAnimIdx = 0;
+          this.movement.finish();
+          this.movement = null;
+
+          if (next) this.doStep(next);
+        }
+      }
+
     });
 
   }
