@@ -1,11 +1,11 @@
 import { Spell } from '../Spell';
 import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
-import { BasePainter } from '../../draw/BasePainter';
 import { CELL, Dir } from '../types';
 import { Lands } from '../Lands';
 import { FireballSpell } from '../actions/FireballSpell';
 import { RES } from '../GameCanvas';
+import { TilePainter } from '../TilePainter';
 
 export class Fireball implements Spell {
   private readonly posX: index;
@@ -62,11 +62,11 @@ export class Fireball implements Spell {
     }
   }
 
-  draw(time: DOMHighResTimeStamp, bp: BasePainter) {
+  draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
     this.anim.run(time);
     let shiftX: px = 0, shiftY: px = 0;
-    let sx: px, sy: px;
+    let sy: px;
     switch (this.direction) {
       case Dir.NORTH:
         shiftY = -this.shift;
@@ -86,14 +86,10 @@ export class Fireball implements Spell {
         break;
     }
 
-    sx = 32 * Math.floor(this.f / 0.25);
-
-    let x: px = this.posX * CELL + shiftX,
-        y: px = this.posY * CELL + shiftY;
-
+    const sx: px = 32 * Math.floor(this.f * 4);
     const fire1 = RES["fireball_32"];
 
-    bp.ctx.drawImage(fire1, sx, sy, 32, 32, x, y, 32, 32);
+    bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
   }
 
 }

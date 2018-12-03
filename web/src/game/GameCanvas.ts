@@ -27,7 +27,8 @@ export class GameCanvas implements CanvasComposer, Pressable {
 
     new Resources().onLoad(r => {
       RES          = r;
-      this.game    = new Game(new Lands(), moving);
+      const lands  = new Lands();
+      this.game    = new Game(lands, moving);
       this.loading = false;
     })
   }

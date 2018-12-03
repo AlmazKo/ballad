@@ -1,11 +1,18 @@
 import { index, int, px, uint } from '../types';
 import { ajax } from '../util/net';
 import { BasePainter } from '../draw/BasePainter';
-import { CELL, Dir } from './types';
+import { CELL, coord, Dir } from './types';
 import { RES } from './GameCanvas';
-import { Protagonist } from './Protagonist';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
+import { DrawableCreature } from './Creature';
+import { toX, toY } from './TilePainter';
+
+
+export declare var POS_X: coord;
+export declare var POS_Y: coord;
+export declare var SHIFT_X: px;
+export declare var SHIFT_Y: px;
 
 
 // type TileType = 'water'| ''
@@ -32,11 +39,6 @@ class Tile {
   }
 }
 
-interface Chunk {
-  data: int[],
-  x: int,
-  y: int
-}
 
 let rawMap: any                = null;
 let tiles: Map<index, RawTile> = new Map();
@@ -61,10 +63,6 @@ export class Lands {
   private tiles   = new Map<index, Tile>();
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
   private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
-  private topPosY: number;
-  private topPosX: number;
-  private shiftX: px;
-  private shiftY: px;
 
   constructor() {
   }
@@ -125,36 +123,20 @@ export class Lands {
     return this.tiles.get(tileId);
   }
 
-  toX(posX: index): px {
-    return (posX - this.topPosX) * CELL - this.shiftX;
+
+  updateFocus(proto: DrawableCreature) {
+    POS_X   = proto.positionX - 8;
+    POS_Y   = proto.positionY - 8;
+    SHIFT_X = proto.shiftX;
+    SHIFT_Y = proto.shiftY;
   }
 
-  toY(posY: index): px {
-    return (posY - this.topPosY) * CELL - this.shiftY;
-  }
-
-  toTopX(posX: index): px {
-    return (posX - this.topPosX) * CELL;
-  }
-
-  toTopY(posY: index): px {
-    return (posY - this.topPosY) * CELL;
-  }
-
-  draw(p: BasePainter, proto: Protagonist | undefined) {
+  draw(p: BasePainter) {
 
     if (!rawMap || !tiles.size) return;
 
     if (this.tiles.size === 0) {
       this.initData(rawMap, tiles);
-    }
-
-    if (proto) {
-
-      this.topPosY = proto.positionY - 8;
-      this.topPosX = proto.positionX - 8;
-      this.shiftX  = proto.shiftX;
-      this.shiftY  = proto.shiftY;
     }
 
 
@@ -163,7 +145,7 @@ export class Lands {
       const posX = idx % MAP_SIZE;
       const posY = Math.floor(idx / MAP_SIZE);
 
-      this.drawTile(p, tileId, this.toX(posX), this.toY(posY));
+      this.drawTile(p, tileId, toX(posX), toY(posY));
       // p.text("" + posX + "x" + posY, x, y, style.debugText)
     });
 
@@ -171,13 +153,13 @@ export class Lands {
 
       const posX = idx % MAP_SIZE;
       const posY = Math.floor(idx / MAP_SIZE);
-      this.drawTile(p, tileId, this.toX(posX), this.toY(posY));
+      this.drawTile(p, tileId, toX(posX), toY(posY));
     });
 
 
     for (let pos = 1; pos < MAP_SIZE; pos++) {
-      p.vline(this.toX(pos), -this.shiftY, MAP_SIZE * CELL, style.grid as StrokeStyle);
-      p.hline(-this.shiftX, MAP_SIZE * CELL, this.toY(pos), style.grid as StrokeStyle);
+      p.vline(toX(pos), -SHIFT_Y, MAP_SIZE * CELL, style.grid as StrokeStyle, false);
+      p.hline(-SHIFT_X, MAP_SIZE * CELL, toY(pos), style.grid as StrokeStyle, false);
     }
   }
 

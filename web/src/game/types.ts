@@ -1,4 +1,4 @@
-import { px } from '../types';
+import { int, px } from '../types';
 
 export const CELL: px  = 32;
 export const HCELL: px = CELL / 2;
@@ -13,3 +13,6 @@ export enum Dir {
 
 export const FIRST  = 49;
 export const SECOND = 50;
+
+
+export type coord = int;

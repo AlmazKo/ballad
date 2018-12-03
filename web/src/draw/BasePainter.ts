@@ -1,13 +1,11 @@
 import { hround, round } from '../canvas/utils';
-import { StrokeStyle, StrokeStyleAcceptor } from './StrokeStyleAcceptor';
+import { StrokeStyleAcceptor } from './StrokeStyleAcceptor';
 import { FontStyle, FontStyleAcceptor } from './FontStyleAcceptor';
 import { color, px } from '../types';
+import { FillStyle } from './FillStyle';
+import { Painter, StringStokeStyle } from './Painter';
 
-export type StringStokeStyle = color | Partial<StrokeStyle>;
-type FillStyle = color | CanvasGradient | CanvasPattern;
-
-
-export class BasePainter {
+export class BasePainter implements Painter {
   readonly ctx: CanvasRenderingContext2D;
   private readonly strokeAcceptor: StrokeStyleAcceptor;
   private readonly fontAcceptor: FontStyleAcceptor;
@@ -41,10 +39,10 @@ export class BasePainter {
   /**
    * Draw a horizontal line
    */
-  hline(x1: px, x2: px, y: px, style: StringStokeStyle) {
+  hline(x1: px, x2: px, y: px, style: StringStokeStyle, pixelPerfect = true) {
 
     this.stroke(style);
-    if (this.ctx.lineWidth % 2 === 1) {
+    if (pixelPerfect && this.ctx.lineWidth % 2 === 1) {
       y = hround(y);
     }
 
@@ -167,7 +165,7 @@ export class BasePainter {
     this.ctx.fillStyle = style;
   }
 
-  protected font(style?: FontStyle) {
+  font(style?: FontStyle) {
     this.fontAcceptor.set(style);
   }
 
@@ -177,18 +175,15 @@ export class BasePainter {
     return this.ctx;
   }
 
-  closePath(strokeStyle: Partial<StringStokeStyle>) {
-    // this.ctx.closePath();
-    this.stroke(strokeStyle);
-    this.ctx.stroke();
-  }
 
+  closePath(strokeStyle?: Partial<StringStokeStyle>, style?: FillStyle) {
 
-  closeStrokeFillPath(strokeStyle: Partial<StringStokeStyle>, style: FillStyle) {
-    this.ctx.fillStyle = style;
-    this.stroke(strokeStyle);
-    this.ctx.fill();
-    this.ctx.stroke();
+    if (strokeStyle) {
+      this.closeStrokePath(strokeStyle)
+    }
+    if (style) {
+      this.closeFillPath(style)
+    }
   }
 
   closeFillPath(style: FillStyle) {
@@ -198,4 +193,16 @@ export class BasePainter {
     this.ctx.fill();
   }
 
+  beginPath0(): CanvasPath {
+    this.ctx.beginPath();
+    return this.ctx;
+  }
+
+  closeStrokePath(strokeStyle: Partial<StringStokeStyle>): void {
+    this.stroke(strokeStyle);
+    this.ctx.stroke();
+  }
+
+  ellipse(x: px, y: px, radiusX: px, radiusY: px, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void {
+  }
 }

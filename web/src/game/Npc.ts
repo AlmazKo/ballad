@@ -1,11 +1,11 @@
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
-import { BasePainter } from '../draw/BasePainter';
 import { CELL, Dir, QCELL } from './types';
 import { float, index, px, uint } from '../types';
 import { RES } from './GameCanvas';
 import { Metrics } from './Metrics';
 import { Step } from './actions/Step';
 import { Animator } from '../anim/Animator';
+import { TilePainter } from './TilePainter';
 
 export class Npc implements DrawableCreature {
 
@@ -14,21 +14,13 @@ export class Npc implements DrawableCreature {
   direction: Dir;
   metrics: Metrics;
 
-  private shiftX = 0;
-  private shiftY = 0;
+  shiftX    = 0;
+  shiftY    = 0;
   private movement: Animator | undefined;
-  private f      = 1;
+  private f = 1;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
-  }
-
-  getX(): px {
-    return this.positionX * CELL + this.shiftX;
-  }
-
-  getY(): px {
-    return this.positionY * CELL + this.shiftY;
   }
 
   constructor(public id: uint, metrics: Metrics, posX: index, posY: index) {
@@ -84,13 +76,9 @@ export class Npc implements DrawableCreature {
 
   }
 
-  draw(time: DOMHighResTimeStamp, bp: BasePainter) {
+  draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
     if (this.movement && !this.movement.isFinished()) this.movement.run(time);
-
-    let x: px = this.positionX * CELL + this.shiftX,
-        y: px = this.positionY * CELL + this.shiftY;
-
     let sy: px;
 
     switch (this.direction) {
@@ -112,11 +100,12 @@ export class Npc implements DrawableCreature {
     }
 
 
-    drawLifeLine(bp, this);
-    const img = RES["NPC_test"];
-    const sx  = Math.floor(this.f * 4) * 16;
-    bp.ctx.drawImage(img, sx, sy, 16, 32, x + QCELL, y, 16, 32);
-    drawName(bp, this);
+    const p = bp.toInTile(this.positionX, this.positionY, this.shiftX, this.shiftY);
+
+    drawLifeLine(p, this);
+    const sx = Math.floor(this.f * 4) * 16;
+    bp.drawTile(RES["NPC_test"], sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
+    drawName(p, this);
   }
 
 

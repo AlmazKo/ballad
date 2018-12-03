@@ -1,9 +1,10 @@
 import { Spell } from '../Spell';
 import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
-import { BasePainter } from '../../draw/BasePainter';
 import { CELL, QCELL } from '../types';
 import { RES } from '../GameCanvas';
+import { TilePainter } from '../TilePainter';
+import { FireShockSpell } from '../actions/FireShockSpell';
 
 export class FireShock implements Spell {
   private posX: index;
@@ -14,12 +15,12 @@ export class FireShock implements Spell {
 
   private f: float;
 
-  constructor(posX: index, posY: index) {
-    this.posX = posX;
-    this.posY = posY;
-    this.anim = new LoopAnimator(400, (f, i) => {
+  constructor(spell: FireShockSpell) {
+    this.posX = spell.posX;
+    this.posY = spell.posY;
+    this.anim = new LoopAnimator(spell.duration, (f, i) => {
         this.f = f;
-        if (i >= 2) {
+        if (i >= spell.distance) {
           this.anim.finish();
           this.isFinished = true;
         } else {
@@ -29,36 +30,36 @@ export class FireShock implements Spell {
     );
   }
 
-  draw(time: DOMHighResTimeStamp, bp: BasePainter) {
+  draw(time: DOMHighResTimeStamp, tp: TilePainter) {
 
     this.anim.run(time);
 
-    const fire1 = RES["objects"];
+    const fire1    = RES["objects"];
+    const size: px = 16;
+    const sy: px   = 48;
+    const sx: px   = 64 + Math.floor(this.f * 6) * size;
+    const s: px    = this.shift;
+    const posX     = this.posX;
+    const posY     = this.posY;
 
-    let x: px = this.posX * CELL + QCELL,
-        y: px = this.posY * CELL + QCELL;
+    tp.drawTile(fire1, sx, sy, size, size, posX - 1, posY, QCELL, s);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL, s);
+    tp.drawTile(fire1, sx, sy, size, size, posX + 1, posY, QCELL, s);
 
-    const coefX = Math.floor(this.f / (1 / 6.0));
-    const sx    = 64 + coefX * 16;
+    tp.drawTile(fire1, sx, sy, size, size, posX - 1, posY, QCELL, -s);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL, -s);
+    tp.drawTile(fire1, sx, sy, size, size, posX + 1, posY, QCELL, -s);
 
 
-    const s = this.shift, c = bp.ctx;
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1,  QCELL+s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL+s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1,  QCELL+s, QCELL);
 
-    c.drawImage(fire1, sx, 48, 16, 16, x + s, y - CELL, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x + s, y, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x + s, y + CELL, 16, 16);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1,  QCELL-s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL-s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1,  QCELL-s, QCELL);
 
-    c.drawImage(fire1, sx, 48, 16, 16, x - s, y - CELL, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x - s, y, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x - s, y + CELL, 16, 16);
 
-    c.drawImage(fire1, sx, 48, 16, 16, x + CELL, y + s, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x, y + s, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x - CELL, y + s, 16, 16);
-
-    c.drawImage(fire1, sx, 48, 16, 16, x + CELL, y - s, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x, y - s, 16, 16);
-    c.drawImage(fire1, sx, 48, 16, 16, x - CELL, y - s, 16, 16);
   }
 
 }

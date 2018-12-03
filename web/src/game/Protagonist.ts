@@ -1,8 +1,6 @@
 import { Animator } from '../anim/Animator';
-import { BasePainter } from '../draw/BasePainter';
 import { float, index, int, px } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
-import { style } from './styles';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
 import { Step } from './actions/Step';
 import { Metrics } from './Metrics';
@@ -11,6 +9,7 @@ import { ApiCreature } from './api/ApiCreature';
 import { MovingKeys } from './MovingKeys';
 import { Lands } from './Lands';
 import { Server } from './api/Server';
+import { TilePainter, toX, toY } from './TilePainter';
 
 export class Protagonist implements DrawableCreature {
 
@@ -51,32 +50,26 @@ export class Protagonist implements DrawableCreature {
     return this.metrics.life / this.metrics.maxLife;
   }
 
-
   getX(): px {
-    return this.positionX * CELL + this.shiftX;
+    return toX(this.positionX) + this.shiftX + HCELL;
   }
 
   getY(): px {
-    return this.positionY * CELL + this.shiftY;
+    return toY(this.positionY) + this.shiftY + HCELL;
   }
 
-
-  draw(time: DOMHighResTimeStamp, bp: BasePainter) {
+  draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
     if (this.movement) {
       this.movement.run(time);
     }
 
-    let x: px = 8 * CELL,
-        y: px = 8 * CELL;
-
-
     const actualCellX = this.shiftX < HCELL ? this.positionX : this.positionX + 1;
     const actualCellY = this.shiftY < HCELL ? this.positionY : this.positionY + 1;
 
-    bp.fillRect(actualCellX, actualCellY, CELL, CELL, style.playerZone);
+    // bp.fillRect(actualCellX, actualCellY, CELL, CELL, style.playerZone);
 
-    drawLifeLine(bp, this);
+
     let s: float, sx: px, sy: px;
     switch (this.direction) {
       case Dir.NORTH:
@@ -100,10 +93,13 @@ export class Protagonist implements DrawableCreature {
         break
     }
 
-    sx = Math.floor(s / 0.25) * 16;
+    const x = toX(this.positionX) + this.shiftX;
+    const y = toY(this.positionY) + this.shiftY;
+    sx      = Math.floor(s / 0.25) * 16;
+    drawLifeLine(bp.toInDirect(x, y), this);
+    bp.drawTile(RES["character"], sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
-    bp.ctx.drawImage(RES["character"], sx, sy, 16, 32, x + QCELL, y, 16, 32);
-    drawName(bp, this);
+    drawName(bp.toInDirect(x, y), this);
   }
 
 
@@ -146,7 +142,7 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-    const step = new Step(this, 400);
+    const step = new Step(this, 150);
     this.server.sendAction(step);
 
     this.movement = new Animator(step.duration, (f) => {

@@ -14,6 +14,9 @@ import { ApiStep } from './api/ApiStep';
 import { Metrics } from './Metrics';
 import { style } from './styles';
 import { Fireball } from './effects/Fireball';
+import { TilePainter } from './TilePainter';
+import { FireShockSpell } from './actions/FireShockSpell';
+import { FireShock } from './effects/FireShock';
 
 let INC: uint = 0;
 
@@ -32,6 +35,7 @@ export class Game {
   private creatures = new Map<uint, Npc>();
   private spells    = [] as Array<Spell>;
   private server: Server;
+  private tp: TilePainter | undefined;
   private proto: Protagonist | undefined;
 
   constructor(private map: Lands, private moving: MovingKeys) {
@@ -41,37 +45,41 @@ export class Game {
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
 
-    this.map.draw(p, this.proto);
-    // this.creatures.forEach(it => {
-    //   it.draw(time, p)
-    // });
 
-    if (this.proto) this.proto.draw(time, p);
-    // if (this.proto) this.drawFog(p);
+    if (!this.proto) return;
 
-    // this.spells.forEach(it => {
-    //   it.draw(time, p)
-    // });
-    //
-    //
-    // //fixme optimize?
-    // this.spells = this.spells.filter(b => !b.isFinished)
+
+    this.map.updateFocus(this.proto);
+    if (!this.tp) this.tp = new TilePainter(p);
+    this.map.draw(p);
+    this.creatures.forEach(it => {
+      it.draw(time, this.tp)
+    });
+
+    this.proto.draw(time, this.tp);
+    if (this.proto) this.drawFog(this.tp);
+
+    this.spells.forEach(it => {
+      it.draw(time, this.tp)
+    });
+
+    //fixme optimize?
+    this.spells = this.spells.filter(b => !b.isFinished)
   }
 
-  private drawFog(p: BasePainter) {
+  private drawFog(p: TilePainter) {
+    const readius = 7.5 * CELL;
+    const x       = this.proto.getX();
+    const y       = this.proto.getY();
+    const xL      = x - readius;
+    const xR      = x + readius;
+    const yU      = y - readius;
+    const yD      = y + readius;
 
-
-    const areaSize = CELL * 8;
-
-    const xL = this.proto.getX() - areaSize;
-    const xR = this.proto.getX() + areaSize + CELL;
-    const yU = this.proto.getY() - areaSize;
-    const yD = this.proto.getY() + areaSize + CELL;
-
-    p.fillRect(0, 0, xL, p.ctx.canvas.height, style.fog); //LEFT
-    p.fillRect(xL, 0, p.ctx.canvas.width - xL, yU, style.fog);// TOP
-    p.fillRect(xR, yU, p.ctx.canvas.width - xR, p.ctx.canvas.height, style.fog);//RIGHT
-    p.fillRect(xL, yD, areaSize + areaSize + +CELL, p.ctx.canvas.height - yD, style.fog);//BOTTOM
+    p.fillRect(0, 0, xL, p.height, style.fog); //LEFT
+    p.fillRect(xL, 0, readius + readius, yU, style.fog);// TOP
+    p.fillRect(xR, 0, p.width - xR, p.height, style.fog);//RIGHT
+    p.fillRect(xL, yD, readius + readius, p.height - yD, style.fog);//BOTTOM
 
   }
 
@@ -120,6 +128,9 @@ export class Game {
         this.spells.push(new Fireball(fireball, this.map));
         break;
       case PlayerAction.FIRESHOCK:
+        const fireshok = new FireShockSpell(this.proto, 400, 2);
+        this.server.sendAction(fireshok);
+        this.spells.push(new FireShock(fireshok));
         break;
 
     }
