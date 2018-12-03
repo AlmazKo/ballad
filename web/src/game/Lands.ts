@@ -2,9 +2,10 @@ import { index, int, px, uint } from '../types';
 import { ajax } from '../util/net';
 import { BasePainter } from '../draw/BasePainter';
 import { CELL, Dir } from './types';
+import { RES } from './GameCanvas';
+import { Protagonist } from './Protagonist';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
-import { RES } from './GameCanvas';
 
 
 // type TileType = 'water'| ''
@@ -60,6 +61,10 @@ export class Lands {
   private tiles   = new Map<index, Tile>();
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
   private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
+  private topPosY: number;
+  private topPosX: number;
+  private shiftX: px;
+  private shiftY: px;
 
   constructor() {
   }
@@ -120,8 +125,23 @@ export class Lands {
     return this.tiles.get(tileId);
   }
 
+  toX(posX: index): px {
+    return (posX - this.topPosX) * CELL - this.shiftX;
+  }
 
-  draw(p: BasePainter, playerX: index, playerY: index) {
+  toY(posY: index): px {
+    return (posY - this.topPosY) * CELL - this.shiftY;
+  }
+
+  toTopX(posX: index): px {
+    return (posX - this.topPosX) * CELL;
+  }
+
+  toTopY(posY: index): px {
+    return (posY - this.topPosY) * CELL;
+  }
+
+  draw(p: BasePainter, proto: Protagonist | undefined) {
 
     if (!rawMap || !tiles.size) return;
 
@@ -129,37 +149,44 @@ export class Lands {
       this.initData(rawMap, tiles);
     }
 
+    if (proto) {
+
+      this.topPosY = proto.positionY - 8;
+      this.topPosX = proto.positionX - 8;
+      this.shiftX  = proto.shiftX;
+      this.shiftY  = proto.shiftY;
+    }
+
 
     this.basic.forEach((tileId: uint, idx: index) => {
-      this.drawTile(p, tileId, idx);
+      //todo add filter not draw tiles
+      const posX = idx % MAP_SIZE;
+      const posY = Math.floor(idx / MAP_SIZE);
+
+      this.drawTile(p, tileId, this.toX(posX), this.toY(posY));
+      // p.text("" + posX + "x" + posY, x, y, style.debugText)
     });
 
     this.objects.forEach((tileId: uint, idx: index) => {
-      this.drawTile(p, tileId, idx);
+
+      const posX = idx % MAP_SIZE;
+      const posY = Math.floor(idx / MAP_SIZE);
+      this.drawTile(p, tileId, this.toX(posX), this.toY(posY));
     });
 
+
     for (let pos = 1; pos < MAP_SIZE; pos++) {
-      p.vline(pos * CELL, 0, MAP_SIZE * CELL, style.grid as StrokeStyle);
-      p.hline(0, MAP_SIZE * CELL, pos * CELL, style.grid as StrokeStyle);
-    }
-
-
-    for (let x = 0; x < MAP_SIZE; x++) {
-      for (let y = 0; y < MAP_SIZE; y++) {
-        p.text("" + x + "x" + y, x * CELL + 1, y * CELL, style.debugText)
-      }
+      p.vline(this.toX(pos), -this.shiftY, MAP_SIZE * CELL, style.grid as StrokeStyle);
+      p.hline(-this.shiftX, MAP_SIZE * CELL, this.toY(pos), style.grid as StrokeStyle);
     }
   }
 
+  drawTile(p: BasePainter, tileId: uint, x: px, y: px) {
 
-  drawTile(p: BasePainter, tileId: uint, idx: index) {
+    const t = this.tiles.get(tileId);
+    if (!t) return;
 
     const img = RES['map1'];
-    const t   = this.tiles.get(tileId);
-    if (!t) return;
-    const x = (idx % MAP_SIZE) * CELL;
-    const y = Math.floor(idx / MAP_SIZE) * CELL;
-
     p.ctx.drawImage(img, t.sx, t.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
   }
 

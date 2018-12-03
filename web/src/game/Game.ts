@@ -41,21 +41,21 @@ export class Game {
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
 
-    this.map.draw(p, 1, 1);
-    this.creatures.forEach(it => {
-      it.draw(time, p)
-    });
+    this.map.draw(p, this.proto);
+    // this.creatures.forEach(it => {
+    //   it.draw(time, p)
+    // });
 
     if (this.proto) this.proto.draw(time, p);
-    if (this.proto) this.drawFog(p);
+    // if (this.proto) this.drawFog(p);
 
-    this.spells.forEach(it => {
-      it.draw(time, p)
-    });
-
-
-    //fixme optimize?
-    this.spells = this.spells.filter(b => !b.isFinished)
+    // this.spells.forEach(it => {
+    //   it.draw(time, p)
+    // });
+    //
+    //
+    // //fixme optimize?
+    // this.spells = this.spells.filter(b => !b.isFinished)
   }
 
   private drawFog(p: BasePainter) {

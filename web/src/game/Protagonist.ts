@@ -26,8 +26,8 @@ export class Protagonist implements DrawableCreature {
   positionX: int;
   positionY: int;
 
-  private shiftX = 0;
-  private shiftY = 0;
+  shiftX = 0;
+  shiftY = 0;
 
   private movement: Animator = null;
   private lastAnimIdx: index = 0;
@@ -67,12 +67,13 @@ export class Protagonist implements DrawableCreature {
       this.movement.run(time);
     }
 
-    let x: px = this.positionX * CELL + this.shiftX,
-        y: px = this.positionY * CELL + this.shiftY;
+    let x: px = 8 * CELL,
+        y: px = 8 * CELL;
 
 
-    const actualCellX = this.shiftX < HCELL ? this.positionX * CELL : this.positionX * CELL + CELL;
-    const actualCellY = this.shiftY < HCELL ? this.positionY * CELL : this.positionY * CELL + CELL;
+    const actualCellX = this.shiftX < HCELL ? this.positionX : this.positionX + 1;
+    const actualCellY = this.shiftY < HCELL ? this.positionY : this.positionY + 1;
+
     bp.fillRect(actualCellX, actualCellY, CELL, CELL, style.playerZone);
 
     drawLifeLine(bp, this);
@@ -145,7 +146,7 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-    const step = new Step(this, 250);
+    const step = new Step(this, 400);
     this.server.sendAction(step);
 
     this.movement = new Animator(step.duration, (f) => {

@@ -6,7 +6,7 @@ export const style = {
   grid  : {
     style: toRGBA("#33", 0.5),
     width: 1,
-    dash : [3, 6]
+    dash : [3, 5]
   },
   bullet: {
     style: "#333",

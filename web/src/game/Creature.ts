@@ -19,10 +19,6 @@ export interface Creature {
 
 export interface DrawableCreature extends Creature, Drawable {
 
-  getX(): px;
-
-  getY(): px;
-
   getLifeShare(): float
 
 }
