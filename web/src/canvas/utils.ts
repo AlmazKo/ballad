@@ -1,7 +1,7 @@
 import { color, float, px } from '../types';
 
 /**
- * Special for canvas X axis
+ * Special for canvas x axis
  * Rounds to next *.5 value
  */
 export function hround(v: px): px {

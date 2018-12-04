@@ -1,4 +1,4 @@
-import { Spell } from '../Spell';
+import { Effect } from '../Effect';
 import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { CELL, Dir } from '../types';
@@ -7,7 +7,7 @@ import { FireballSpell } from '../actions/FireballSpell';
 import { RES } from '../GameCanvas';
 import { TilePainter } from '../TilePainter';
 
-export class Fireball implements Spell {
+export class Fireball implements Effect {
   private readonly posX: index;
   private readonly posY: index;
   private readonly direction: Dir;

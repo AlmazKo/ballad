@@ -179,6 +179,10 @@ export class Protagonist implements DrawableCreature {
           isActionContinue = false
         }
 
+        if (isActionContinue) {
+          this.server.sendAction(new Step(this, 400));
+        }
+
         console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);
       }
 

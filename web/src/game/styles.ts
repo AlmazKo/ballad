@@ -14,7 +14,7 @@ export const style = {
   },
 
   fireShock : "#ff4200",
-  fog : toRGBA("#000", 0.666),
+  fog       : toRGBA("#000", 0.666),
   playerZone: toRGBA("#007704", 0.2),
 
   player         : {
@@ -59,6 +59,20 @@ export const style = {
     baseline: "bottom",
     style   : "blue",
     font    : "7px sans"
+  } as Partial<FontStyle>,
+
+  dmgText: {
+    align   : "center",
+    baseline: "top",
+    style   : "#fff",
+    font    : "bold 23px sans"
+  } as Partial<FontStyle>,
+
+  dmgText2: {
+    align   : "center",
+    baseline: "top",
+    style   : "#000",
+    font    : "bold 24px sans"
   } as Partial<FontStyle>,
 
   debugText: {

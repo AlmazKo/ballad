@@ -2,7 +2,7 @@ import { Lands } from './Lands';
 import { Server } from './api/Server';
 import { MovingKeys } from './MovingKeys';
 import { uint } from '../types';
-import { Spell } from './Spell';
+import { Effect } from './Effect';
 import { BasePainter } from '../draw/BasePainter';
 import { Step } from './actions/Step';
 import { FireballSpell } from './actions/FireballSpell';
@@ -11,7 +11,6 @@ import { Npc } from './Npc';
 import { CELL, Dir } from './types';
 import { ApiArrival } from './api/ApiArrival';
 import { ApiStep } from './api/ApiStep';
-import { Metrics } from './Metrics';
 import { style } from './styles';
 import { Fireball } from './effects/Fireball';
 import { TilePainter } from './TilePainter';
@@ -19,6 +18,7 @@ import { FireShockSpell } from './actions/FireShockSpell';
 import { FireShock } from './effects/FireShock';
 import { ApiDamage } from './api/ApiDamage';
 import { ApiDeath } from './api/ApiDeath';
+import { DamageEffect } from './effects/DamageEffect';
 
 let INC: uint = 0;
 
@@ -35,7 +35,7 @@ export enum PlayerAction {
 export class Game {
 
   private creatures = new Map<uint, Npc>();
-  private spells    = [] as Array<Spell>;
+  private effects   = [] as Array<Effect>;
   private server: Server;
   // @ts-ignore
   private tp: TilePainter;
@@ -63,12 +63,12 @@ export class Game {
     this.proto.draw(time, this.tp);
     if (this.proto) this.drawFog(this.tp);
 
-    this.spells.forEach(it => {
+    this.effects.forEach(it => {
       it.draw(time, this.tp)
     });
 
     //fixme optimize?
-    this.spells = this.spells.filter(b => !b.isFinished)
+    this.effects = this.effects.filter(b => !b.isFinished)
   }
 
   private drawFog(p: TilePainter) {
@@ -136,6 +136,8 @@ export class Game {
       c.metrics.life -= d.amount;
 
     }
+
+    this.effects.push(new DamageEffect(d));
   }
 
   private onDeath(d: ApiDeath) {
@@ -153,13 +155,13 @@ export class Game {
       case PlayerAction.FIREBALL:
         const fireball = new FireballSpell(this.proto, 200, 8);
         this.server.sendAction(fireball);
-        this.spells.push(new Fireball(fireball, this.map));
+        this.effects.push(new Fireball(fireball, this.map));
         break;
 
       case PlayerAction.FIRESHOCK:
         const fireshok = new FireShockSpell(this.proto, 400, 2);
         this.server.sendAction(fireshok);
-        this.spells.push(new FireShock(fireshok));
+        this.effects.push(new FireShock(fireshok));
         break;
 
     }

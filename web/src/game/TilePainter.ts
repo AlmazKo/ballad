@@ -128,6 +128,7 @@ export class TilePainter implements Painter {
   }
 
   text(text: string, x: px, y: px, style?: Partial<FontStyle>, maxWidth?: px): void {
+    this.bp.text(text, x, y, style, maxWidth)
   }
 
   vline(x: px, y1: px, y2: px, style: StringStokeStyle, pixelPerfect?: boolean): void {

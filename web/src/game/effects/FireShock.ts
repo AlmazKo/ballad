@@ -1,4 +1,4 @@
-import { Spell } from '../Spell';
+import { Effect } from '../Effect';
 import { float, index, px } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { CELL, QCELL } from '../types';
@@ -6,7 +6,7 @@ import { RES } from '../GameCanvas';
 import { TilePainter } from '../TilePainter';
 import { FireShockSpell } from '../actions/FireShockSpell';
 
-export class FireShock implements Spell {
+export class FireShock implements Effect {
   private posX: index;
   private posY: index;
   private shift: px = 0;

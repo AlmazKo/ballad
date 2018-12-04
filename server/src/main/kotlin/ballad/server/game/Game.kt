@@ -137,10 +137,11 @@ class Game(vertx: Vertx, val map: GameMap) {
         map.spells.forEach { spell ->
 
             spell as Fireball //fixme
-            val distance = Math.round((time - spell.time) / spell.speed.toFloat())
+            val distance = Math.min(spell.distance, Math.round((time - spell.time) / spell.speed.toFloat()))
 
             val x = spell.x + (if (spell.direction === WEST) -distance else if (spell.direction == EAST) distance else 0)
-            val y = spell.x + (if (spell.direction === NORTH) -distance else if (spell.direction == SOUTH) distance else 0)
+            val y = spell.y + (if (spell.direction === NORTH) -distance else if (spell.direction == SOUTH) distance else 0)
+
             map.npcs.values.filter { it.x == x && it.y == y && it.id != spell.creature.id }.forEach { victim ->
 
                 val d = Damage(x, y, time, victim, spell.creature, 10)
@@ -155,7 +156,7 @@ class Game(vertx: Vertx, val map: GameMap) {
 
 
             map.players.values.filter { it.x == x && it.y == y && it.id != spell.creature.id }.forEach { victim ->
-                val d = Damage(x, y, time, victim, spell.creature, 10)
+                val d = Damage(x, y, time, victim, spell.creature, 8)
                 victim.damage(d)
                 actions.add(d)
 
