@@ -1,6 +1,6 @@
 package ballad.server.game
 
-import ballad.server.game.Direction.NORTH
+import ballad.server.game.Direction.SOUTH
 import ballad.server.map.Tile
 import ballad.server.map.TileType.BRIDGE
 import ballad.server.map.TileType.NOTHING
@@ -19,16 +19,16 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
 
 
     init {
-//        val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
-//
-//        val npc = Npc(++creaturesInc, type, 50, CreatureState(50, 15, 17, NORTH), 2)
-//        npcs[npc.id] = npc
-//
-//        val npc2 = Npc(++creaturesInc, type, 50, CreatureState(50, 1, 17, NORTH), 2)
-//        npcs[npc2.id] = npc2
-//
-//        strategies.add(NpcStrategy(npc, this))
-//        strategies.add(NpcStrategy(npc2, this))
+        //        val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
+        //
+        //        val npc = Npc(++creaturesInc, type, 50, CreatureState(50, 15, 17, NORTH), 2)
+        //        npcs[npc.id] = npc
+        //
+        //        val npc2 = Npc(++creaturesInc, type, 50, CreatureState(50, 1, 17, NORTH), 2)
+        //        npcs[npc2.id] = npc2
+        //
+        //        strategies.add(NpcStrategy(npc, this))
+        //        strategies.add(NpcStrategy(npc2, this))
 
         debug()
     }
@@ -70,7 +70,7 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     }
 
     fun addPlayer(id: Int): Player {
-        val player = Player(id, CreatureState(50, 15, 18, NORTH))
+        val player = Player(id, CreatureState(50, 15, 18, SOUTH))
         players[id] = player
         return player
     }

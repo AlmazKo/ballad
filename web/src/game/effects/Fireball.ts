@@ -16,7 +16,7 @@ export class Fireball implements Spell {
   private shift: px     = 0;
   private anim: LoopAnimator;
   isFinished            = false;
-  private f: float;
+  private f: float      = 0;
   private map: Lands;
 
   constructor(spec: FireballSpell, map: Lands) {
@@ -84,10 +84,13 @@ export class Fireball implements Spell {
         shiftX = this.shift;
         sy     = 32 * 4;
         break;
+
+      default:
+        return;
     }
 
     const sx: px = 32 * Math.floor(this.f * 4);
-    const fire1 = RES["fireball_32"];
+    const fire1  = RES["fireball_32"];
 
     bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
   }

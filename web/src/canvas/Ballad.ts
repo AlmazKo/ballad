@@ -34,12 +34,17 @@ export class Ballad {
   private width: px;
   private height: px;
   private ratio: number;
-
+// @ts-ignore
   private composer: CanvasComposer;
+  // @ts-ignore
   private draggable: Draggable | null;
+  // @ts-ignore
   private zoom: ZoomChange | null;
+  // @ts-ignore
   private position: CursorChange | null;
+  // @ts-ignore
   private dblClick: Clickable | null;
+  // @ts-ignore
   private pressable: Pressable | null;
   private id: number;
 

@@ -6,9 +6,11 @@ import { Metrics } from './Metrics';
 import { Step } from './actions/Step';
 import { Animator } from '../anim/Animator';
 import { TilePainter } from './TilePainter';
+import { ApiCreature } from './api/ApiCreature';
 
 export class Npc implements DrawableCreature {
 
+  id: uint;
   positionX: index;
   positionY: index;
   direction: Dir;
@@ -17,16 +19,18 @@ export class Npc implements DrawableCreature {
   shiftX    = 0;
   shiftY    = 0;
   private movement: Animator | undefined;
-  private f = 1;
+  private f = 0;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
   }
 
-  constructor(public id: uint, metrics: Metrics, posX: index, posY: index) {
-    this.metrics   = metrics;
-    this.positionX = posX;
-    this.positionY = posY;
+  constructor(c: ApiCreature) {
+    this.id        = c.id;
+    this.metrics   = c.metrics;
+    this.direction = c.direction;
+    this.positionX = c.x;
+    this.positionY = c.y;
   }
 
 
@@ -96,7 +100,10 @@ export class Npc implements DrawableCreature {
 
       case Dir.WEST:
         sy = 96;
-        break
+        break;
+
+      default:
+        return;
     }
 
 

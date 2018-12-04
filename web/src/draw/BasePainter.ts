@@ -161,8 +161,8 @@ export class BasePainter implements Painter {
     this.strokeAcceptor.set(strokeStyle);
   }
 
-  fill(style: FillStyle = this.baseFillColor) {
-    this.ctx.fillStyle = style;
+  fill(style?: FillStyle) {
+    if (style) this.ctx.fillStyle = style;
   }
 
   font(style?: FontStyle) {

@@ -3,12 +3,11 @@ import { BasePainter } from '../draw/BasePainter';
 import { FontStyle } from '../draw/FontStyleAcceptor';
 import { Painter, StringStokeStyle } from '../draw/Painter';
 import { FillStyle } from '../draw/FillStyle';
-import { toX, toY } from './TilePainter';
 
 export class InTilePainter implements Painter {
 
-  currentX: px;
-  currentY: px;
+  currentX: px = 0;
+  currentY: px = 0;
 
   constructor(private readonly bp: BasePainter) {
   }
@@ -18,7 +17,7 @@ export class InTilePainter implements Painter {
   }
 
   beginPath(startX: px, startY: px): CanvasPath {
-    return undefined;
+    throw Error("Not implemented")
   }
 
   beginPath0(): CanvasPath {
@@ -34,7 +33,7 @@ export class InTilePainter implements Painter {
   closeFillPath(style: FillStyle): void {
   }
 
-  closePath(strokeStyle: Partial<StringStokeStyle> | null, style: FillStyle | null): void {
+  closePath(strokeStyle?: Partial<StringStokeStyle>, style?: FillStyle): void {
   }
 
   closeStrokePath(strokeStyle: Partial<StringStokeStyle>): void {
@@ -62,11 +61,11 @@ export class InTilePainter implements Painter {
   }
 
   measureHeight(style: FontStyle): px {
-    return undefined;
+    return 0;
   }
 
   measureWidth(text: string, style: FontStyle): px {
-    return undefined;
+    return 0;
   }
 
   rect(x: px, y: px, w: px, h: px, style: StringStokeStyle, pixelPerfect?: boolean): void {
@@ -85,7 +84,6 @@ export class InTilePainter implements Painter {
     this.bp.ctx.ellipse(this.currentX + x, this.currentY + y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise);
     this.bp.ctx.stroke();
   }
-
 
 
 }

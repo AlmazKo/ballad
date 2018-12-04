@@ -13,7 +13,7 @@ export class FireShock implements Spell {
   private anim: LoopAnimator;
   isFinished        = false;
 
-  private f: float;
+  private f: float = 0;
 
   constructor(spell: FireShockSpell) {
     this.posX = spell.posX;

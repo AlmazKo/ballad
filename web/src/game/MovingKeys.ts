@@ -26,6 +26,8 @@ export class KeyQueue {
     if (el === 0) return false;
 
     console.debug("MovingKeys: add, data: ", q)
+
+    return true;
   }
 
 

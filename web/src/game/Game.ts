@@ -37,8 +37,10 @@ export class Game {
   private creatures = new Map<uint, Npc>();
   private spells    = [] as Array<Spell>;
   private server: Server;
-  private tp: TilePainter | undefined;
-  private proto: Protagonist | undefined;
+  // @ts-ignore
+  private tp: TilePainter;
+  // @ts-ignore
+  private proto: Protagonist;
 
   constructor(private map: Lands, private moving: MovingKeys) {
     this.server = new Server(map);
@@ -98,8 +100,7 @@ export class Game {
 
       case "ARRIVAL":
         a       = action as ApiArrival;
-        const m = new Metrics(a.creature.metrics);
-        const n = new Npc(a.creature.id, m, a.creature.x, a.creature.y);
+        const n = new Npc(a.creature);
         this.creatures.set(a.creature.id, n);
         break;
 

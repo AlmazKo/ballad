@@ -5,6 +5,7 @@ import { WS_HOST } from '../../util/net';
 import { FireballSpell } from '../actions/FireballSpell';
 
 export class Server {
+  // @ts-ignore
   private handler: (name: String, action: Action) => void;
   private ws: WebSocket;
 

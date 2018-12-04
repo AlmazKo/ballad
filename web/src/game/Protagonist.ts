@@ -29,10 +29,10 @@ export class Protagonist implements DrawableCreature {
   shiftX = 0;
   shiftY = 0;
 
-  private movement: LoopAnimator = null;
-  private lastAnimIdx: index     = 0;
-  private frozen: Dir            = 0;
-  private rotated                = false;
+  private movement: LoopAnimator | null = null;
+  private lastAnimIdx: index            = 0;
+  private frozen: Dir                   = 0;
+  private rotated                       = false;
 
 
   constructor(c: ApiCreature,
@@ -91,7 +91,10 @@ export class Protagonist implements DrawableCreature {
       case Dir.WEST:
         sy = 96;
         s  = -this.shiftX / CELL;
-        break
+        break;
+
+      default:
+        return;
     }
 
     const x = toX(this.positionX) + this.shiftX;
@@ -197,7 +200,7 @@ export class Protagonist implements DrawableCreature {
           this.lastAnimIdx = i;
         } else {
           this.lastAnimIdx = 0;
-          this.movement.finish();
+          this.movement!!.finish();
           this.movement = null;
 
           if (next) this.doStep(next);

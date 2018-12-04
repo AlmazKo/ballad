@@ -13,12 +13,16 @@ const moving = new MovingKeys();
 
 export class GameCanvas implements CanvasComposer, Pressable {
 
+  // @ts-ignore
   height: px;
+  // @ts-ignore
   width: px;
 
-
+  // @ts-ignore
   private p: BasePainter;
+  // @ts-ignore
   private loading = true;
+  // @ts-ignore
   private game: Game;
 
 

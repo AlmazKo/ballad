@@ -48,7 +48,7 @@ export interface Painter {
 
   stroke(strokeStyle: Partial<StringStokeStyle>): void
 
-  fill(style: FillStyle): void
+  fill(style?: FillStyle): void
 
   font(style?: FontStyle): void
 
@@ -60,6 +60,6 @@ export interface Painter {
 
   closeFillPath(style: FillStyle): void
 
-  closePath(strokeStyle: Partial<StringStokeStyle> | null, style: FillStyle | null): void
+  closePath(strokeStyle?: Partial<StringStokeStyle>, style?: FillStyle): void
 
 }
