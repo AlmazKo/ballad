@@ -7,4 +7,6 @@ data class Arrival(
     override val y: Int,
     override val time: Tsm,
     val creature: Creature
-) : Action
+) : Action {
+    constructor(time: Tsm, c: Creature) : this(c.x, c.y, time, c)
+}

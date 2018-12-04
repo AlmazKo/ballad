@@ -1,5 +1,6 @@
 package ballad.server.game
 
+import ballad.server.Tsm
 import ballad.server.game.Direction.EAST
 import ballad.server.game.Direction.NORTH
 import ballad.server.game.Direction.SOUTH
@@ -71,6 +72,68 @@ class Game(vertx: Vertx, val map: GameMap) {
         }
 
 
+        handleSpells(time, actions)
+
+        map.strategies.removeIf {
+            val isActive = it.isActive()
+            if (!isActive) map.npcs.remove(it.npcId)
+
+            !isActive
+        }
+
+
+        val playerActions = HashMap<Int, MutableList<Action>>()
+
+        actions.data.forEach { a ->
+            map.players.values.forEach { p ->
+
+                val v = p.viewDistance
+                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+                when (a) {
+                    is Arrival -> {
+                        if (inZone(a, p, v)) {
+                            if (p.id == a.creature.id) {
+                                //the 1st player arrival -> scan area
+                                this.map.npcs.values.filter { inZone(it, p, v) }.forEach { npc ->
+                                    p.zone[npc.id] = npc
+                                    pActions.add(Arrival(time, npc))
+                                }
+                                this.map.players.values.filter { p.id != it.id && inZone(it, p, v) }.forEach { pl ->
+                                    p.zone[pl.id] = pl
+                                    pActions.add(Arrival(time, pl))
+                                }
+                            } else if (!p.zone.contains(a.creature.id)) {
+                                p.zone[a.creature.id] = a.creature
+                                pActions.add(a)
+                            }
+                        }
+                    }
+                    is Step -> {
+                        if (inZone(a, p, v)) {
+                            if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
+                                p.zone[a.creature.id] = a.creature
+                                val arr = Arrival(a.x, a.y, time, a.creature)
+                                pActions.add(arr)
+                            }
+                            pActions.add(a)
+                        } else {
+                            p.zone.remove(a.creature.id)
+                        }
+                    }
+
+                    is Damage -> if (inZone(a, p, v)) pActions.add(a)
+                    is Death -> if (inZone(a, p, v)) pActions.add(a)
+                }
+            }
+        }
+
+        //after tick process
+        playerActions.forEach { pId, acts ->
+            playerHandler[pId]?.invoke(acts)
+        }
+    }
+
+    private fun handleSpells(time: Tsm, actions: ActionConsumer) {
         map.spells.forEach { spell ->
 
             spell as Fireball //fixme
@@ -107,54 +170,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
-
-        map.strategies.removeIf {
-            val isActive = it.isActive()
-            if (!isActive) map.npcs.remove(it.npcId)
-
-            !isActive
-        }
-
         map.spells.removeIf { it.finished }
-
-        val playerActions = HashMap<Int, MutableList<Action>>()
-
-        actions.data.forEach { a ->
-            map.players.values.forEach { p ->
-
-                val v = p.viewDistance
-                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
-                when (a) {
-                    is Arrival -> {
-                        if (inZone(a, p, v)) {
-                            if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
-                                p.zone[a.creature.id] = a.creature
-                                pActions.add(a)
-                            }
-                        }
-                    }
-                    is Step -> {
-                        if (inZone(a, p, v)) {1
-                            if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
-                                p.zone[a.creature.id] = a.creature
-                                val arr = Arrival(a.x, a.y, time, a.creature)
-                                pActions.add(arr)
-                            }
-                            pActions.add(a)
-                        } else {
-                            p.zone.remove(a.creature.id)
-                        }
-                    }
-                    is Damage -> if (inZone(a, p, v)) pActions.add(a)
-                    is Death -> if (inZone(a, p, v)) pActions.add(a)
-                }
-            }
-        }
-
-        //after tick process
-        playerActions.forEach { pId, acts ->
-            playerHandler[pId]?.invoke(acts)
-        }
     }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
@@ -169,6 +185,9 @@ class Game(vertx: Vertx, val map: GameMap) {
         const val TICK_TIME = 50
         private fun inZone(a: Action, c: Creature, radius: Int) =
             a.x <= c.x + radius && a.x >= c.x - radius && a.y <= c.y + radius && a.y >= c.y - radius
+
+        private fun inZone(other: Creature, c: Creature, radius: Int) =
+            other.x <= c.x + radius && other.x >= c.x - radius && other.y <= c.y + radius && other.y >= c.y - radius
     }
 
 }

@@ -55,6 +55,7 @@ class App(vertx: Vertx) {
             ws.writeFinalTextFrame("""{"action":"PROTAGONIST_ARRIVAL", "data": $act}""")
             ws.closeHandler {
                 map.removePlayer(id)
+                log.info("Connection is closed: $id")
             }
 
             ws.textMessageHandler { msg ->
