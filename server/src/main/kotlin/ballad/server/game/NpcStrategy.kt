@@ -6,7 +6,6 @@ import ballad.server.game.Direction.NORTH
 import ballad.server.game.Direction.SOUTH
 import ballad.server.game.Direction.WEST
 import ballad.server.map.TileType
-import io.vertx.core.logging.LoggerFactory
 import kotlin.random.Random
 
 class NpcStrategy(
@@ -15,13 +14,15 @@ class NpcStrategy(
 ) {
     private var nextPlannedTime = -1L
 
+    val npcId: Int get() = npc.id
+
     fun onTick(id: Int, time: Tsm, consumer: ActionConsumer) {
         if (time > nextPlannedTime) {
 
             val step = passive(time) ?: return
 
             consumer.add(step)
-            nextPlannedTime = time + 1000
+            nextPlannedTime = time + 6000
         }
     }
 
@@ -40,7 +41,7 @@ class NpcStrategy(
             return null
         }
 
-        return Step(npc.state.x, npc.state.y, time, dir, 800, npc)
+        return Step(npc.state.x, npc.state.y, time, dir, 5000, npc)
     }
 
 
@@ -64,8 +65,8 @@ class NpcStrategy(
         return tile.type !== TileType.WALL && tile.type !== TileType.WATER
     }
 
-    companion object {
-        val log = LoggerFactory.getLogger(NpcStrategy::class.java)
-    }
 
+    fun isActive(): Boolean {
+        return npc.state.life > 0
+    }
 }

@@ -17,6 +17,8 @@ import { Fireball } from './effects/Fireball';
 import { TilePainter } from './TilePainter';
 import { FireShockSpell } from './actions/FireShockSpell';
 import { FireShock } from './effects/FireShock';
+import { ApiDamage } from './api/ApiDamage';
+import { ApiDeath } from './api/ApiDeath';
 
 let INC: uint = 0;
 
@@ -111,7 +113,32 @@ export class Game {
 
         c.onStep(s);
         break;
+
+      case "DAMAGE":
+        this.onDamage(action as ApiDamage);
+        break;
+
+      case "DEATH":
+        this.onDeath(action as ApiDeath);
+        break;
     }
+  }
+
+
+  private onDamage(d: ApiDamage) {
+
+    if (this.proto.id === d.victimId) {
+      this.proto.metrics.life -= d.amount;
+    } else {
+      const c = this.creatures.get(d.victimId);
+      if (!c) return;
+      c.metrics.life -= d.amount;
+
+    }
+  }
+
+  private onDeath(d: ApiDeath) {
+    this.creatures.delete(d.victimId);
   }
 
   onStep(dir: Dir) {
@@ -123,10 +150,11 @@ export class Game {
 
     switch (action) {
       case PlayerAction.FIREBALL:
-        const fireball = new FireballSpell(this.proto, 200, 12);
+        const fireball = new FireballSpell(this.proto, 200, 8);
         this.server.sendAction(fireball);
         this.spells.push(new Fireball(fireball, this.map));
         break;
+
       case PlayerAction.FIRESHOCK:
         const fireshok = new FireShockSpell(this.proto, 400, 2);
         this.server.sendAction(fireshok);

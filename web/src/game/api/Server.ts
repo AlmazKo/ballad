@@ -33,7 +33,7 @@ export class Server {
       this.ws.send(JSON.stringify({
         action: "SPELL", data: {
           type: "FIREBALL",
-          x   : action.posX, y: action.posY, direction: action.direction
+          x   : action.posX, y: action.posY, direction: action.direction, distance: action.distance, speed: action.duration
         }
       }))
 

@@ -18,4 +18,10 @@ interface Creature {
             Direction.EAST -> state.x++
         }
     }
+
+    fun damage(d: Damage) {
+        state.life -= d.amount
+        if (state.life < 0) state.life = 0
+    }
+
 }

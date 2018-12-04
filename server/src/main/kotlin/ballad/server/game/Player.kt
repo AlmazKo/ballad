@@ -1,6 +1,6 @@
 package ballad.server.game
 
-class Player(
+data class Player(
     override val id: Int,
     override val state: CreatureState
 ) : Creature {

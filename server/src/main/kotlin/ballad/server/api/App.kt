@@ -1,6 +1,9 @@
 package ballad.server.api
 
 import ballad.server.game.Arrival
+import ballad.server.game.Damage
+import ballad.server.game.Death
+import ballad.server.game.Fireball
 import ballad.server.game.Game
 import ballad.server.game.GameMap
 import ballad.server.game.Step
@@ -68,6 +71,17 @@ class App(vertx: Vertx) {
                             direction = mapToDirection[data.getInteger("direction")]!!
                         )
                     }
+                    "SPELL" -> {
+                        Fireball(
+                            x = data.getInteger("x"),
+                            y = data.getInteger("y"),
+                            time = tsm(), //fixme
+                            distance =  data.getInteger("distance"),
+                            speed = data.getInteger("speed"),
+                            creature = p,
+                            direction = mapToDirection[data.getInteger("direction")]!!
+                        )
+                    }
                     else -> return@textMessageHandler
                 }
 
@@ -79,6 +93,8 @@ class App(vertx: Vertx) {
                     val act = when (it) {
                         is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
                         is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
+                        is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
+                        is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
                         else -> return@forEach
                     }
                     ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
