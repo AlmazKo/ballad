@@ -6,6 +6,7 @@ import ballad.server.game.Death
 import ballad.server.game.Fireball
 import ballad.server.game.Game
 import ballad.server.game.GameMap
+import ballad.server.game.Hide
 import ballad.server.game.Step
 import ballad.server.map.Lands
 import ballad.server.toJson
@@ -54,6 +55,7 @@ class App(vertx: Vertx) {
             val act = JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(arr))
             ws.writeFinalTextFrame("""{"action":"PROTAGONIST_ARRIVAL", "data": $act}""")
             ws.closeHandler {
+                game.send(Hide(tsm(), p))
                 map.removePlayer(id)
                 log.info("Connection is closed: $id")
             }
@@ -77,7 +79,7 @@ class App(vertx: Vertx) {
                             x = data.getInteger("x"),
                             y = data.getInteger("y"),
                             time = tsm(), //fixme
-                            distance =  data.getInteger("distance"),
+                            distance = data.getInteger("distance"),
                             speed = data.getInteger("speed"),
                             creature = p,
                             direction = mapToDirection[data.getInteger("direction")]!!
@@ -92,6 +94,7 @@ class App(vertx: Vertx) {
             game.subscribe(id) { actions ->
                 actions.forEach {
                     val act = when (it) {
+                        is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), ballad.server.api.Hide(it))
                         is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
                         is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
                         is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
@@ -114,7 +117,8 @@ class App(vertx: Vertx) {
             val vp = ViewMap(0, 0, lands.map)
             val vp2 = ViewMap(0, 0, lands.mapObjects)
             req.response().putHeader("content-type", "application/json; charset=utf-8")
-            req.response().end("""{"x":${vp.x}, "y":${vp.y}, "terrain":[${vp.chunk.joinToString(",")}], "objects1":[${vp2.chunk.joinToString(",")}]}""")
+            req.response()
+                .end("""{"x":${vp.x}, "y":${vp.y}, "terrain":[${vp.chunk.joinToString(",")}], "objects1":[${vp2.chunk.joinToString(",")}]}""")
         }
 
         router.get("/tiles").handler { req ->

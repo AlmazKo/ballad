@@ -19,6 +19,7 @@ import { FireShock } from './effects/FireShock';
 import { ApiDamage } from './api/ApiDamage';
 import { ApiDeath } from './api/ApiDeath';
 import { DamageEffect } from './effects/DamageEffect';
+import { ApiHide } from './api/ApiHide';
 
 let INC: uint = 0;
 
@@ -119,6 +120,10 @@ export class Game {
         this.onDamage(action as ApiDamage);
         break;
 
+      case "HIDE":
+        this.onHidden(action as ApiHide);
+        break;
+
       case "DEATH":
         this.onDeath(action as ApiDeath);
         break;
@@ -138,6 +143,10 @@ export class Game {
     }
 
     this.effects.push(new DamageEffect(d));
+  }
+
+  private onHidden(d: ApiHide) {
+    this.creatures.delete(d.creatureId);
   }
 
   private onDeath(d: ApiDeath) {

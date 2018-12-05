@@ -42,20 +42,19 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         playerRequests.forEach {
 
-            if (it is Step) {
-                //add validation
-                it.creature.state.direction = it.direction
-                actions.add(it)
-            }
-
-            if (it is Fireball) {
-                it.startTime = time
-                actions.add(it)
-                map.spells.add(it)
-            }
-
-            if (it is Arrival) {
-                actions.add(it)
+            when (it) {
+                is Step -> {
+                    //add validation
+                    it.creature.state.direction = it.direction
+                    actions.add(it)
+                }
+                is Fireball -> {
+                    it.startTime = time
+                    actions.add(it)
+                    map.spells.add(it)
+                }
+                is Arrival -> actions.add(it)
+                is Hide -> actions.add(it)
             }
         }
 
@@ -90,6 +89,12 @@ class Game(vertx: Vertx, val map: GameMap) {
                 val v = p.viewDistance
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
                 when (a) {
+                    is Hide -> {
+                        if (inZone(a, p, v) && p.id != a.creature.id) {
+                            p.zone.remove(a.creature.id)
+                            pActions.add(a)
+                        }
+                    }
                     is Arrival -> {
                         if (inZone(a, p, v)) {
                             if (p.id == a.creature.id) {
