@@ -1,5 +1,6 @@
 package ballad.server.api
 
+import ballad.server.game.actions.Damage
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,5 +13,5 @@ data class Damage(
     val time: Long
 
 ) {
-    constructor(d: ballad.server.game.Damage) : this(d.x, d.y, d.culprit.id, d.victim.id, d.amount, d.time)
+    constructor(d: Damage) : this(d.x, d.y, d.culprit.id, d.victim.id, d.amount, d.time)
 }

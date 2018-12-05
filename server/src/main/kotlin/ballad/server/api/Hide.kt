@@ -1,6 +1,6 @@
 package ballad.server.api
 
-import ballad.server.game.Hide
+import ballad.server.game.actions.Hide
 import ballad.server.tsm
 import kotlinx.serialization.Serializable
 

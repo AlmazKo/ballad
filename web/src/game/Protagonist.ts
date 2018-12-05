@@ -1,5 +1,5 @@
 import { LoopAnimator } from '../anim/Animator';
-import { float, index, int, px } from '../types';
+import { float, index, int, px, uint } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
 import { Step } from './actions/Step';
@@ -21,6 +21,7 @@ export class Protagonist implements DrawableCreature {
   }
 
   readonly id: int;
+  readonly viewDistance: uint;
   readonly metrics: Metrics;
   direction: Dir;
   positionX: int;
@@ -39,11 +40,12 @@ export class Protagonist implements DrawableCreature {
               private moving: MovingKeys,
               private map: Lands,
               private server: Server) {
-    this.id        = c.id;
-    this.metrics   = c.metrics;
-    this.direction = c.direction;
-    this.positionX = c.x;
-    this.positionY = c.y;
+    this.id           = c.id;
+    this.metrics      = c.metrics;
+    this.direction    = c.direction;
+    this.positionX    = c.x;
+    this.positionY    = c.y;
+    this.viewDistance = c.viewDistance;
   }
 
 

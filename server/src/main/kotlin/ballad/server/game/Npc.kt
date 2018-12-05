@@ -5,7 +5,7 @@ data class Npc(
     val type: CreatureType,
     val life: Int,
     override val state: CreatureState,
-    val threatDistance: Int
+    override val viewDistance: Int
 ) : Creature {
 
 

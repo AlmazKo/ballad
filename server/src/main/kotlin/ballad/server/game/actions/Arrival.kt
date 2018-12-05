@@ -1,8 +1,9 @@
-package ballad.server.game
+package ballad.server.game.actions
 
 import ballad.server.Tsm
+import ballad.server.game.Creature
 
-data class Hide(
+data class Arrival(
     override val x: Int,
     override val y: Int,
     override val time: Tsm,

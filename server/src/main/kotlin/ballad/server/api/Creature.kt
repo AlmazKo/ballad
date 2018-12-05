@@ -12,7 +12,8 @@ data class Creature(
     val x: Int,
     val y: Int,
     val direction: Int = UP,
-    val metrics: NpcMetrics
+    val metrics: NpcMetrics,
+    val viewDistance: Int
 ) {
     constructor(id: Creature) : this(
 
@@ -26,6 +27,7 @@ data class Creature(
             Direction.WEST -> LEFT
             Direction.EAST -> RIGHT
         },
-        NpcMetrics(id.name, id.state.life, id.state.life)
+        NpcMetrics(id.name, id.state.life, id.state.life),
+        id.viewDistance
     )
 }

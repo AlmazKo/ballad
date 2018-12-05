@@ -1,6 +1,6 @@
 package ballad.server.api
 
-import ballad.server.game.Arrival
+import ballad.server.game.actions.Arrival
 import ballad.server.tsm
 import kotlinx.serialization.Serializable
 

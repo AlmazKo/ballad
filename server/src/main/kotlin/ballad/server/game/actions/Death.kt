@@ -1,6 +1,7 @@
-package ballad.server.game
+package ballad.server.game.actions
 
 import ballad.server.Tsm
+import ballad.server.game.Creature
 
 data class Death(
     override val x: Int,
@@ -9,5 +10,5 @@ data class Death(
     val victim: Creature,
     val culprit: Creature
 ) : Action {
-    constructor(d: Damage) : this(d.x,d.y,d.time,d.victim, d.culprit)
+    constructor(d: Damage) : this(d.x, d.y, d.time, d.victim, d.culprit)
 }

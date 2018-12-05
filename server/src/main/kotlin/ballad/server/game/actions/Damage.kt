@@ -1,6 +1,7 @@
-package ballad.server.game
+package ballad.server.game.actions
 
 import ballad.server.Tsm
+import ballad.server.game.Creature
 
 data class Damage(
     override val x: Int,
@@ -9,4 +10,4 @@ data class Damage(
     val victim: Creature,
     val culprit: Creature,
     var amount: Int = 0
-) : Action 
+) : Action

@@ -74,7 +74,7 @@ export class Game {
   }
 
   private drawFog(p: TilePainter) {
-    const readius = 7.5 * CELL;
+    const readius = (this.proto.viewDistance + 0.5) * CELL;
     const x       = this.proto.getX();
     const y       = this.proto.getY();
     const xL      = x - readius;

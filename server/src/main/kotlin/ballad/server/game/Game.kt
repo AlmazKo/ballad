@@ -1,10 +1,12 @@
 package ballad.server.game
 
 import ballad.server.Tsm
-import ballad.server.game.Direction.EAST
-import ballad.server.game.Direction.NORTH
-import ballad.server.game.Direction.SOUTH
-import ballad.server.game.Direction.WEST
+import ballad.server.game.actions.Action
+import ballad.server.game.actions.Arrival
+import ballad.server.game.actions.Damage
+import ballad.server.game.actions.Death
+import ballad.server.game.actions.Fireball
+import ballad.server.game.actions.Hide
 import ballad.server.tsm
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
@@ -88,6 +90,8 @@ class Game(vertx: Vertx, val map: GameMap) {
 
                 val v = p.viewDistance
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+
+
                 when (a) {
                     is Hide -> {
                         if (inZone(a, p, v) && p.id != a.creature.id) {
@@ -114,15 +118,18 @@ class Game(vertx: Vertx, val map: GameMap) {
                         }
                     }
                     is Step -> {
-                        if (inZone(a, p, v)) {
-                            if (p.id != a.creature.id && !p.zone.contains(a.creature.id)) {
-                                p.zone[a.creature.id] = a.creature
-                                val arr = Arrival(a.x, a.y, time, a.creature)
-                                pActions.add(arr)
+                        if (p.id != a.creature.id) {
+                            if (inZone(a, p, v)) {
+                                if (!p.zone.contains(a.creature.id)) {
+                                    p.zone[a.creature.id] = a.creature
+                                    pActions.add(Arrival(a.x, a.y, time, a.creature))
+                                }
+                                pActions.add(a)
+                            } else {
+                                if (p.zone.remove(a.creature.id) !== null) {
+                                    pActions.add(Hide(time, a.creature))
+                                }
                             }
-                            pActions.add(a)
-                        } else {
-                            p.zone.remove(a.creature.id)
                         }
                     }
 
@@ -131,6 +138,24 @@ class Game(vertx: Vertx, val map: GameMap) {
                 }
             }
         }
+
+
+
+        map.spells.forEach { s ->
+            map.players.values.forEach { p ->
+
+                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+                if (s.inZone(p.x, p.y, p.viewDistance)) {
+                    if (p.spellZone.put(s.id, s) === null) {
+                        pActions.add(s)
+                    }
+                } else {
+                    p.spellZone.remove(s.id)
+                }
+
+            }
+        }
+
 
         //after tick process
         playerActions.forEach { pId, acts ->
@@ -143,13 +168,14 @@ class Game(vertx: Vertx, val map: GameMap) {
 
             spell as Fireball //fixme
             val distance = Math.min(spell.distance, Math.round((time - spell.time) / spell.speed.toFloat()))
+            spell.distanceTravelled = distance
 
-            val x = spell.x + (if (spell.direction === WEST) -distance else if (spell.direction == EAST) distance else 0)
-            val y = spell.y + (if (spell.direction === NORTH) -distance else if (spell.direction == SOUTH) distance else 0)
+            val x = spell.currentX
+            val y = spell.currentY
 
-            map.npcs.values.filter { it.x == x && it.y == y && it.id != spell.creature.id }.forEach { victim ->
+            map.npcs.values.filter { it.x == x && it.y == y && it.id != spell.source.id }.forEach { victim ->
 
-                val d = Damage(x, y, time, victim, spell.creature, 10)
+                val d = Damage(x, y, time, victim, spell.source, 10)
                 victim.damage(d)
                 actions.add(d)
 
@@ -160,8 +186,8 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
 
 
-            map.players.values.filter { it.x == x && it.y == y && it.id != spell.creature.id }.forEach { victim ->
-                val d = Damage(x, y, time, victim, spell.creature, 8)
+            map.players.values.filter { it.x == x && it.y == y && it.id != spell.source.id }.forEach { victim ->
+                val d = Damage(x, y, time, victim, spell.source, 8)
                 victim.damage(d)
                 actions.add(d)
 
@@ -192,10 +218,10 @@ class Game(vertx: Vertx, val map: GameMap) {
     companion object {
         const val TICK_TIME = 50
         private fun inZone(a: Action, c: Creature, radius: Int) =
-            a.x <= c.x + radius && a.x >= c.x - radius && a.y <= c.y + radius && a.y >= c.y - radius
+            a.x < c.x + radius && a.x > c.x - radius && a.y < c.y + radius && a.y > c.y - radius
 
         private fun inZone(other: Creature, c: Creature, radius: Int) =
-            other.x <= c.x + radius && other.x >= c.x - radius && other.y <= c.y + radius && other.y >= c.y - radius
+            other.x < c.x + radius && other.x > c.x - radius && other.y < c.y + radius && other.y > c.y - radius
     }
 
 }

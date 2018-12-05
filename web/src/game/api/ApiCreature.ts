@@ -8,4 +8,5 @@ export interface ApiCreature {
   x: index;
   y: index;
   direction: Dir;
+  viewDistance: uint;
 }

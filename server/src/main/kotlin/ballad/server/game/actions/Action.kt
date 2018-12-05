@@ -1,4 +1,4 @@
-package ballad.server.game
+package ballad.server.game.actions
 
 import ballad.server.Tsm
 

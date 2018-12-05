@@ -1,5 +1,6 @@
 package ballad.server.game
 
+import ballad.server.game.actions.Action
 import io.vertx.core.logging.LoggerFactory
 
 class ActionConsumer {

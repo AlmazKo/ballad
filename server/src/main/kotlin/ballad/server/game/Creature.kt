@@ -1,11 +1,14 @@
 package ballad.server.game
 
+import ballad.server.game.actions.Damage
+
 interface Creature {
     val id: Int
     val name: String
     val state: CreatureState
     val x: Int
     val y: Int
+    val viewDistance: Int
 
 
     fun step(direction: Direction) {

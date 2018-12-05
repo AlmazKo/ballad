@@ -1,6 +1,7 @@
 package ballad.server.game
 
 import ballad.server.game.Direction.SOUTH
+import ballad.server.game.actions.SpellAction
 import ballad.server.map.Tile
 import ballad.server.map.TileType.BRIDGE
 import ballad.server.map.TileType.NOTHING
@@ -15,7 +16,7 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     val log = LoggerFactory.getLogger(javaClass)
 
     private var creaturesInc = 1000
-    val spells = ArrayList<Spell>()
+    val spells = ArrayList<SpellAction>()
 
 
     init {

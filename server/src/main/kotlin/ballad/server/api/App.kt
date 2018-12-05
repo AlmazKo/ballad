@@ -1,13 +1,14 @@
 package ballad.server.api
 
-import ballad.server.game.Arrival
-import ballad.server.game.Damage
-import ballad.server.game.Death
-import ballad.server.game.Fireball
+import ballad.server.game.actions.Arrival
+import ballad.server.game.actions.Damage
+import ballad.server.game.actions.Death
+import ballad.server.game.actions.Fireball
 import ballad.server.game.Game
 import ballad.server.game.GameMap
-import ballad.server.game.Hide
+import ballad.server.game.actions.Hide
 import ballad.server.game.Step
+import ballad.server.game.actions.SpellAction
 import ballad.server.map.Lands
 import ballad.server.toJson
 import ballad.server.tsm
@@ -48,7 +49,7 @@ class App(vertx: Vertx) {
 
             val p = map.addPlayer(id)
 
-            val arr = ballad.server.game.Arrival(p.x, p.y, tsm(), p)
+            val arr = Arrival(p.x, p.y, tsm(), p)
             game.send(arr)
 
 
@@ -79,13 +80,13 @@ class App(vertx: Vertx) {
                     "SPELL" -> {
                         val spellType = data.getString("type")
                         Fireball(
-                            id=globalId,
+                            id = globalId,
                             x = data.getInteger("x"),
                             y = data.getInteger("y"),
                             time = tsm(), //fixme
                             distance = data.getInteger("distance"),
                             speed = data.getInteger("speed"),
-                            creature = p,
+                            source = p,
                             direction = mapToDirection[data.getInteger("direction")]!!
                         )
                     }
@@ -97,15 +98,26 @@ class App(vertx: Vertx) {
 
             game.subscribe(id) { actions ->
                 actions.forEach {
-                    val act = when (it) {
-                        is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), ballad.server.api.Hide(it))
-                        is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
-                        is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
-                        is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
-                        is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
-                        else -> return@forEach
+
+                    if (it is SpellAction) {
+                        val act = when (it) {
+                            is Fireball -> JSON.stringify(ballad.server.api.Fireball.serializer(), ballad.server.api.Fireball(it))
+                            else -> return@forEach
+                        }
+                        ws.writeFinalTextFrame("""{"action":"SPELL", "type":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
+                    } else  {
+                        val act = when (it) {
+                            is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), ballad.server.api.Hide(it))
+                            is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
+                            is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
+                            is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
+                            is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
+                            else -> return@forEach
+                        }
+                        ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
                     }
-                    ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
+
+
                 }
             }
         }
