@@ -148,7 +148,7 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-    const step = new Step(this, 400);
+    const step = new Step(this, 200);
     this.server.sendAction(step);
 
     this.movement = new LoopAnimator(step.duration, (f, i) => {
@@ -182,7 +182,7 @@ export class Protagonist implements DrawableCreature {
         }
 
         if (isActionContinue) {
-          this.server.sendAction(new Step(this, 400));
+          this.server.sendAction(new Step(this, 200));
         }
 
         console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);

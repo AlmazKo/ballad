@@ -27,7 +27,9 @@ data class Creature(
             Direction.WEST -> LEFT
             Direction.EAST -> RIGHT
         },
-        NpcMetrics(id.name, id.state.life, id.state.life),
+
+        // todo id.name
+        NpcMetrics(id.id.toString(), id.state.life, id.state.life),
         id.viewDistance
     )
 }

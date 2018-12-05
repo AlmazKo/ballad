@@ -8,8 +8,8 @@ import { FontStyle } from '../draw/FontStyleAcceptor';
 import { POS_X, POS_Y, SHIFT_X, SHIFT_Y } from './Lands';
 
 
-export var toX = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
-export var toY = (pos: coord) => (pos - POS_Y) * CELL - SHIFT_Y;
+export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
+export var toY: (pos: coord) => px = (pos: coord) => (pos - POS_Y) * CELL - SHIFT_Y;
 
 
 export class TilePainter implements Painter {

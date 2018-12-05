@@ -27,7 +27,7 @@ data class Fireball(
         val xx = currentX
         val yy = currentY
 
-        return objX < xx + radius && xx > objX - radius && objY < yy + radius && objY > yy - radius
+        return objX <= xx + radius && xx >= objX - radius && objY <= yy + radius && objY >= yy - radius
     }
 
     val currentX: Int get() = x + (if (direction === WEST) -distanceTravelled else if (direction == EAST) distanceTravelled else 0)

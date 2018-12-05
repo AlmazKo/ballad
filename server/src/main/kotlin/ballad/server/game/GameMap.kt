@@ -23,7 +23,7 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
         val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
 
 
-        repeat(100) {
+        repeat(500) {
             strategies.add(NpcStrategy(type, this))
         }
 
@@ -62,7 +62,10 @@ class GameMap(val map: ShortArray, val tiles: Array<Tile>) {
     }
 
     operator fun get(x: Int, y: Int): Tile? {
-        val tile = map[x + y * 32]
+        val idx = x + y * 32
+        if (idx < 0 || idx >= map.size) return null
+
+        val tile = map[idx]
         return tiles[tile.toInt()]
     }
 

@@ -43,14 +43,6 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         addRequestedActions(actions, time)
 
-        actions.data.forEach {
-            if (it is Step) {
-                val plannedId = id + it.duration / TICK_TIME
-                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
-            }
-        }
-
-
         handleSpells(time, actions)
 
         map.npcs.values.removeIf { it.isDead }
@@ -142,6 +134,24 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
+        map.players.values.forEach { p ->
+            val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+
+            map.npcs.values.forEach { n ->
+                if (inZone(n, p, p.viewDistance)) {
+                    if (!p.zone.contains(n.id)) {
+                        p.zone[n.id] = n
+                        pActions.add(Arrival(n.x, n.y, time, n))
+                    }
+                } else {
+                    if (p.zone.remove(n.id) !== null) {
+                        pActions.add(Hide(time, n))
+                    }
+                }
+
+            }
+        }
+
 
         //after tick process
         playerActions.forEach { pId, acts ->
@@ -226,10 +236,10 @@ class Game(vertx: Vertx, val map: GameMap) {
     companion object {
         const val TICK_TIME = 50
         private fun inZone(a: Action, c: Creature, radius: Int) =
-            a.x < c.x + radius && a.x > c.x - radius && a.y < c.y + radius && a.y > c.y - radius
+            a.x <= c.x + radius && a.x >= c.x - radius && a.y <= c.y + radius && a.y >= c.y - radius
 
         private fun inZone(other: Creature, c: Creature, radius: Int) =
-            other.x < c.x + radius && other.x > c.x - radius && other.y < c.y + radius && other.y > c.y - radius
+            other.x <= c.x + radius && other.x >= c.x - radius && other.y <= c.y + radius && other.y >= c.y - radius
     }
 
 }

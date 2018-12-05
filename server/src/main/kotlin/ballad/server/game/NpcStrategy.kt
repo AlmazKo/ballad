@@ -30,11 +30,11 @@ class NpcStrategy(
             } while (!canStep(dir) && attemtps < 5)
 
             if (attemtps >= 5) {
-                println("Fail get direction" + npc.state)
+                //println("Fail get direction" + npc.state)
                 return null
             }
 
-            return Step(npc.state.x, npc.state.y, time, dir, 300, npc)
+            return Step(npc.state.x, npc.state.y, time, dir, 800, npc)
         }
 
 
@@ -61,10 +61,11 @@ class NpcStrategy(
         fun onTick(time: Tsm, consumer: ActionConsumer) {
             if (time > nextPlannedTime) {
 
+
                 val step = passive(time) ?: return
 
                 consumer.add(step)
-                nextPlannedTime = time + 500
+                nextPlannedTime = time + Random.nextInt(1000, 2000)
             }
         }
 
@@ -81,7 +82,9 @@ class NpcStrategy(
                 return
             }
             isDead = false
-            val npc = Npc(++creaturesInc, type, 50, CreatureState(50, 15, 17, NORTH), 2)
+            val x = Random.nextInt(0, 31)
+            val y = Random.nextInt(0, 31)
+            val npc = Npc(++creaturesInc, type, 50, CreatureState(50, x, y, NORTH), 2)
             consumer.add(Arrival(time, npc))
             live = Live(npc, map)
             live!!
@@ -90,7 +93,7 @@ class NpcStrategy(
         if (lv.isDead()) {
             live = null
             isDead = true
-            respawnTime = time + 8000
+            respawnTime = time + Random.nextInt(10_000, 60_000)
             return
         }
 

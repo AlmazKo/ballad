@@ -6,7 +6,7 @@ import { RES } from './GameCanvas';
 import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 import { DrawableCreature } from './Creature';
-import { toX, toY } from './TilePainter';
+import { TilePainter, toX, toY } from './TilePainter';
 
 
 export declare var POS_X: coord;
@@ -124,9 +124,10 @@ export class Lands {
   }
 
 
-  updateFocus(proto: DrawableCreature) {
-    POS_X   = proto.positionX - 8;
-    POS_Y   = proto.positionY - 8;
+  updateFocus(p: TilePainter, proto: DrawableCreature) {
+
+    POS_X   = proto.positionX - Math.floor(p.width / CELL / 4);
+    POS_Y   = proto.positionY - Math.floor(p.height / CELL / 4);
     SHIFT_X = proto.shiftX;
     SHIFT_Y = proto.shiftY;
   }
@@ -157,7 +158,7 @@ export class Lands {
     });
 
 
-    for (let pos = 1; pos < MAP_SIZE; pos++) {
+    for (let pos = 0; pos < MAP_SIZE; pos++) {
       p.vline(toX(pos), -SHIFT_Y, MAP_SIZE * CELL, style.grid as StrokeStyle, false);
       p.hline(-SHIFT_X, MAP_SIZE * CELL, toY(pos), style.grid as StrokeStyle, false);
     }

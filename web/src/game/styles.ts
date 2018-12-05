@@ -76,7 +76,8 @@ export const style = {
   } as Partial<FontStyle>,
 
   debugText: {
-    style: "#ff0000",
-    font : "8px sans"
+    align: "left",
+    style: "#000",
+    font : "12px sans-serif"
   } as Partial<FontStyle>
 };

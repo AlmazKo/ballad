@@ -8,12 +8,12 @@ import { Step } from './actions/Step';
 import { FireballSpell } from './actions/FireballSpell';
 import { Protagonist } from './Protagonist';
 import { Npc } from './Npc';
-import { CELL, Dir } from './types';
+import { CELL, Dir, HCELL } from './types';
 import { ApiArrival } from './api/ApiArrival';
 import { ApiStep } from './api/ApiStep';
 import { style } from './styles';
 import { Fireball } from './effects/Fireball';
-import { TilePainter } from './TilePainter';
+import { TilePainter, toX, toY } from './TilePainter';
 import { FireShockSpell } from './actions/FireShockSpell';
 import { FireShock } from './effects/FireShock';
 import { ApiDamage } from './api/ApiDamage';
@@ -33,6 +33,8 @@ export enum PlayerAction {
   FIREBALL, FIRESHOCK
 }
 
+
+export const DEBUG = true;
 
 export class Game {
 
@@ -55,8 +57,8 @@ export class Game {
     if (!this.proto) return;
 
 
-    this.map.updateFocus(this.proto);
     if (!this.tp) this.tp = new TilePainter(p);
+    this.map.updateFocus(this.tp, this.proto);
     this.map.draw(p);
     this.creatures.forEach(it => {
       it.draw(time, this.tp)
@@ -71,21 +73,41 @@ export class Game {
 
     //fixme optimize?
     this.effects = this.effects.filter(b => !b.isFinished)
+    if (DEBUG) this.debug(p);
+  }
+
+  private debug(bp: BasePainter) {
+    const p = this.proto;
+
+    const pX = p.getX(), pY = p.getY();
+    bp.rect(pX - HCELL, pY - HCELL, CELL, CELL, {style: "red"});
+    bp.text(`${p.positionX}x${p.positionY}`, pX + 1, pY + HCELL + 1, {align: 'center', font: "12px sans-serif", style: "#000"});
+    bp.text(`${p.positionX}x${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
+
+    bp.fillRect(20, 0, this.tp.width, 20, "#ffffff88");
+    bp.fillRect(0, 0, 20, this.tp.height, "ffffff88");
+    for (let pos = 0; pos < 100; pos++) {
+      bp.text("" + pos, toX(pos) + 2, 0, style.debugText);
+      bp.text("" + pos, 1, toY(pos), style.debugText);
+      bp.vline(toX(pos), 0, 20, {style: "white"});
+      bp.hline(0, 20, toY(pos), {style: "white"});
+    }
+    bp.fillRect(0, 0, 20, 20, "#ccc");
   }
 
   private drawFog(p: TilePainter) {
-    const readius = (this.proto.viewDistance + 0.5) * CELL;
-    const x       = this.proto.getX();
-    const y       = this.proto.getY();
-    const xL      = x - readius;
-    const xR      = x + readius;
-    const yU      = y - readius;
-    const yD      = y + readius;
+    const radius = (this.proto.viewDistance + 0.5) * CELL;
+    const x      = this.proto.getX();
+    const y      = this.proto.getY();
+    const xL     = x - radius;
+    const xR     = x + radius;
+    const yU     = y - radius;
+    const yD     = y + radius;
 
     p.fillRect(0, 0, xL, p.height, style.fog); //LEFT
-    p.fillRect(xL, 0, readius + readius, yU, style.fog);// TOP
+    p.fillRect(xL, 0, radius + radius, yU, style.fog);// TOP
     p.fillRect(xR, 0, p.width - xR, p.height, style.fog);//RIGHT
-    p.fillRect(xL, yD, readius + readius, p.height - yD, style.fog);//BOTTOM
+    p.fillRect(xL, yD, radius + radius, p.height - yD, style.fog);//BOTTOM
 
   }
 
