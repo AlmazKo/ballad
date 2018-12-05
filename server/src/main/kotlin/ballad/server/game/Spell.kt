@@ -1,8 +1,7 @@
 package ballad.server.game
 
-import ballad.server.Tsm
 
-
-interface Spell{
+interface Spell {
+    val id: Long
     var finished: Boolean
 }

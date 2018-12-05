@@ -63,6 +63,8 @@ class App(vertx: Vertx) {
             ws.textMessageHandler { msg ->
                 val raw = JsonObject(msg)
                 val data = raw.getJsonObject("data")
+                val id = raw.getInteger("id")
+                val globalId = Int.MAX_VALUE.toLong() + id
                 val act = when (raw.getString("action")) {
                     "STEP" -> {
                         Step(
@@ -75,7 +77,9 @@ class App(vertx: Vertx) {
                         )
                     }
                     "SPELL" -> {
+                        val spellType = data.getString("type")
                         Fireball(
+                            id=globalId,
                             x = data.getInteger("x"),
                             y = data.getInteger("y"),
                             time = tsm(), //fixme

@@ -20,6 +20,7 @@ import { ApiDamage } from './api/ApiDamage';
 import { ApiDeath } from './api/ApiDeath';
 import { DamageEffect } from './effects/DamageEffect';
 import { ApiHide } from './api/ApiHide';
+import { ApiSpell } from './api/ApiSpell';
 
 let INC: uint = 0;
 
@@ -120,6 +121,10 @@ export class Game {
         this.onDamage(action as ApiDamage);
         break;
 
+      case "SPELL":
+        this.onSpell(action as ApiSpell);
+        break;
+
       case "HIDE":
         this.onHidden(action as ApiHide);
         break;
@@ -130,6 +135,11 @@ export class Game {
     }
   }
 
+
+  private onSpell(s: ApiSpell) {
+
+    // this.effects.push()
+  }
 
   private onDamage(d: ApiDamage) {
 

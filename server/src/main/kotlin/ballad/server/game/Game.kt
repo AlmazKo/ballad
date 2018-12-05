@@ -176,7 +176,9 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
-        map.spells.removeIf { it.finished }
+        map.spells.removeIf {
+            it.finished
+        }
     }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {

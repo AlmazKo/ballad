@@ -3,6 +3,7 @@ package ballad.server.game
 import ballad.server.Tsm
 
 data class Fireball(
+    override val id: Long,
     override val x: Int,
     override val y: Int,
     override val time: Tsm,

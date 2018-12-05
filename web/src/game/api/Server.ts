@@ -4,6 +4,9 @@ import { Step } from '../actions/Step';
 import { WS_HOST } from '../../util/net';
 import { FireballSpell } from '../actions/FireballSpell';
 
+
+let incId = 0;
+
 export class Server {
   // @ts-ignore
   private handler: (name: String, action: Action) => void;
@@ -26,15 +29,15 @@ export class Server {
 
     if (action instanceof Step) {
       this.ws.send(JSON.stringify({
-        action: "STEP", data: {
+        action: "STEP", id: ++incId, data: {
           x: action.fromPosX, y: action.fromPosY, direction: action.direction
         }
       }))
     } else if (action instanceof FireballSpell) {
       this.ws.send(JSON.stringify({
-        action: "SPELL", data: {
-          type: "FIREBALL",
-          x   : action.posX, y: action.posY, direction: action.direction, distance: action.distance, speed: action.duration
+        action: "SPELL", id: ++incId, type: "FIREBALL", data: {
+
+          x: action.posX, y: action.posY, direction: action.direction, distance: action.distance, speed: action.duration
         }
       }))
 
