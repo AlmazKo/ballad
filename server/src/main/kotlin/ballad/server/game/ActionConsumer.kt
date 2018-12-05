@@ -8,7 +8,7 @@ class ActionConsumer {
     val data = ArrayList<Action>()
 
     fun add(action: Action) {
-        log.info("New action: {}", action)
+//        log.info("New action: {}", action)
         this.data.add(action)
 
     }

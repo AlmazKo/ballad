@@ -33,7 +33,6 @@ class Game(vertx: Vertx, val map: GameMap) {
         val time = tsm()
         val actions = ActionConsumer()
 
-
         val planned = steps.remove(id)
 
         if (planned !== null) {
@@ -42,28 +41,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
-        playerRequests.forEach {
-
-            when (it) {
-                is Step -> {
-                    //add validation
-                    it.creature.state.direction = it.direction
-                    actions.add(it)
-                }
-                is Fireball -> {
-                    it.startTime = time
-                    actions.add(it)
-                    map.spells.add(it)
-                }
-                is Arrival -> actions.add(it)
-                is Hide -> actions.add(it)
-            }
-        }
-
-        playerRequests.clear()
-
-
-        map.strategies.forEach { it.onTick(id, time, actions) }
+        addRequestedActions(actions, time)
 
         actions.data.forEach {
             if (it is Step) {
@@ -75,17 +53,25 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         handleSpells(time, actions)
 
-        map.strategies.removeIf {
-            val isActive = it.isActive()
-            if (!isActive) map.npcs.remove(it.npcId)
+        map.npcs.values.removeIf { it.isDead }
+        map.strategies.forEach { it.onTick(id, time, actions) }
 
-            !isActive
+        val playerActions = HashMap<Int, MutableList<Action>>()
+        actions.data.forEach {
+            if (it is Step) {
+                val plannedId = id + it.duration / TICK_TIME
+                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
+            }
         }
 
 
-        val playerActions = HashMap<Int, MutableList<Action>>()
 
         actions.data.forEach { a ->
+
+            if (a is Arrival && a.creature is Npc) {
+                map.npcs[a.creature.id] = a.creature
+            }
+
             map.players.values.forEach { p ->
 
                 val v = p.viewDistance
@@ -161,6 +147,28 @@ class Game(vertx: Vertx, val map: GameMap) {
         playerActions.forEach { pId, acts ->
             playerHandler[pId]?.invoke(acts)
         }
+    }
+
+    private fun addRequestedActions(actions: ActionConsumer, time: Tsm) {
+        playerRequests.forEach {
+
+            when (it) {
+                is Step -> {
+                    //add validation
+                    it.creature.state.direction = it.direction
+                    actions.add(it)
+                }
+                is Fireball -> {
+                    it.startTime = time
+                    actions.add(it)
+                    map.spells.add(it)
+                }
+                is Arrival -> actions.add(it)
+                is Hide -> actions.add(it)
+            }
+        }
+
+        playerRequests.clear()
     }
 
     private fun handleSpells(time: Tsm, actions: ActionConsumer) {

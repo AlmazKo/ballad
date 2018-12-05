@@ -27,4 +27,6 @@ interface Creature {
         if (state.life < 0) state.life = 0
     }
 
+    val isDead get() = state.life <= 0
+
 }
