@@ -9,5 +9,7 @@ data class Step(
     override val time: Tsm,
     val direction: Direction,
     val duration: Duration,
-    val creature: Creature
+    val creature: Creature,
+    var distanceTravelled: Int = 0,
+    var finished: Boolean = false
 ) : Action

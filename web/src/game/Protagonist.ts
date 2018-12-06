@@ -138,10 +138,9 @@ export class Protagonist implements DrawableCreature {
   }
 
   doStep(dr: Dir) {
-    const nextPs   = this.nextPos(dr);
     this.direction = this.frozen ? this.frozen : dr;
 
-    if (this.map.canMove([this.positionY, this.positionY], nextPs)) {
+    if (this.map.canStep([this.positionX, this.positionY], this.direction) ) {
       console.info("START NEW " + dr);
     } else {
       console.warn("Forbidden direction " + dr);

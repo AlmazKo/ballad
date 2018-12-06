@@ -6,6 +6,8 @@ import ballad.server.game.Direction.NORTH
 import ballad.server.game.Direction.SOUTH
 import ballad.server.game.Direction.WEST
 import ballad.server.game.actions.Arrival
+import ballad.server.map.TileType.WALL
+import ballad.server.map.TileType.WATER
 import kotlin.random.Random
 
 class NpcStrategy(
@@ -44,19 +46,14 @@ class NpcStrategy(
             val y = npc.state.y
 
             return when (dir) {
-                NORTH -> canMove(x, y - 1)
-                SOUTH -> canMove(x, y + 1)
-                WEST -> canMove(x - 1, y)
-                EAST -> canMove(x + 1, y)
+                NORTH -> map.canMove(x, y - 1)
+                SOUTH -> map.canMove(x, y + 1)
+                WEST -> map.canMove(x - 1, y)
+                EAST -> map.canMove(x + 1, y)
             }
 
         }
 
-        private fun canMove(toX: Int, toY: Int): Boolean {
-
-            val tile = map[toX, toY] ?: return false
-            return tile.type !== ballad.server.map.TileType.WALL && tile.type !== ballad.server.map.TileType.WATER
-        }
 
         fun onTick(time: Tsm, consumer: ActionConsumer) {
             if (time > nextPlannedTime) {
@@ -82,10 +79,11 @@ class NpcStrategy(
                 return
             }
             isDead = false
-            val x = Random.nextInt(0, 31)
-            val y = Random.nextInt(0, 31)
+
+
+            val (x, y) = map.findFreePlace(23, 15, 4) ?: return
             val npc = Npc(++creaturesInc, type, 50, CreatureState(50, x, y, NORTH), 2)
-            consumer.add(Arrival(time, npc))
+            map.addCreature(npc)
             live = Live(npc, map)
             live!!
         } else live!!

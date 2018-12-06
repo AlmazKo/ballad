@@ -38,8 +38,6 @@ export const DEBUG = true;
 
 export class Game {
 
-  private creatures = new Map<uint, Npc>();
-  private effects   = [] as Array<Effect>;
   private server: Server;
   // @ts-ignore
   private tp: TilePainter;
@@ -60,19 +58,19 @@ export class Game {
     if (!this.tp) this.tp = new TilePainter(p);
     this.map.updateFocus(this.tp, this.proto);
     this.map.draw(p);
-    this.creatures.forEach(it => {
+    this.map.creatures.forEach(it => {
       it.draw(time, this.tp)
     });
 
     this.proto.draw(time, this.tp);
     if (this.proto) this.drawFog(this.tp);
 
-    this.effects.forEach(it => {
+    this.map.effects.forEach(it => {
       it.draw(time, this.tp)
     });
 
     //fixme optimize?
-    this.effects = this.effects.filter(b => !b.isFinished)
+    this.map.effects = this.map.effects.filter(b => !b.isFinished)
     if (DEBUG) this.debug(p);
   }
 
@@ -125,12 +123,12 @@ export class Game {
       case "ARRIVAL":
         a       = action as ApiArrival;
         const n = new Npc(a.creature);
-        this.creatures.set(a.creature.id, n);
+        this.map.creatures.set(a.creature.id, n);
         break;
 
       case "STEP":
         a       = action as ApiStep;
-        const c = this.creatures.get(a.creatureId);
+        const c = this.map.creatures.get(a.creatureId);
         if (!c) return;
         const s    = new Step(c, a.duration, a.direction);
         s.fromPosX = a.fromX;
@@ -168,21 +166,21 @@ export class Game {
     if (this.proto.id === d.victimId) {
       this.proto.metrics.life -= d.amount;
     } else {
-      const c = this.creatures.get(d.victimId);
+      const c = this.map.creatures.get(d.victimId);
       if (!c) return;
       c.metrics.life -= d.amount;
 
     }
 
-    this.effects.push(new DamageEffect(d));
+    this.map.effects.push(new DamageEffect(d));
   }
 
   private onHidden(d: ApiHide) {
-    this.creatures.delete(d.creatureId);
+    this.map.creatures.delete(d.creatureId);
   }
 
   private onDeath(d: ApiDeath) {
-    this.creatures.delete(d.victimId);
+    this.map.creatures.delete(d.victimId);
   }
 
   onStep(dir: Dir) {
@@ -196,13 +194,13 @@ export class Game {
       case PlayerAction.FIREBALL:
         const fireball = new FireballSpell(this.proto, 200, 8);
         this.server.sendAction(fireball);
-        this.effects.push(new Fireball(fireball, this.map));
+        this.map.effects.push(new Fireball(fireball, this.map));
         break;
 
       case PlayerAction.FIRESHOCK:
         const fireshok = new FireShockSpell(this.proto, 400, 2);
         this.server.sendAction(fireshok);
-        this.effects.push(new FireShock(fireshok));
+        this.map.effects.push(new FireShock(fireshok));
         break;
 
     }

@@ -19,7 +19,7 @@ export class Server {
   }
 
   private onRawData(data: any) {
-    console.log("Raw data", data);
+    //console.log("Raw data", data);
     this.handler(data.action, data.data)
   }
 

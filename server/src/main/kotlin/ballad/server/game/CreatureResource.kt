@@ -3,10 +3,10 @@ package ballad.server.game
 class CreatureResource(
     val id: Int,
     val tilesetName: String,
-    val width: Short,
-    val height: Short,
-    val tileX: Short,
-    val tileY: Short
+    val width: Int,
+    val height: Int,
+    val tileX: Int,
+    val tileY: Int
 //    val positions= mapOf(
 //        "up" to mapOf(16)
 //    )

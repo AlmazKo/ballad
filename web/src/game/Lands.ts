@@ -7,6 +7,8 @@ import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 import { DrawableCreature } from './Creature';
 import { TilePainter, toX, toY } from './TilePainter';
+import { Npc } from './Npc';
+import { Effect } from './Effect';
 
 
 export declare var POS_X: coord;
@@ -64,6 +66,10 @@ export class Lands {
   private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
   private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
 
+
+  public creatures = new Map<uint, Npc>();
+  public effects   = [] as Array<Effect>;
+
   constructor() {
   }
 
@@ -112,7 +118,14 @@ export class Lands {
         break;
 
     }
-    return this.canMove(from, [x, y], isFly)
+    const canMv = this.canMove(from, [x, y], isFly);
+    if (!canMv) return false;
+
+    for (const c of this.creatures.values()[Symbol.iterator]()) {
+      if (c.positionX === x && c.positionY === y) return false;
+    }
+
+    return true;
   }
 
 

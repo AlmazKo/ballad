@@ -7,6 +7,7 @@ import ballad.server.game.actions.Damage
 import ballad.server.game.actions.Death
 import ballad.server.game.actions.Fireball
 import ballad.server.game.actions.Hide
+import ballad.server.map.TileType
 import ballad.server.tsm
 import io.vertx.core.Vertx
 import io.vertx.core.logging.LoggerFactory
@@ -36,23 +37,23 @@ class Game(vertx: Vertx, val map: GameMap) {
         val planned = steps.remove(id)
 
         if (planned !== null) {
-            planned.forEach {
-                it.creature.step(it.direction)
-            }
+
         }
 
         addRequestedActions(actions, time)
 
+        handleSteps(time)
         handleSpells(time, actions)
 
-        map.npcs.values.removeIf { it.isDead }
+        map.cleanDeadCreatures()
         map.strategies.forEach { it.onTick(id, time, actions) }
 
         val playerActions = HashMap<Int, MutableList<Action>>()
         actions.data.forEach {
             if (it is Step) {
-                val plannedId = id + it.duration / TICK_TIME
-                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
+                map.steps.add(it)
+                //                val plannedId = id + it.duration / TICK_TIME
+                //                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
             }
         }
 
@@ -60,64 +61,18 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         actions.data.forEach { a ->
 
-            if (a is Arrival && a.creature is Npc) {
-                map.npcs[a.creature.id] = a.creature
-            }
-
             map.players.values.forEach { p ->
 
                 val v = p.viewDistance
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
 
-
                 when (a) {
-                    is Hide -> {
-                        if (inZone(a, p, v) && p.id != a.creature.id) {
-                            p.zone.remove(a.creature.id)
-                            pActions.add(a)
-                        }
-                    }
-                    is Arrival -> {
-                        if (inZone(a, p, v)) {
-                            if (p.id == a.creature.id) {
-                                //the 1st player arrival -> scan area
-                                this.map.npcs.values.filter { inZone(it, p, v) }.forEach { npc ->
-                                    p.zone[npc.id] = npc
-                                    pActions.add(Arrival(time, npc))
-                                }
-                                this.map.players.values.filter { p.id != it.id && inZone(it, p, v) }.forEach { pl ->
-                                    p.zone[pl.id] = pl
-                                    pActions.add(Arrival(time, pl))
-                                }
-                            } else if (!p.zone.contains(a.creature.id)) {
-                                p.zone[a.creature.id] = a.creature
-                                pActions.add(a)
-                            }
-                        }
-                    }
-                    is Step -> {
-                        if (p.id != a.creature.id) {
-                            if (inZone(a, p, v)) {
-                                if (!p.zone.contains(a.creature.id)) {
-                                    p.zone[a.creature.id] = a.creature
-                                    pActions.add(Arrival(a.x, a.y, time, a.creature))
-                                }
-                                pActions.add(a)
-                            } else {
-                                if (p.zone.remove(a.creature.id) !== null) {
-                                    pActions.add(Hide(time, a.creature))
-                                }
-                            }
-                        }
-                    }
-
+                    is Step -> if (inZone(a, p, v)) pActions.add(a)
                     is Damage -> if (inZone(a, p, v)) pActions.add(a)
                     is Death -> if (inZone(a, p, v)) pActions.add(a)
                 }
             }
         }
-
-
 
         map.spells.forEach { s ->
             map.players.values.forEach { p ->
@@ -150,6 +105,12 @@ class Game(vertx: Vertx, val map: GameMap) {
                 }
 
             }
+
+
+            //            this.map.players.values.filter { p.id != it.id && inZone(it, p, v) }.forEach { pl ->
+            //                p.zone[pl.id] = pl
+            //                pActions.add(Arrival(time, pl))
+            //            }
         }
 
 
@@ -217,6 +178,49 @@ class Game(vertx: Vertx, val map: GameMap) {
 
             if (distance >= spell.distance) {
                 spell.finished = true
+            }
+        }
+
+        map.spells.removeIf {
+            it.finished
+        }
+    }
+
+    private fun handleSteps(time: Tsm) {
+        map.steps.forEach { step ->
+
+
+            val st = step.creature.state
+
+            //            if(step.time == time) {
+            st.direction = step.direction
+            //            }
+            val distance = Math.min(1, Math.round((time - step.time) / step.duration.toFloat()))
+            if (distance > step.distanceTravelled) {
+                var xx = st.x
+                var yy = st.y
+                when (step.direction) {
+                    Direction.NORTH -> yy--
+                    Direction.SOUTH -> yy++
+                    Direction.WEST -> xx--
+                    Direction.EAST -> xx++
+                }
+
+                val tile = map[xx, yy]
+                if (tile !== null) {
+                    if (tile.type !== TileType.WALL && tile.type !== TileType.WATER) {
+                        if (map.isNoCreatures(xx, yy)) {
+                            map.moveCreatures(st.x, st.y, xx, yy)
+                            st.x = xx
+                            st.y = yy
+                            step.distanceTravelled = distance
+                        }
+                    }
+                }
+            }
+
+            if (time - step.time >= step.duration) {
+                step.finished = true
             }
         }
 
