@@ -96,26 +96,21 @@ class Game(vertx: Vertx, val map: GameMap) {
 
         map.players.values.forEach { p ->
             val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
-
-            map.npcs.values.forEach { n ->
-                if (inZone(n, p, p.viewDistance)) {
-                    if (!p.zone.contains(n.id)) {
-                        p.zone[n.id] = n
-                        pActions.add(Arrival(n.x, n.y, time, n))
-                    }
-                } else {
-                    if (p.zone.remove(n.id) !== null) {
-                        pActions.add(Hide(time, n))
-                    }
-                }
-
+            val zCreatures = map.getCreatures(p.x, p.y, p.viewDistance)
+            p.zone.values.removeIf {
+                if (!zCreatures.contains(it)) {
+                    p.zone.remove(it.id)
+                    pActions.add(Hide(it.x, it.y, time, it))
+                    true
+                } else false
             }
 
-
-            //            this.map.players.values.filter { p.id != it.id && inZone(it, p, v) }.forEach { pl ->
-            //                p.zone[pl.id] = pl
-            //                pActions.add(Arrival(time, pl))
-            //            }
+            zCreatures.forEach { n ->
+                if (!p.zone.contains(n.id)) {
+                    p.zone[n.id] = n
+                    pActions.add(Arrival(n.x, n.y, time, n))
+                }
+            }
         }
 
 

@@ -5,10 +5,15 @@ import ballad.server.map.Coord;
 import ballad.server.map.Tile;
 import ballad.server.map.TileType;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public final class GameMap {
     private final short[] map;
@@ -29,7 +34,7 @@ public final class GameMap {
         this.tiles = tiles;
         this.creatures = new int[map.length];
 
-        settleMobs();
+        //settleMobs();
         debug();
     }
 
@@ -139,9 +144,36 @@ public final class GameMap {
     @Nullable Creature getCreature(int x, int y) {
         if (!isValid(x, y)) return null;
 
+        return _getCreature(x, y);
+    }
+
+    @Nullable private Creature _getCreature(int x, int y) {
         int crId = creatures[getIndex(x, y)];
-        if (crId == 0) return null;
-        return npcs.get(crId);
+        if (crId > 1000) {
+            return npcs.get(crId);
+        } else if (crId > 0) {
+            return players.get(crId);
+        }
+
+        return null;
+    }
+
+    List<@NotNull Creature> getCreatures(int centerX, int centerY, int radius) {
+
+        ArrayList<@NotNull Creature> result = new ArrayList<>();
+
+        for (int x = max(0, centerX - radius); x <= min(centerX + radius, SIZE); x++) {
+            for (int y = max(0, centerY - radius); y <= min(centerY + radius, SIZE); y++) {
+                if (x == centerX && y == centerY) continue;
+
+                @Nullable Creature cr = _getCreature(x, y);
+                if (cr != null) {
+                    result.add(cr);
+                }
+            }
+        }
+
+        return result;
     }
 
     boolean addCreature(Creature c) {
