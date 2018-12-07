@@ -1,5 +1,5 @@
 import { Effect } from '../Effect';
-import { float, index, px } from '../../types';
+import { float, index, px, uint } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { CELL, Dir } from '../types';
 import { Lands } from '../Lands';
@@ -14,12 +14,14 @@ export class Fireball implements Effect {
 
   private lastAnimIndex = 0;
   private shift: px     = 0;
-  private anim: LoopAnimator;
+  private readonly anim: LoopAnimator;
   isFinished            = false;
   private f: float      = 0;
   private map: Lands;
+  id: uint;
 
   constructor(spec: FireballSpell, map: Lands) {
+    this.id        = spec.id;
     this.direction = spec.direction;
     this.posX      = spec.posX;
     this.posY      = spec.posY;
@@ -93,6 +95,11 @@ export class Fireball implements Effect {
     const fire1  = RES["fireball_32"];
 
     bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
+  }
+
+  stop(): void {
+    this.anim.finish();
+    this.isFinished = true;
   }
 
 }

@@ -8,17 +8,11 @@ import { RES } from './GameCanvas';
 import { ApiCreature } from './api/ApiCreature';
 import { MovingKeys } from './MovingKeys';
 import { Lands } from './Lands';
-import { Server } from './api/Server';
 import { TilePainter, toX, toY } from './TilePainter';
 import { style } from './styles';
+import { Game, PlayerAction } from './Game';
 
 export class Protagonist implements DrawableCreature {
-
-
-  onStep(step: Step): void {
-
-    //add sync
-  }
 
   readonly id: int;
   readonly viewDistance: uint;
@@ -39,7 +33,7 @@ export class Protagonist implements DrawableCreature {
   constructor(c: ApiCreature,
               private moving: MovingKeys,
               private map: Lands,
-              private server: Server) {
+              private game: Game) {
     this.id           = c.id;
     this.metrics      = c.metrics;
     this.direction    = c.direction;
@@ -147,8 +141,8 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-    const step = new Step(this, 200);
-    this.server.sendAction(step);
+
+    const step = this.game.sendAction(PlayerAction.STEP) as Step;
 
     this.movement = new LoopAnimator(step.duration, (f, i) => {
       let isActionContinue = true;
@@ -181,7 +175,7 @@ export class Protagonist implements DrawableCreature {
         }
 
         if (isActionContinue) {
-          this.server.sendAction(new Step(this, 200));
+          this.game.sendAction(PlayerAction.STEP);
         }
 
         console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);
@@ -233,5 +227,11 @@ export class Protagonist implements DrawableCreature {
 
   onRotated(rotated: boolean) {
     this.rotated = rotated;
+  }
+
+
+  onStep(step: Step): void {
+
+    //todo add server sync
   }
 }

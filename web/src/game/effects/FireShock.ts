@@ -1,5 +1,5 @@
 import { Effect } from '../Effect';
-import { float, index, px } from '../../types';
+import { float, index, px, uint } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
 import { CELL, QCELL } from '../types';
 import { RES } from '../GameCanvas';
@@ -14,13 +14,16 @@ export class FireShock implements Effect {
   isFinished        = false;
 
   private f: float = 0;
+  readonly id: uint;
 
-  constructor(spell: FireShockSpell) {
-    this.posX = spell.posX;
-    this.posY = spell.posY;
-    this.anim = new LoopAnimator(spell.duration, (f, i) => {
+  constructor(spec: FireShockSpell) {
+
+    this.id   = spec.id;
+    this.posX = spec.posX;
+    this.posY = spec.posY;
+    this.anim = new LoopAnimator(spec.duration, (f, i) => {
         this.f = f;
-        if (i >= spell.distance) {
+        if (i >= spec.distance) {
           this.anim.finish();
           this.isFinished = true;
         } else {
@@ -51,15 +54,20 @@ export class FireShock implements Effect {
     tp.drawTile(fire1, sx, sy, size, size, posX + 1, posY, QCELL, -s);
 
 
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1,  QCELL+s, QCELL);
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL+s, QCELL);
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1,  QCELL+s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1, QCELL + s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL + s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1, QCELL + s, QCELL);
 
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1,  QCELL-s, QCELL);
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL-s, QCELL);
-    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1,  QCELL-s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY - 1, QCELL - s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY, QCELL - s, QCELL);
+    tp.drawTile(fire1, sx, sy, size, size, posX, posY + 1, QCELL - s, QCELL);
 
 
   }
 
+
+  stop(): void {
+    this.anim.finish();
+    this.isFinished = true;
+  }
 }

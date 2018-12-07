@@ -52,7 +52,7 @@ class App(vertx: Vertx) {
             val id = playerInc.incrementAndGet()
             log.info("Connected player: #$id")
             val p = map.addPlayer(id)
-            PlayerSocket(p, ws, game)
+            PlayerSession(p, ws, game)
         }
 
 

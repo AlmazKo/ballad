@@ -16,7 +16,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import kotlinx.serialization.json.JSON
 
-class PlayerSocket(
+class PlayerSession(
     private val p: Player,
     private val ws: WebSocketBase,
     private val game: Game
@@ -49,7 +49,7 @@ class PlayerSocket(
                     is Fireball -> JSON.stringify(ballad.server.api.Fireball.serializer(), Fireball(it))
                     else -> return@forEach
                 }
-                ws.writeFinalTextFrame("""{"action":"SPELL", "type":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
+                ws.writeFinalTextFrame("""{"action":"SPELL", "type":"${it.javaClass.simpleName.toUpperCase()}", "id": ${it.id}, "data": $act}""")
             } else {
                 val act = when (it) {
                     is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), Hide(it))
@@ -67,8 +67,8 @@ class PlayerSocket(
     private fun onClientMessage(msg: String?) {
         val raw = JsonObject(msg)
         val data = raw.getJsonObject("data")
-        val id = raw.getInteger("id")
-        val globalId = Int.MAX_VALUE.toLong() + id
+        val id = raw.getLong("id")
+
         val act = when (raw.getString("action")) {
             "STEP" -> {
                 Step(
@@ -83,7 +83,7 @@ class PlayerSocket(
             "SPELL" -> {
                 val spellType = data.getString("type")
                 Fireball(
-                    id = globalId,
+                    id = id,
                     x = data.getInteger("x"),
                     y = data.getInteger("y"),
                     time = tsm(), //fixme

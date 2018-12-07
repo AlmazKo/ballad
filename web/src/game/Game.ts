@@ -1,36 +1,17 @@
 import { Lands } from './Lands';
 import { Server } from './api/Server';
 import { MovingKeys } from './MovingKeys';
-import { uint } from '../types';
-import { Effect } from './Effect';
 import { BasePainter } from '../draw/BasePainter';
-import { Step } from './actions/Step';
-import { FireballSpell } from './actions/FireballSpell';
 import { Protagonist } from './Protagonist';
-import { Npc } from './Npc';
 import { CELL, Dir, HCELL } from './types';
 import { ApiArrival } from './api/ApiArrival';
-import { ApiStep } from './api/ApiStep';
 import { style } from './styles';
-import { Fireball } from './effects/Fireball';
 import { TilePainter, toX, toY } from './TilePainter';
-import { FireShockSpell } from './actions/FireShockSpell';
-import { FireShock } from './effects/FireShock';
-import { ApiDamage } from './api/ApiDamage';
-import { ApiDeath } from './api/ApiDeath';
-import { DamageEffect } from './effects/DamageEffect';
-import { ApiHide } from './api/ApiHide';
-import { ApiSpell } from './api/ApiSpell';
-
-let INC: uint = 0;
-
-export function nextId(): uint {
-  return INC++;
-}
-
+import { Session } from './Session';
+import { Action } from './actions/Action';
 
 export enum PlayerAction {
-  FIREBALL, FIRESHOCK
+  FIREBALL, FIRESHOCK, STEP
 }
 
 
@@ -43,6 +24,7 @@ export class Game {
   private tp: TilePainter;
   // @ts-ignore
   private proto: Protagonist;
+  private session: Session | null = null;
 
   constructor(private map: Lands, private moving: MovingKeys) {
     this.server = new Server();
@@ -50,28 +32,11 @@ export class Game {
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
-
-
-    if (!this.proto) return;
-
-
     if (!this.tp) this.tp = new TilePainter(p);
-    this.map.updateFocus(this.tp, this.proto);
-    this.map.draw(p);
-    this.map.creatures.forEach(it => {
-      it.draw(time, this.tp)
-    });
-
-    this.proto.draw(time, this.tp);
-    if (this.proto) this.drawFog(this.tp);
-
-    this.map.effects.forEach(it => {
-      it.draw(time, this.tp)
-    });
-
-    //fixme optimize?
-    this.map.effects = this.map.effects.filter(b => !b.isFinished)
-    if (DEBUG) this.debug(p);
+    if (this.session) {
+      this.session.draw(time, p);
+      if (DEBUG) this.debug(p);
+    }
   }
 
   private debug(bp: BasePainter) {
@@ -93,117 +58,30 @@ export class Game {
     bp.fillRect(0, 0, 20, 20, "#ccc");
   }
 
-  private drawFog(p: TilePainter) {
-    const radius = (this.proto.viewDistance + 0.5) * CELL;
-    const x      = this.proto.getX();
-    const y      = this.proto.getY();
-    const xL     = x - radius;
-    const xR     = x + radius;
-    const yU     = y - radius;
-    const yD     = y + radius;
-
-    p.fillRect(0, 0, xL, p.height, style.fog); //LEFT
-    p.fillRect(xL, 0, radius + radius, yU, style.fog);// TOP
-    p.fillRect(xR, 0, p.width - xR, p.height, style.fog);//RIGHT
-    p.fillRect(xL, yD, radius + radius, p.height - yD, style.fog);//BOTTOM
-
-  }
-
-
   onServerAction(type: String, action: any) {
     let a;
 
     switch (type) {
-
       case "PROTAGONIST_ARRIVAL":
         a          = action as ApiArrival;
-        this.proto = new Protagonist(a.creature, this.moving, this.map, this.server);
+        this.proto = new Protagonist(a.creature, this.moving, this.map, this);
+
+        this.session = new Session(this.server, this.proto, this.map, this.tp);
         break;
 
-      case "ARRIVAL":
-        a       = action as ApiArrival;
-        const n = new Npc(a.creature);
-        this.map.creatures.set(a.creature.id, n);
-        break;
+      default:
+        if (this.session) this.session.onServerAction(type, action)
 
-      case "STEP":
-        a       = action as ApiStep;
-        const c = this.map.creatures.get(a.creatureId);
-        if (!c) return;
-        const s    = new Step(c, a.duration, a.direction);
-        s.fromPosX = a.fromX;
-        s.fromPosY = a.fromY;
-
-        c.onStep(s);
-        break;
-
-      case "DAMAGE":
-        this.onDamage(action as ApiDamage);
-        break;
-
-      case "SPELL":
-        this.onSpell(action as ApiSpell);
-        break;
-
-      case "HIDE":
-        this.onHidden(action as ApiHide);
-        break;
-
-      case "DEATH":
-        this.onDeath(action as ApiDeath);
-        break;
     }
   }
 
+  sendAction(action: PlayerAction): Action {
+    if (this.session) return this.session.sendAction(action);
 
-  private onSpell(s: ApiSpell) {
-
-    // this.effects.push()
-  }
-
-  private onDamage(d: ApiDamage) {
-
-    if (this.proto.id === d.victimId) {
-      this.proto.metrics.life -= d.amount;
-    } else {
-      const c = this.map.creatures.get(d.victimId);
-      if (!c) return;
-      c.metrics.life -= d.amount;
-
-    }
-
-    this.map.effects.push(new DamageEffect(d));
-  }
-
-  private onHidden(d: ApiHide) {
-    this.map.creatures.delete(d.creatureId);
-  }
-
-  private onDeath(d: ApiDeath) {
-    this.map.creatures.delete(d.victimId);
+    return null!!;
   }
 
   onStep(dir: Dir) {
-
     this.proto.step(dir)
-  }
-
-  sendAction(action: PlayerAction) {
-
-    switch (action) {
-      case PlayerAction.FIREBALL:
-        const fireball = new FireballSpell(this.proto, 200, 8);
-        this.server.sendAction(fireball);
-        this.map.effects.push(new Fireball(fireball, this.map));
-        break;
-
-      case PlayerAction.FIRESHOCK:
-        const fireshok = new FireShockSpell(this.proto, 400, 2);
-        this.server.sendAction(fireshok);
-        this.map.effects.push(new FireShock(fireshok));
-        break;
-
-    }
-    // new Fireball()
   }
 }

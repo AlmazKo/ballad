@@ -7,13 +7,14 @@ import { style } from '../styles';
 import { HCELL } from '../types';
 
 export class DamageEffect implements Effect {
+  readonly id = 0;
+  isFinished  = false;
   private readonly posX: index;
   private readonly posY: index;
   private readonly amount: int;
 
   private shift: px = 0;
   private anim: Animator;
-  isFinished        = false;
   private f: float  = 0;
 
   constructor(spec: ApiDamage) {
@@ -36,4 +37,9 @@ export class DamageEffect implements Effect {
 
   }
 
+
+  stop(): void {
+    this.anim.finish();
+    this.isFinished = true;
+  }
 }

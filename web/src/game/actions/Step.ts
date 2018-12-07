@@ -1,21 +1,20 @@
-import { index, ms, tsm, uint } from '../../types';
+import { index, int, ms, tsm, uint } from '../../types';
 import { Action } from './Action';
 import { Creature } from '../Creature';
 import { Dir } from '../types';
-import { nextId } from '../Game';
 
 export class Step implements Action {
   fromPosX: index;
   fromPosY: index;
-  direction: Dir;
-  duration: ms;
-  id: uint;
-  creature: Creature;
-  time: tsm;
+  readonly direction: Dir;
+  readonly duration: ms;
+  readonly id: uint;
+  readonly creature: Creature;
+  readonly time: tsm;
 
-  constructor(source: Creature, duration: uint, direction: Dir = source.direction) {
+  constructor(id: int, source: Creature, duration: uint, direction: Dir = source.direction) {
 
-    this.id        = nextId();
+    this.id        = id;
     this.time      = Date.now();//fixme take it from performance*
     this.creature  = source;
     this.fromPosX  = source.positionX;

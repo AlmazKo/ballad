@@ -131,8 +131,7 @@ export class LoopAnimator implements Animated {
   }
 
   /**
-   * Finish animation
-   * The Handler will be executed once sfter this call
+   * interrupt animation
    */
   finish() {
     this.finished = true;

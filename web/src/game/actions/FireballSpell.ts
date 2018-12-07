@@ -1,8 +1,7 @@
-import { index, tsm, uint } from '../../types';
+import { index, int, tsm, uint } from '../../types';
 import { Dir } from '../types';
 import { Action } from './Action';
 import { Creature } from '../Creature';
-import { nextId } from '../Game';
 
 export class FireballSpell implements Action {
   readonly posX: index;
@@ -15,9 +14,9 @@ export class FireballSpell implements Action {
   readonly creature: Creature;
   readonly time: tsm;
 
-  constructor(source: Creature, duration: uint, distance: uint) {
+  constructor(id: int, source: Creature, duration: uint, distance: uint) {
 
-    this.id        = nextId();
+    this.id        = id;
     this.time      = Date.now();//fixme take it from performance*
     this.creature  = source;
     this.posX      = source.positionX;

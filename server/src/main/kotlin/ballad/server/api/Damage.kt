@@ -10,8 +10,9 @@ data class Damage(
     val culpritId: Int,
     val victimId: Int,
     val amount: Int,
-    val time: Long
+    val time: Long,
+    val spellId: Long
 
 ) {
-    constructor(d: Damage) : this(d.x, d.y, d.culprit.id, d.victim.id, d.amount, d.time)
+    constructor(d: Damage) : this(d.x, d.y, d.culprit.id, d.victim.id, d.amount, d.time, d.spellId)
 }

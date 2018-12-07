@@ -6,4 +6,5 @@ export interface ApiDamage {
   x: index;
   y: index;
   amount: int;
+  spellId: int;
 }

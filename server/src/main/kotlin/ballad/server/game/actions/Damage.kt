@@ -9,5 +9,6 @@ data class Damage(
     override val time: Tsm,
     val victim: Creature,
     val culprit: Creature,
-    var amount: Int = 0
+    var amount: Int = 0,
+    val spellId: Long = 0
 ) : Action
