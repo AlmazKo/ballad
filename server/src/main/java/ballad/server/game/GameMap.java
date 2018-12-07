@@ -29,14 +29,16 @@ public final class GameMap {
         this.tiles = tiles;
         this.creatures = new int[map.length];
 
+        settleMobs();
+        debug();
+    }
+
+    private void settleMobs() {
         CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
         for (int i = 0; i < 400; i++) {
             strategies.add(new NpcStrategy(type, this));
         }
-
-        debug();
     }
-
 
     private void debug() {
         StringBuilder sb = new StringBuilder();
@@ -103,6 +105,7 @@ public final class GameMap {
     public Player addPlayer(int id) {
 
         int idx = findFreeIndex(2, 15, 3);
+        if (idx == -1) throw new RuntimeException("Not found the place for player");
 
         Player player = new Player(id, new CreatureState(50, idx % SIZE, idx / SIZE, Direction.SOUTH));
 
@@ -130,6 +133,14 @@ public final class GameMap {
         if (idx < 0 || idx >= map.length) return null;
 
         return tiles[map[idx]];
+    }
+
+    @Nullable Creature getCreature(int x, int y) {
+        if (!isValid(x, y)) return null;
+
+        int crId = creatures[getIndex(x, y)];
+        if (crId == 0) return null;
+        return npcs.get(crId);
     }
 
     boolean addCreature(Creature c) {

@@ -54,7 +54,10 @@ class Game(vertx: Vertx, val map: GameMap) {
                 map.steps.add(it)
                 //                val plannedId = id + it.duration / TICK_TIME
                 //                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
+            } else if (it is Hide) {
+                map.removePlayer(it.creature.id)
             }
+
         }
 
 
@@ -152,8 +155,8 @@ class Game(vertx: Vertx, val map: GameMap) {
             val x = spell.currentX
             val y = spell.currentY
 
-            map.npcs.values.filter { it.x == x && it.y == y && it.id != spell.source.id }.forEach { victim ->
-
+            val victim = map.getCreature(x, y)
+            if (victim !== null) {
                 val d = Damage(x, y, time, victim, spell.source, 10)
                 victim.damage(d)
                 actions.add(d)
@@ -161,18 +164,7 @@ class Game(vertx: Vertx, val map: GameMap) {
                 if (victim.state.life == 0) {
                     actions.add(Death(d))
                 }
-                spell.finished = true
-            }
 
-
-            map.players.values.filter { it.x == x && it.y == y && it.id != spell.source.id }.forEach { victim ->
-                val d = Damage(x, y, time, victim, spell.source, 8)
-                victim.damage(d)
-                actions.add(d)
-
-                if (victim.state.life == 0) {
-                    actions.add(Death(d))
-                }
                 spell.finished = true
             }
 

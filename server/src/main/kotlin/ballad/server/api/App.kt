@@ -1,17 +1,9 @@
 package ballad.server.api
 
-import ballad.server.game.actions.Arrival
-import ballad.server.game.actions.Damage
-import ballad.server.game.actions.Death
-import ballad.server.game.actions.Fireball
 import ballad.server.game.Game
 import ballad.server.game.GameMap
-import ballad.server.game.actions.Hide
-import ballad.server.game.Step
-import ballad.server.game.actions.SpellAction
 import ballad.server.map.Lands
 import ballad.server.toJson
-import ballad.server.tsm
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -20,7 +12,6 @@ import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.StaticHandler
-import kotlinx.serialization.json.JSON
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -46,80 +37,8 @@ class App(vertx: Vertx) {
         server.websocketHandler { ws ->
             val id = playerInc.incrementAndGet()
             log.info("Connected player: #$id")
-
             val p = map.addPlayer(id)
-
-            val arr = Arrival(p.x, p.y, tsm(), p)
-            game.send(arr)
-
-
-            val act = JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(arr))
-            ws.writeFinalTextFrame("""{"action":"PROTAGONIST_ARRIVAL", "data": $act}""")
-            ws.closeHandler {
-                game.send(Hide(tsm(), p))
-                map.removePlayer(id)
-                log.info("Connection is closed: $id")
-            }
-
-            ws.textMessageHandler { msg ->
-                val raw = JsonObject(msg)
-                val data = raw.getJsonObject("data")
-                val id = raw.getInteger("id")
-                val globalId = Int.MAX_VALUE.toLong() + id
-                val act = when (raw.getString("action")) {
-                    "STEP" -> {
-                        Step(
-                            x = data.getInteger("x"),
-                            y = data.getInteger("y"),
-                            time = tsm(), //fixme
-                            creature = p,
-                            duration = 300,
-                            direction = mapToDirection[data.getInteger("direction")]!!
-                        )
-                    }
-                    "SPELL" -> {
-                        val spellType = data.getString("type")
-                        Fireball(
-                            id = globalId,
-                            x = data.getInteger("x"),
-                            y = data.getInteger("y"),
-                            time = tsm(), //fixme
-                            distance = data.getInteger("distance"),
-                            speed = data.getInteger("speed"),
-                            source = p,
-                            direction = mapToDirection[data.getInteger("direction")]!!
-                        )
-                    }
-                    else -> return@textMessageHandler
-                }
-
-                game.send(act)
-            }
-
-            game.subscribe(id) { actions ->
-                actions.forEach {
-
-                    if (it is SpellAction) {
-                        val act = when (it) {
-                            is Fireball -> JSON.stringify(ballad.server.api.Fireball.serializer(), ballad.server.api.Fireball(it))
-                            else -> return@forEach
-                        }
-                        ws.writeFinalTextFrame("""{"action":"SPELL", "type":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
-                    } else  {
-                        val act = when (it) {
-                            is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), ballad.server.api.Hide(it))
-                            is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
-                            is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
-                            is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
-                            is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
-                            else -> return@forEach
-                        }
-                        ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")
-                    }
-
-
-                }
-            }
+            PlayerSocket(p, ws, game)
         }
     }
 
