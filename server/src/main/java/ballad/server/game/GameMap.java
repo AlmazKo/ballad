@@ -34,13 +34,13 @@ public final class GameMap {
         this.tiles = tiles;
         this.creatures = new int[map.length];
 
-        //settleMobs();
+        settleMobs();
         debug();
     }
 
     private void settleMobs() {
         CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 5; i++) {
             strategies.add(new NpcStrategy(type, this));
         }
     }

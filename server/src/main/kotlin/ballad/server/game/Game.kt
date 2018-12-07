@@ -152,7 +152,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             val y = spell.currentY
 
             val victim = map.getCreature(x, y)
-            if (victim !== null) {
+            if (victim !== null && victim.id != spell.source.id) {
                 val d = Damage(x, y, time, victim, spell.source, 10)
                 victim.damage(d)
                 actions.add(d)
