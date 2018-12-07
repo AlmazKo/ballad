@@ -13,6 +13,9 @@ import { Effect } from './Effect';
 
 export declare var POS_X: coord;
 export declare var POS_Y: coord;
+
+export declare var PROTO_X: coord;
+export declare var PROTO_Y: coord;
 export declare var SHIFT_X: px;
 export declare var SHIFT_Y: px;
 
@@ -139,8 +142,10 @@ export class Lands {
 
   updateFocus(p: TilePainter, proto: DrawableCreature) {
 
-    POS_X   = proto.positionX - Math.floor(p.width / CELL / 4);
-    POS_Y   = proto.positionY - Math.floor(p.height / CELL / 4);
+    POS_X = proto.positionX - Math.floor(p.width / CELL / 4);
+    POS_Y = proto.positionY - Math.floor(p.height / CELL / 4);
+    PROTO_X = proto.positionX;
+    PROTO_Y = proto.positionY;
     SHIFT_X = proto.shiftX;
     SHIFT_Y = proto.shiftY;
   }

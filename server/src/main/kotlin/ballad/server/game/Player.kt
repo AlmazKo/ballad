@@ -16,5 +16,5 @@ data class Player(
     override val x get() = state.x
     override val y get() = state.y
 
-    override val viewDistance: Int = 16
+    override val viewDistance: Int = 8
 }

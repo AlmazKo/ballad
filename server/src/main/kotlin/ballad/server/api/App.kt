@@ -7,6 +7,7 @@ import ballad.server.toJson
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
+import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
@@ -18,33 +19,42 @@ import java.util.concurrent.atomic.AtomicInteger
 class App(vertx: Vertx) {
     private val log = LoggerFactory.getLogger(javaClass)
     private val playerInc = AtomicInteger(0)
+    private var game: Game
+    private var map: GameMap
 
     init {
         val lands = loadLands()
-        val map = GameMap(lands.map, lands.tiles)
-        val game = Game(vertx, map)
+        this.map = GameMap(lands.map, lands.tiles)
+        this.game = Game(vertx, map)
         val server = vertx.createHttpServer()
 
         initApi(vertx, lands, server)
-        initWsApi(server, map, game)
 
         server.listen {
             log.info("Started!")
         }
     }
 
-    private fun initWsApi(server: HttpServer, map: GameMap, game: Game) {
-        server.websocketHandler { ws ->
+    private fun initApi(vertx: Vertx, lands: Lands, server: HttpServer) {
+        val router = Router.router(vertx)
+        initCors(router)
+
+
+        router.route("/admin").handler { ctx ->
+            val ws = ctx.request().upgrade()
+            game.onEndTick{
+                ws.writeFinalTextFrame(JsonArray(map.creatures.toList()).toString())
+            }
+        }
+
+        router.route("/ws").handler { ctx ->
+            val ws = ctx.request().upgrade()
             val id = playerInc.incrementAndGet()
             log.info("Connected player: #$id")
             val p = map.addPlayer(id)
             PlayerSocket(p, ws, game)
         }
-    }
 
-    private fun initApi(vertx: Vertx, lands: Lands, server: HttpServer) {
-        val router = Router.router(vertx)
-        initCors(router)
 
         router.route("/res/*").handler(StaticHandler.create("../resources"))
 

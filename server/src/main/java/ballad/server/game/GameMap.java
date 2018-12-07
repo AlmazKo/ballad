@@ -13,7 +13,7 @@ import java.util.HashMap;
 public final class GameMap {
     private final short[] map;
     private final Tile[]  tiles;
-    private final int[]   creatures;
+    public final  int[]   creatures;
 
 
     final HashMap<Integer, Npc>    npcs       = new HashMap<>();
@@ -35,7 +35,7 @@ public final class GameMap {
 
     private void settleMobs() {
         CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
-        for (int i = 0; i < 400; i++) {
+        for (int i = 0; i < 40; i++) {
             strategies.add(new NpcStrategy(type, this));
         }
     }

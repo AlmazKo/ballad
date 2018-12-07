@@ -45,7 +45,7 @@ export class Game {
   private proto: Protagonist;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.server = new Server(map);
+    this.server = new Server();
     this.server.subOnAction((name, action) => this.onServerAction(name, action));
   }
 

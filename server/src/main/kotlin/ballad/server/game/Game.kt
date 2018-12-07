@@ -18,6 +18,8 @@ class Game(vertx: Vertx, val map: GameMap) {
     private val playerHandler = HashMap<Int, (actions: List<Action>) -> Unit>()
     private val playerRequests = ArrayList<Action>()
 
+    private var endHandler: (() -> Unit)? = null
+
     var id = -1
 
 
@@ -219,6 +221,8 @@ class Game(vertx: Vertx, val map: GameMap) {
         map.spells.removeIf {
             it.finished
         }
+
+        endHandler?.invoke()
     }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
@@ -227,6 +231,14 @@ class Game(vertx: Vertx, val map: GameMap) {
 
     fun send(action: Action) {
         playerRequests.add(action)
+    }
+
+    fun unSubscribe(id: Int) {
+        playerHandler.remove(id)
+    }
+
+    fun onEndTick(function: () -> Unit) {
+        endHandler = function
     }
 
     companion object {

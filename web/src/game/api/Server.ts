@@ -1,5 +1,4 @@
 import { Action } from '../actions/Action';
-import { Lands } from '../Lands';
 import { Step } from '../actions/Step';
 import { WS_HOST } from '../../util/net';
 import { FireballSpell } from '../actions/FireballSpell';
@@ -12,9 +11,8 @@ export class Server {
   private handler: (name: String, action: Action) => void;
   private ws: WebSocket;
 
-  constructor(private map: Lands) {
-    this.map          = map;
-    this.ws           = new WebSocket(WS_HOST);
+  constructor() {
+    this.ws           = new WebSocket(WS_HOST+'/ws');
     this.ws.onmessage = (event) => this.onRawData(JSON.parse(event.data))
   }
 
@@ -30,7 +28,7 @@ export class Server {
     if (action instanceof Step) {
       this.ws.send(JSON.stringify({
         action: "STEP", id: ++incId, data: {
-          x: action.fromPosX, y: action.fromPosY, direction: action.direction
+          x: action.fromPosX, y: action.fromPosY, direction: action.direction, duration: action.duration
         }
       }))
     } else if (action instanceof FireballSpell) {

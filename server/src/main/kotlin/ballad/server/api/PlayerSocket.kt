@@ -29,10 +29,10 @@ class PlayerSocket(
         val arr = Arrival(p.x, p.y, tsm(), p)
         game.send(arr)
 
-
         val act = JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(arr))
         ws.writeFinalTextFrame("""{"action":"PROTAGONIST_ARRIVAL", "data": $act}""")
         ws.closeHandler {
+            game.unSubscribe(p.id)
             game.send(Hide(tsm(), p))
             log.info("Connection is closed: ${p.id}")
         }
