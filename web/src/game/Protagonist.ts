@@ -140,7 +140,7 @@ export class Protagonist implements DrawableCreature {
   doStep(dr: Dir) {
     this.direction = this.frozen ? this.frozen : dr;
 
-    if (this.map.canStep([this.positionX, this.positionY], this.direction) ) {
+    if (this.map.canStep([this.positionX, this.positionY], this.direction)) {
       console.info("START NEW " + dr);
     } else {
       console.warn("Forbidden direction " + dr);
@@ -176,7 +176,7 @@ export class Protagonist implements DrawableCreature {
             break;
         }
 
-        if (isActionContinue && !this.map.canMove([this.positionY, this.positionY], this.nextPos(next))) {
+        if (isActionContinue && !this.map.canStep([this.positionX, this.positionY], next)) {
           isActionContinue = false
         }
 

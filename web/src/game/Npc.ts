@@ -12,11 +12,12 @@ import { inZone } from './util';
 
 export class Npc implements DrawableCreature {
 
-  id: uint;
+  readonly id: uint;
   positionX: index;
   positionY: index;
   direction: Dir;
-  metrics: Metrics;
+  readonly metrics: Metrics;
+  readonly isPlayer: boolean;
 
   shiftX    = 0;
   shiftY    = 0;
@@ -33,6 +34,7 @@ export class Npc implements DrawableCreature {
     this.direction = c.direction;
     this.positionX = c.x;
     this.positionY = c.y;
+    this.isPlayer  = c.isPlayer;
   }
 
 
@@ -115,7 +117,15 @@ export class Npc implements DrawableCreature {
 
     if (inZon) drawLifeLine(p, this);
     const sx = Math.floor(this.f * 4) * 16;
-    bp.drawTile(RES["NPC_test"], sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
+
+    let img;
+    if (this.isPlayer) {
+      img = RES["character_alien"]
+    } else {
+      img = RES["NPC_test"]
+    }
+
+    bp.drawTile(img, sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
     if (inZon) drawName(p, this);
   }

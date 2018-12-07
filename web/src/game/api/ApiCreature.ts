@@ -5,6 +5,7 @@ import { Dir } from '../types';
 export interface ApiCreature {
   id: uint;
   metrics: Metrics;
+  isPlayer: boolean,
   x: index;
   y: index;
   direction: Dir;

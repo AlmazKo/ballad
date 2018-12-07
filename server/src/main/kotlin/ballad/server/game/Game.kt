@@ -99,8 +99,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             val zCreatures = map.getCreatures(p.x, p.y, p.viewDistance)
             p.zone.values.removeIf {
                 if (!zCreatures.contains(it)) {
-                    p.zone.remove(it.id)
-                    pActions.add(Hide(it.x, it.y, time, it))
+                      pActions.add(Hide(it.x, it.y, time, it))
                     true
                 } else false
             }

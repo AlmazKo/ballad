@@ -124,6 +124,7 @@ export class Lands {
     const canMv = this.canMove(from, [x, y], isFly);
     if (!canMv) return false;
 
+    console.log(x, y, this.creatures.values())
     for (const c of this.creatures.values()[Symbol.iterator]()) {
       if (c.positionX === x && c.positionY === y) return false;
     }
@@ -142,8 +143,8 @@ export class Lands {
 
   updateFocus(p: TilePainter, proto: DrawableCreature) {
 
-    POS_X = proto.positionX - Math.floor(p.width / CELL / 4);
-    POS_Y = proto.positionY - Math.floor(p.height / CELL / 4);
+    POS_X   = proto.positionX - Math.floor(p.width / CELL / 4);
+    POS_Y   = proto.positionY - Math.floor(p.height / CELL / 4);
     PROTO_X = proto.positionX;
     PROTO_Y = proto.positionY;
     SHIFT_X = proto.shiftX;
