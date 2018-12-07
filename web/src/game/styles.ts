@@ -4,7 +4,7 @@ import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 
 export const style = {
   grid  : {
-    style: toRGBA("#33", 0.5),
+    style: toRGBA("#333", 0.5),
     width: 1,
     dash : [3, 5]
   },

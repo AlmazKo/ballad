@@ -91,14 +91,14 @@ export class Lands {
     if (!tile) return true;
 
     if (tile.type === 'water' && !isFly) return false;
-    if (tile.type === 'blocked') return false;
+    if (tile.type === 'wall') return false;
 
 
     tile = this.tiles.get(this.objects[x + y * MAP_SIZE]);
     if (!tile) return true;
 
     if (tile.type === 'water' && !isFly) return false;
-    if (tile.type === 'blocked') return false;
+    if (tile.type === 'wall') return false;
 
     return true;
   }

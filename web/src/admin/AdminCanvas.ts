@@ -67,29 +67,34 @@ export class AdminCanvas implements CanvasComposer {
     const width = MAP_SIZE * CELL;
 
     this.creatures.forEach((c, i) => {
+      if (c < 1000) return;
 
       const x = i % MAP_SIZE;
       const y = Math.floor(i / MAP_SIZE);
+      p.fillRect(toX(x) + 4, toY(y) + 4, CELL - 7, CELL - 7, "#9dc69d");
+    });
 
-      if (c > 1000) {
-        p.fillRect(toX(x)+4, toY(y)+4, CELL-7, CELL-7, "#9dc69d");
-      } else if (c > 0) {
-        p.fillRect(toX(x), toY(y), CELL, CELL, "#9d0508");
-        p.text("" + c, toX(x) + CELL / 2, toY(y) + 2, {align: "center", font: "bold 10px sans-serif", style: "#fff",});
-      }
+    this.creatures.forEach((c, i) => {
+      if (c < 1 || c >= 1000) return;
+
+      const x = i % MAP_SIZE;
+      const y = Math.floor(i / MAP_SIZE);
+      p.fillRect(toX(x), toY(y), CELL, CELL, "#9d0508");
+      p.text("" + c, toX(x) + CELL / 2, toY(y) + 2, {align: "center", font: "bold 10px sans-serif", style: "#fff",});
+      p.fillRect(toX(x) - 8 * CELL, toY(y) - 8 * CELL, CELL * 17, CELL * 17, "#9d050833");
     });
 
 
     for (let pos = 0; pos < MAP_SIZE; pos++) {
-      p.vline(toX(pos), PAD, width + PAD, {style: "#ccc"});
-      p.hline(PAD, width + PAD, toY(pos), {style: "#ccc"});
+      p.vline(toX(pos), PAD, width + PAD, {style: "#33333333"});
+      p.hline(PAD, width + PAD, toY(pos), {style: "#33333333"});
 
       p.text("" + pos, toX(pos) + 2, 0, {align: "left", font: "10px sans-serif"});
       p.text("" + pos, 1, toY(pos), {align: "left", font: "10px sans-serif"});
     }
 
-    p.vline(toX(MAP_SIZE), PAD, width + PAD, {style: "#ccc"});
-    p.hline(PAD, width + PAD, toY(MAP_SIZE), {style: "#ccc"});
+    p.vline(toX(MAP_SIZE), PAD, width + PAD, {style: "#44444444"});
+    p.hline(PAD, width + PAD, toY(MAP_SIZE), {style: "#44444444"});
 
 
     p.text('Mobs: ' + this.npcs, 2, toY(MAP_SIZE) + 10, {align: "left", font: "10px sans-serif"});

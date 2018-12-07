@@ -35,7 +35,7 @@ public final class GameMap {
 
     private void settleMobs() {
         CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 100; i++) {
             strategies.add(new NpcStrategy(type, this));
         }
     }
@@ -118,11 +118,12 @@ public final class GameMap {
         Player removed = players.remove(id);
 
         if (removed != null) {
-            int inMap = creatures[getIndex(removed.getX(), removed.getY())];
+            int idx = getIndex(removed.getX(), removed.getY());
+            int inMap = creatures[idx];
             if (inMap != id) {
                 throw new RuntimeException("Wrong place player=" + id);
             } else {
-                creatures[id] = 0;
+                creatures[idx] = 0;
             }
 
         }
@@ -244,8 +245,10 @@ public final class GameMap {
 
             if (it == 0) {
                 sb.append('.');
-            } else {
+            } else if (it >= 1000) {
                 sb.append('c');
+            } else {
+                sb.append('p');
             }
 
         }
