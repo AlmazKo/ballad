@@ -1,6 +1,7 @@
 package ballad.server.game
 
 import ballad.server.Tsm
+import ballad.server.map.TileType
 import kotlin.random.Random
 
 class NpcStrategy(
@@ -47,8 +48,8 @@ class NpcStrategy(
             if (tile.type.isSteppable()) {
                 if (map.isNoCreatures(x, y)) {
                     val obj = map.getObject(x, y)
-
-                    if (obj !== null && !obj.type.isSteppable()) return false;
+                    //mobs can't move through gates
+                    if (obj !== null && (!obj.type.isSteppable() || obj.type === TileType.GATE)) return false;
                     return true
                 }
             }

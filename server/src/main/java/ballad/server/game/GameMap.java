@@ -47,7 +47,7 @@ public final class GameMap {
         this.objects = lands.getObjects();
         this.creatures = new int[basis.length];
         this.tiles = lands.getTiles();
-//        settleMobs();
+        settleMobs();
         debug();
     }
 

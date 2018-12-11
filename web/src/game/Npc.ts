@@ -7,8 +7,6 @@ import { Step } from './actions/Step';
 import { Animator } from '../anim/Animator';
 import { TilePainter } from './TilePainter';
 import { ApiCreature } from './api/ApiCreature';
-import { PROTO_X, PROTO_Y } from './Lands';
-import { inZone } from './util';
 
 export class Npc implements DrawableCreature {
 
@@ -113,7 +111,7 @@ export class Npc implements DrawableCreature {
 
     const p = bp.toInTile(this.positionX, this.positionY, this.shiftX, this.shiftY);
 
-    const inZon = inZone(this.positionX, this.positionY, PROTO_X, PROTO_Y, 3)
+    const inZon = true;//inZone(this.positionX, this.positionY, PROTO_X, PROTO_Y, 3)
 
     if (inZon) drawLifeLine(p, this);
     const sx = Math.floor(this.f * 4) * 16;

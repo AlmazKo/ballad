@@ -20,13 +20,15 @@ import { FireShockSpell } from './actions/FireShockSpell';
 import { FireShock } from './effects/FireShock';
 import { style } from './styles';
 import { Drawable } from './Drawable';
-import { uint } from '../types';
+import { tsm, uint } from '../types';
 import { Action } from './actions/Action';
 
 
 let INC: uint = 0;
 
 export class Session implements Drawable {
+  private lastSpellTime: tsm = 0;
+
   constructor(
     private server: Server,
     private proto: Protagonist,
@@ -153,24 +155,30 @@ export class Session implements Drawable {
     this.proto.step(dir)
   }
 
-  sendAction(action: PlayerAction): Action {
+  sendAction(action: PlayerAction): Action | undefined {
 
+    const time = Date.now();
     switch (action) {
       case PlayerAction.FIREBALL:
-        const fireball = new FireballSpell(this.nextId(), this.proto, 200, 8);
+        if (time - this.lastSpellTime < 1000) return undefined;
+        this.lastSpellTime = time;
+        const fireball     = new FireballSpell(time, this.nextId(), this.proto, 100, 10);
+
         this.server.sendAction(fireball);
         this.map.effects.push(new Fireball(fireball, this.map));
         return fireball;
 
       case PlayerAction.FIRESHOCK:
-        const fireshok = new FireShockSpell(this.nextId(), this.proto, 400, 2);
+        if (time - this.lastSpellTime < 1000) return undefined;
+        this.lastSpellTime = time;
+        const fireshok = new FireShockSpell(time, this.nextId(), this.proto, 400, 2);
         this.server.sendAction(fireshok);
         const act = new FireShock(fireshok);
         this.map.effects.push(act);
         return fireshok;
 
       case PlayerAction.STEP:
-        const step = new Step(this.nextId(), this.proto, 400);
+        const step = new Step(this.nextId(), this.proto, 300);
         this.server.sendAction(step);
         return step;
 

@@ -12,12 +12,16 @@ export class BasePainter implements Painter {
   private readonly baseFillColor: FillStyle;
 
   private hMeasuringCache: { [key: string]: px | undefined } = {};
+  width: number;
+  height: number;
 
   constructor(ctx: CanvasRenderingContext2D, baseColor: color = '#000', baseFillColor: color = '#fff') {
     this.ctx            = ctx;
     this.baseFillColor  = baseFillColor;
     this.strokeAcceptor = new StrokeStyleAcceptor(ctx, baseColor);
     this.fontAcceptor   = new FontStyleAcceptor(ctx, baseColor);
+    this.width          = ctx.canvas.width;
+    this.height         = ctx.canvas.height;
   }
 
   /**

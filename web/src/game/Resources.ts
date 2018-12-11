@@ -6,7 +6,9 @@ export const RESOURCES = [
   'fireball_32',
   'map1',
   'character',
-  'character_alien'
+  'character_alien',
+  'ico_fireball',
+  'ico_fireshock'
 ];
 
 

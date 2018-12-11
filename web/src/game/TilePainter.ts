@@ -17,7 +17,7 @@ export class TilePainter implements Painter {
 
   private readonly bp: BasePainter;
   private readonly bp2: InTilePainter;
-  private readonly ctx: CanvasRenderingContext2D;
+   readonly ctx: CanvasRenderingContext2D;
 
   width: px;
   height: px;

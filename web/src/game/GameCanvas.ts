@@ -33,11 +33,11 @@ export class GameCanvas implements CanvasComposer, Pressable {
     // const game = new Game();
 
     new Resources().onLoad(r => {
-      RES       = r;
+      RES = r;
       ajax('/map', map => {
         ajax('/tiles', tiles => {
           const lands  = new Lands(map as ViewMap, tiles as Tiles);
-          this.game = new Game(lands, moving);
+          this.game    = new Game(lands, moving);
           this.loading = false;
 
         })
@@ -59,9 +59,6 @@ export class GameCanvas implements CanvasComposer, Pressable {
     this.p      = new BasePainter(ctx);
   }
 
-  onEndFrame(time: DOMHighResTimeStamp, error?: Error): void {
-  }
-
   onFrame(time: DOMHighResTimeStamp, frameId?: uint): void {
     this.p.clearArea(this.width, this.height);
 
@@ -72,6 +69,9 @@ export class GameCanvas implements CanvasComposer, Pressable {
     } else {
       this.game.onFrame(time, p)
     }
+  }
+
+  onEndFrame(time: DOMHighResTimeStamp, error?: Error): void {
   }
 
   register(register: Registrar): void {

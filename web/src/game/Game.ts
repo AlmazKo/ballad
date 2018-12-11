@@ -9,13 +9,26 @@ import { style } from './styles';
 import { TilePainter, toX, toY } from './TilePainter';
 import { Session } from './Session';
 import { Action } from './actions/Action';
+import { RES } from './GameCanvas';
+import { toRGBA } from '../canvas/utils';
+import { Animator } from '../anim/Animator';
+import { Animators } from '../anim/Animators';
 
 export enum PlayerAction {
   FIREBALL, FIRESHOCK, STEP
 }
 
 
-export const DEBUG = true;
+export const DEBUG = false;
+
+class Slot {
+  constructor(
+    public readonly img: HTMLImageElement,
+    public readonly  button: string,
+    public readonly  spell: PlayerAction) {
+
+  }
+}
 
 export class Game {
 
@@ -24,25 +37,73 @@ export class Game {
   private tp: TilePainter;
   // @ts-ignore
   private proto: Protagonist;
-  private session: Session | null     = null;
+  private session: Session | null   = null;
+  private animators                 = new Animators();
+  private coolDownFraction          = 1;
+  private slots: Array<Slot | null> = [null, null, null, null, null];
 
   constructor(private map: Lands, private moving: MovingKeys) {
-
+    this.slots[0] = new Slot(RES['ico_fireball'], "1", PlayerAction.FIREBALL);
+    this.slots[1] = new Slot(RES['ico_fireshock'], "2", PlayerAction.FIRESHOCK);
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
     if (!this.tp) this.tp = new TilePainter(p);
+    this.animators.run(time);
     if (this.session) {
       this.session.draw(time, p);
       if (DEBUG) this.debug(p);
+      this.drawPanels(p)
     }
 
 
-  if(!this.server){
+    if (!this.server) {
       this.server = new Server();
       this.server.subOnAction((name, action) => this.onServerAction(name, action));
     }
   }
+
+
+  private drawPanels(p: BasePainter) {
+
+    const ctx = this.tp.ctx;
+
+    const [width, height] = [this.tp.ctx.canvas.clientWidth, this.tp.ctx.canvas.clientHeight];
+
+    let x   = 60;
+    const y = height - 45;
+    for (let i = 0; i < 5; i++) {
+
+      x = 60 + 60 * i;
+
+      const slot = this.slots[i];
+      if (slot) {
+        ctx.drawImage(slot.img, 0, 0, slot.img.width, slot.img.height, x - 25, y - 25, 50, 50);
+
+        if (this.coolDownFraction != 0) {
+          p.fill(toRGBA("#000", 0.66));
+          ctx.beginPath();
+          ctx.arc(x, y, 25, 1.5 * Math.PI, (1.5 + this.coolDownFraction * 2) * Math.PI, true);
+          ctx.lineTo(x, y);
+          ctx.fill();
+        }
+      } else {
+        p.fill(toRGBA("#000", 0.2));
+        ctx.beginPath();
+        ctx.arc(x, y, 25, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+
+      p.circle(x, y, 25, {style: "white", width: 2});
+
+      if (slot) {
+        p.fillRect(x - 8, y + 17, 16, 16, "#cc0100");
+        p.text(slot.button, x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"});
+      }
+    }
+  }
+
 
   private debug(bp: BasePainter) {
     const p = this.proto;
@@ -80,10 +141,17 @@ export class Game {
     }
   }
 
-  sendAction(action: PlayerAction): Action {
-    if (this.session) return this.session.sendAction(action);
+  sendAction(action: PlayerAction): Action | undefined {
+    if (this.session) {
+      const a = this.session.sendAction(action);
+      if (a && (action === PlayerAction.FIREBALL || action === PlayerAction.FIRESHOCK)) {
+        this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f))
+      }
 
-    return null!!;
+      return a;
+    }
+
+    return undefined;
   }
 
   onStep(dir: Dir) {

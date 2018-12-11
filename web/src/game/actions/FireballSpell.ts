@@ -1,4 +1,4 @@
-import { index, int, tsm, uint } from '../../types';
+import { index, tsm, uint } from '../../types';
 import { Dir } from '../types';
 import { Action } from './Action';
 import { Creature } from '../Creature';
@@ -7,24 +7,17 @@ export class FireballSpell implements Action {
   readonly posX: index;
   readonly posY: index;
   readonly direction: Dir;
-  readonly duration: uint;
-  readonly distance: uint;
 
-  readonly id: uint;
-  readonly creature: Creature;
-  readonly time: tsm;
+  constructor(
+    public readonly time: tsm,
+    public readonly id: uint,
+    public readonly creature: Creature,
+    public readonly duration: uint,
+    public readonly distance: uint) {
 
-  constructor(id: int, source: Creature, duration: uint, distance: uint) {
-
-    this.id        = id;
-    this.time      = Date.now();//fixme take it from performance*
-    this.creature  = source;
-    this.posX      = source.positionX;
-    this.posY      = source.positionY;
-    this.direction = source.direction;
-
-    this.duration = duration;
-    this.distance = distance;
+    this.posX      = creature.positionX;
+    this.posY      = creature.positionY;
+    this.direction = creature.direction;
   }
 
 }

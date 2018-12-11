@@ -188,6 +188,6 @@ export class Lands {
   }
 
   private isValid(x: int, y: int): boolean {
-    return x >= this.offsetX && x < (this.offsetX + this.width) && y >= this.offsetY && x < (this.offsetY + this.height);
+    return x >= this.offsetX && x < (this.offsetX + this.width) && y >= this.offsetY && y < (this.offsetY + this.height);
   }
 }
