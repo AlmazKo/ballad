@@ -33,7 +33,7 @@ export class Session implements Drawable {
     private map: Lands,
     private tp: TilePainter
   ) {
-
+    console.log(tp)
   }
 
   draw(time: DOMHighResTimeStamp, p: BasePainter) {
@@ -170,7 +170,7 @@ export class Session implements Drawable {
         return fireshok;
 
       case PlayerAction.STEP:
-        const step = new Step(this.nextId(), this.proto, 200);
+        const step = new Step(this.nextId(), this.proto, 400);
         this.server.sendAction(step);
         return step;
 

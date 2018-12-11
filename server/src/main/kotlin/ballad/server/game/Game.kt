@@ -1,6 +1,7 @@
 package ballad.server.game
 
 import ballad.server.Tsm
+import ballad.server.game.Direction.*
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Arrival
 import ballad.server.game.actions.Damage
@@ -99,7 +100,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             val zCreatures = map.getCreatures(p.x, p.y, p.viewDistance)
             p.zone.values.removeIf {
                 if (!zCreatures.contains(it)) {
-                      pActions.add(Hide(it.x, it.y, time, it))
+                    pActions.add(Hide(it.x, it.y, time, it))
                     true
                 } else false
             }
@@ -184,27 +185,8 @@ class Game(vertx: Vertx, val map: GameMap) {
             st.direction = step.direction
             //            }
             val distance = Math.min(1, Math.round((time - step.time) / step.duration.toFloat()))
-            if (distance > step.distanceTravelled) {
-                var xx = st.x
-                var yy = st.y
-                when (step.direction) {
-                    Direction.NORTH -> yy--
-                    Direction.SOUTH -> yy++
-                    Direction.WEST -> xx--
-                    Direction.EAST -> xx++
-                }
-
-                val tile = map[xx, yy]
-                if (tile !== null) {
-                    if (tile.type !== TileType.WALL && tile.type !== TileType.WATER) {
-                        if (map.isNoCreatures(xx, yy)) {
-                            map.moveCreatures(st.x, st.y, xx, yy)
-                            st.x = xx
-                            st.y = yy
-                            step.distanceTravelled = distance
-                        }
-                    }
-                }
+            if (distance > step.distanceTravelled && step(st, step.direction)) {
+                step.distanceTravelled = distance
             }
 
             if (time - step.time >= step.duration) {
@@ -217,6 +199,35 @@ class Game(vertx: Vertx, val map: GameMap) {
         }
 
         endHandler?.invoke()
+    }
+
+    private fun step(st: CreatureState, dir: Direction): Boolean {
+        var xx = st.x
+        var yy = st.y
+        when (dir) {
+            NORTH -> yy--
+            SOUTH -> yy++
+            WEST -> xx--
+            EAST -> xx++
+        }
+
+        val tile = map[xx, yy]
+        if (tile !== null) {
+            if (tile.type.isSteppable()) {
+                if (map.isNoCreatures(xx, yy)) {
+                    val obj = map.getObject(xx, yy)
+
+                    if (obj !== null && !obj.type.isSteppable()) return false;
+
+                    map.moveCreatures(st.x, st.y, xx, yy)
+                    st.x = xx
+                    st.y = yy
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
@@ -245,3 +256,5 @@ class Game(vertx: Vertx, val map: GameMap) {
     }
 
 }
+
+fun TileType?.isSteppable() = this !== TileType.WALL && this !== TileType.WATER && this !== TileType.NOTHING

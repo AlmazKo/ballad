@@ -6,6 +6,9 @@ import { Resources } from './Resources';
 import { Game, PlayerAction } from './Game';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
+import { ajax } from '../util/net';
+import { ViewMap } from './api/ViewMap';
+import { Tiles } from './api/Tiles';
 
 export declare var RES: { [index: string]: HTMLImageElement };
 
@@ -30,10 +33,15 @@ export class GameCanvas implements CanvasComposer, Pressable {
     // const game = new Game();
 
     new Resources().onLoad(r => {
-      RES          = r;
-      const lands  = new Lands();
-      this.game    = new Game(lands, moving);
-      this.loading = false;
+      RES       = r;
+      ajax('/map', map => {
+        ajax('/tiles', tiles => {
+          const lands  = new Lands(map as ViewMap, tiles as Tiles);
+          this.game = new Game(lands, moving);
+          this.loading = false;
+
+        })
+      })
     })
   }
 

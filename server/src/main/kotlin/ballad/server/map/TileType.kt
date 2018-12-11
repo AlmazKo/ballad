@@ -1,5 +1,5 @@
 package ballad.server.map
 
 enum class TileType {
-    WATER, GRASS, WALL, BRIDGE, NOTHING
+    WATER, LAND, WALL, NOTHING, GATE
 }

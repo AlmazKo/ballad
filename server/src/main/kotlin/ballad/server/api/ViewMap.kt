@@ -4,7 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ViewMap(
-    val x: Int,
-    val y: Int,
-    val chunk: ShortArray
+    val width: Int,
+    val heigt: Int,
+    val offsetX: Int,
+    val offsetY: Int,
+    val terrain: ShortArray,
+    val objects1: ShortArray
 )

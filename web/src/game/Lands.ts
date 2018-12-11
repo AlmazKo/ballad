@@ -1,5 +1,4 @@
 import { index, int, px, uint } from '../types';
-import { ajax } from '../util/net';
 import { BasePainter } from '../draw/BasePainter';
 import { CELL, coord, Dir } from './types';
 import { RES } from './GameCanvas';
@@ -9,6 +8,8 @@ import { DrawableCreature } from './Creature';
 import { TilePainter, toX, toY } from './TilePainter';
 import { Npc } from './Npc';
 import { Effect } from './Effect';
+import { ViewMap } from './api/ViewMap';
+import { Tiles } from './api/Tiles';
 
 
 export declare var POS_X: coord;
@@ -19,12 +20,6 @@ export declare var PROTO_Y: coord;
 export declare var SHIFT_X: px;
 export declare var SHIFT_Y: px;
 
-
-// type TileType = 'water'| ''
-interface RawTile {
-  id: index;
-  type: string;
-}
 
 class Tile {
   id: index;
@@ -44,45 +39,45 @@ class Tile {
   }
 }
 
-
-let rawMap: any                = null;
-let tiles: Map<index, RawTile> = new Map();
-
-ajax("/map", data => {
-  rawMap = data
-});
-
-ajax("/tiles", (data: any) => {
-  data.data.forEach((t: any) => {
-    const tile = {id: t.id, type: t.type.toLowerCase()} as any;
-    tiles.set(t.id, tile);
-  });
-});
-
-const MAP_SIZE: uint   = 32;
 const TILE_SIZE: px    = 32;//fixme remove. take from api
 const TILESET_SIZE: px = 23;//fixme remove. take from api
 
 
 export class Lands {
-  private tiles   = new Map<index, Tile>();
-  private basic   = new Uint16Array(MAP_SIZE * MAP_SIZE);
-  private objects = new Uint16Array(MAP_SIZE * MAP_SIZE);
-
+  private readonly tiles = new Map<index, Tile>();
+  private readonly basic: Uint16Array;
+  private readonly objects: Uint16Array;
+  private readonly width: uint;
+  private readonly offsetX: int;
+  private readonly offsetY: int;
+  private readonly height: uint;
 
   public creatures = new Map<uint, Npc>();
   public effects   = [] as Array<Effect>;
 
-  constructor() {
+  constructor(map: ViewMap, tiles: Tiles) {
+    this.width   = map.width;
+    this.height  = map.height;
+    this.offsetX = map.offsetX;
+    this.offsetY = map.offsetY;
+    this.basic   = new Uint16Array(map.terrain);
+    this.objects = new Uint16Array(map.objects1);
+
+    tiles.data.forEach(t => {
+      const tileX = t.id % TILESET_SIZE;
+      const tileY = Math.floor(t.id / TILESET_SIZE);
+      const sx    = TILE_SIZE * tileX;
+      const sy    = TILE_SIZE * tileY;
+      this.tiles.set(t.id, new Tile(t.id, t.type, tileX, tileY, sx, sy));
+    })
   }
 
   canMove(from: [index, index], to: [index, index], isFly: boolean = false): boolean {
-    const [x, y]    = to;
-    const maxBounds = x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE;
-    if (!maxBounds) return false;
+    const [x, y] = to;
+    if (!this.isValid(x, y)) return false;
 
 
-    const basicTile = this.basic[x + y * MAP_SIZE];
+    const basicTile = this.basic[this.toIndex(x, y)];
     if (!basicTile) return false;
 
 
@@ -90,15 +85,15 @@ export class Lands {
 
     if (!tile) return true;
 
-    if (tile.type === 'water' && !isFly) return false;
-    if (tile.type === 'wall') return false;
+    if (tile.type === 'WATER' && !isFly) return false;
+    if (tile.type === 'WALL') return false;
 
 
-    tile = this.tiles.get(this.objects[x + y * MAP_SIZE]);
+    tile = this.tiles.get(this.objects[this.toIndex(x, y)]);
     if (!tile) return true;
 
-    if (tile.type === 'water' && !isFly) return false;
-    if (tile.type === 'wall') return false;
+    if (tile.type === 'WATER' && !isFly) return false;
+    if (tile.type === 'WALL'&& !isFly) return false;
 
     return true;
   }
@@ -124,7 +119,6 @@ export class Lands {
     const canMv = this.canMove(from, [x, y], isFly);
     if (!canMv) return false;
 
-    console.log(x, y, this.creatures.values())
     for (const c of this.creatures.values()[Symbol.iterator]()) {
       if (c.positionX === x && c.positionY === y) return false;
     }
@@ -132,13 +126,13 @@ export class Lands {
     return true;
   }
 
-
-  getBasic(posX: index, posY: index): Tile | undefined {
-    const tileId = this.basic[posX + posY * MAP_SIZE];
-    if (!tileId) return undefined;
-
-    return this.tiles.get(tileId);
-  }
+  //
+  // getBasic(posX: index, posY: index): Tile | undefined {
+  //   const tileId = this.basic[posX + posY * MAP_WIDTH];
+  //   if (!tileId) return undefined;
+  //
+  //   return this.tiles.get(tileId);
+  // }
 
 
   updateFocus(p: TilePainter, proto: DrawableCreature) {
@@ -153,33 +147,30 @@ export class Lands {
 
   draw(p: BasePainter) {
 
-    if (!rawMap || !tiles.size) return;
-
-    if (this.tiles.size === 0) {
-      this.initData(rawMap, tiles);
-    }
-
-
     this.basic.forEach((tileId: uint, idx: index) => {
+      if (tileId === 0) return;
       //todo add filter not draw tiles
-      const posX = idx % MAP_SIZE;
-      const posY = Math.floor(idx / MAP_SIZE);
+      const posX = idx % this.width + this.offsetX;
+      const posY = Math.floor(idx / this.width) + this.offsetY;
 
       this.drawTile(p, tileId, toX(posX), toY(posY));
-      // p.text("" + posX + "x" + posY, x, y, style.debugText)
+      // p.text("" + posX + ";" + posY, toX(posX), toY(posY), style.debugText)
     });
 
     this.objects.forEach((tileId: uint, idx: index) => {
-
-      const posX = idx % MAP_SIZE;
-      const posY = Math.floor(idx / MAP_SIZE);
+      if (tileId === 0) return;
+      const posX = idx % this.width + this.offsetX;
+      const posY = Math.floor(idx / this.width) + this.offsetY;
       this.drawTile(p, tileId, toX(posX), toY(posY));
     });
 
 
-    for (let pos = 0; pos < MAP_SIZE; pos++) {
-      p.vline(toX(pos), -SHIFT_Y, MAP_SIZE * CELL, style.grid as StrokeStyle, false);
-      p.hline(-SHIFT_X, MAP_SIZE * CELL, toY(pos), style.grid as StrokeStyle, false);
+    for (let pos = this.offsetX; pos < this.width; pos++) {
+      p.vline(toX(pos), -SHIFT_Y, this.height * CELL, style.grid as StrokeStyle, false);
+    }
+
+    for (let pos = this.offsetY; pos < this.height; pos++) {
+      p.hline(-SHIFT_X, this.width * CELL, toY(pos), style.grid as StrokeStyle, false);
     }
   }
 
@@ -192,42 +183,11 @@ export class Lands {
     p.ctx.drawImage(img, t.sx, t.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
   }
 
-  private initData(raw: any, tileProps: Map<index, RawTile>) {
+  private toIndex(x: int, y: int): uint {
+    return x - this.offsetX + (y - this.offsetY) * this.width;
+  }
 
-    let posX = 16, posY = 16;
-
-
-    posX = 0;
-    posY = 0;
-    (raw.terrain as int[]).forEach((t, idx) => {
-      if (t === 0) return;
-
-      const tileX = t % TILESET_SIZE;
-      const tileY = Math.floor(t / TILESET_SIZE);
-      const sx    = TILE_SIZE * tileX;
-      const sy    = TILE_SIZE * tileY;
-      const props = tileProps.get(t);
-      const type  = !props ? null : props.type;
-      this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
-
-      this.basic[posX + idx % 32 + (posY + Math.floor(idx / 32)) * MAP_SIZE] = t;
-
-    });
-
-    (raw.objects1 as int[]).forEach((t, idx) => {
-      if (t === 0) return;
-
-      const tileX = t % TILESET_SIZE;
-      const tileY = Math.floor(t / TILESET_SIZE);
-      const sx    = TILE_SIZE * tileX;
-      const sy    = TILE_SIZE * tileY;
-      const props = tileProps.get(t);
-      const type  = !props ? null : props.type;
-      this.tiles.set(t, new Tile(t, type, tileX, tileY, sx, sy));
-
-      this.objects[posX + idx % 32 + (posY + Math.floor(idx / 32)) * MAP_SIZE] = t;
-
-    });
-
+  private isValid(x: int, y: int): boolean {
+    return x >= this.offsetX && x < (this.offsetX + this.width) && y >= this.offsetY && x < (this.offsetY + this.height);
   }
 }

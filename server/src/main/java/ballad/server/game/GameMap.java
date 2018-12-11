@@ -2,6 +2,7 @@ package ballad.server.game;
 
 import ballad.server.game.actions.SpellAction;
 import ballad.server.map.Coord;
+import ballad.server.map.Lands;
 import ballad.server.map.Tile;
 import ballad.server.map.TileType;
 import org.jetbrains.annotations.Contract;
@@ -16,43 +17,55 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 public final class GameMap {
-    private final short[] map;
+    private final short[] basis;
+    private final short[] objects;
     private final Tile[]  tiles;
-    public final  int[]   creatures;
 
+    public int[] getCreatures() {
+        return creatures;
+    }
 
-    final HashMap<Integer, Npc>    npcs       = new HashMap<>();
-    final ArrayList<NpcStrategy>   strategies = new ArrayList<>();
-    final ArrayList<SpellAction>   spells     = new ArrayList<>();
-    final ArrayList<Step>          steps      = new ArrayList<>();
-    final HashMap<Integer, Player> players    = new HashMap<>();
+    private final int[] creatures;
+    private final int   width;
+    private final int   height;
 
-    private final static int SIZE = 32;
+    private final HashMap<Integer, Npc> npcs = new HashMap<>();
 
-    public GameMap(short[] map, Tile[] tiles) {
-        this.map = map;
-        this.tiles = tiles;
-        this.creatures = new int[map.length];
+    final         ArrayList<ReSpawnStrategy> strategies = new ArrayList<>();
+    final         ArrayList<SpellAction>     spells     = new ArrayList<>();
+    final         ArrayList<Step>            steps      = new ArrayList<>();
+    final         HashMap<Integer, Player>   players    = new HashMap<>();
+    private final int                        offsetX;
+    private final int                        offsetY;
 
-        settleMobs();
+    public GameMap(Lands lands) {
+        this.offsetX = lands.getOffsetX();
+        this.offsetY = lands.getOffsetY();
+        this.width = lands.getWidth();
+        this.height = lands.getHeight();
+        this.basis = lands.getBasis();
+        this.objects = lands.getObjects();
+        this.creatures = new int[basis.length];
+        this.tiles = lands.getTiles();
+//        settleMobs();
         debug();
     }
 
     private void settleMobs() {
         CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
-        for (int i = 0; i < 5; i++) {
-            strategies.add(new NpcStrategy(type, this));
+        for (int i = 0; i < 4; i++) {
+            strategies.add(new ReSpawnStrategy(type, this));
         }
     }
 
     private void debug() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < map.length; i++) {
+        for (int i = 0; i < basis.length; i++) {
 
-            short it = map[i];
-            if (i % SIZE == 0) {
+            short it = basis[i];
+            if (i % width == 0) {
                 sb.append('\n');
-                sb.append(String.format("%1$-4s", i / SIZE));
+                sb.append(String.format("%1$-4s", i / width + offsetY));
             }
 
             if (it == 0) {
@@ -70,14 +83,15 @@ public final class GameMap {
                     case WATER:
                         b = '~';
                         break;
-                    case GRASS:
-                        b = '_';
+
+                    case LAND:
+                        b = '.';
                         break;
                     case WALL:
                         b = '#';
                         break;
-                    case BRIDGE:
-                        b = '=';
+                    case GATE:
+                        b = 'D';
                         break;
                     case NOTHING:
                         b = 'x';
@@ -95,24 +109,13 @@ public final class GameMap {
         System.out.println(sb.toString());
     }
 
-    public boolean canMove(int x, int y) {
-
-        Tile tile = get(x, y);
-        if (tile != null) {
-            if (tile.getType() != TileType.WALL && tile.getType() != TileType.WATER) {
-                return isNoCreatures(x, y);
-            }
-        }
-
-        return false;
-    }
-
     public Player addPlayer(int id) {
 
-        int idx = findFreeIndex(2, 15, 3);
+        int idx = findFreeIndex(-18, 0, 3);
         if (idx == -1) throw new RuntimeException("Not found the place for player");
 
-        Player player = new Player(id, new CreatureState(50, idx % SIZE, idx / SIZE, Direction.SOUTH));
+        Coord coord = toCoord(idx);
+        Player player = new Player(id, new CreatureState(50, coord.getX(), coord.getY(), Direction.SOUTH));
 
         creatures[idx] = id;
         players.put(id, player);
@@ -123,7 +126,7 @@ public final class GameMap {
         Player removed = players.remove(id);
 
         if (removed != null) {
-            int idx = getIndex(removed.getX(), removed.getY());
+            int idx = toIndex(removed.getX(), removed.getY());
             int inMap = creatures[idx];
             if (inMap != id) {
                 throw new RuntimeException("Wrong place player=" + id);
@@ -135,10 +138,17 @@ public final class GameMap {
     }
 
     @Nullable public Tile get(int x, int y) {
-        int idx = getIndex(x, y);
-        if (idx < 0 || idx >= map.length) return null;
+        int idx = toIndex(x, y);
+        if (idx < 0 || idx >= basis.length) return null;
 
-        return tiles[map[idx]];
+        return tiles[basis[idx]];
+    }
+
+    @Nullable public Tile getObject(int x, int y) {
+        int idx = toIndex(x, y);
+        if (idx < 0 || idx >= basis.length) return null;
+
+        return tiles[objects[idx]];
     }
 
     @Nullable Creature getCreature(int x, int y) {
@@ -148,7 +158,7 @@ public final class GameMap {
     }
 
     @Nullable private Creature _getCreature(int x, int y) {
-        int crId = creatures[getIndex(x, y)];
+        int crId = creatures[toIndex(x, y)];
         if (crId > 1000) {
             return npcs.get(crId);
         } else if (crId > 0) {
@@ -162,8 +172,8 @@ public final class GameMap {
 
         ArrayList<@NotNull Creature> result = new ArrayList<>();
 
-        for (int x = max(0, centerX - radius); x <= min(centerX + radius, SIZE); x++) {
-            for (int y = max(0, centerY - radius); y <= min(centerY + radius, SIZE); y++) {
+        for (int x = max(offsetX, centerX - radius); x <= min(centerX + radius, width + offsetX); x++) {
+            for (int y = max(offsetY, centerY - radius); y <= min(centerY + radius, height + offsetY); y++) {
                 if (x == centerX && y == centerY) continue;
 
                 @Nullable Creature cr = _getCreature(x, y);
@@ -177,8 +187,8 @@ public final class GameMap {
     }
 
     boolean addCreature(Creature c) {
-        int idx = getIndex(c.getX(), c.getY());
-        if (idx < 0 || idx >= map.length) return false;
+        int idx = toIndex(c.getX(), c.getY());
+        if (idx < 0 || idx >= basis.length) return false;
 
         idx = findFreeIndex(c.getX(), c.getY(), 2);
 
@@ -195,15 +205,15 @@ public final class GameMap {
     public boolean isNoCreatures(int x, int y) {
         if (!isValid(x, y)) return false;
 
-        return creatures[getIndex(x, y)] == 0;
+        return creatures[toIndex(x, y)] == 0;
     }
 
     public void moveCreatures(int fromX, int fromY, int toX, int toY) {
         //        if (!isValid(x, y)) return false;
         //todo add validation
 
-        int from = getIndex(fromX, fromY);
-        int to = getIndex(toX, toY);
+        int from = toIndex(fromX, fromY);
+        int to = toIndex(toX, toY);
         creatures[to] = creatures[from];
         creatures[from] = 0;
     }
@@ -213,7 +223,7 @@ public final class GameMap {
         if (idx == -1) {
             return null;
         } else {
-            return new Coord(idx % SIZE, idx / SIZE);
+            return toCoord(idx);
         }
     }
 
@@ -229,29 +239,29 @@ public final class GameMap {
 
         if (!isValid(x, y)) return -1;
 
-        if (creatures[getIndex(x, y)] == 0) return getIndex(x, y);
+        if (creatures[toIndex(x, y)] == 0) return toIndex(x, y);
 
         for (int i = 1; i <= maxDev; i++) {
 
             if (i % 2 == 1) {
                 for (int s = 0; s < i; s++) {
                     x++;
-                    if (isValid(x, y) && creatures[getIndex(x, y)] == 0) return getIndex(x, y);
+                    if (isValid(x, y) && creatures[toIndex(x, y)] == 0) return toIndex(x, y);
                 }
 
                 for (int s = 0; s < i; s++) {
                     y++;
-                    if (isValid(x, y) && creatures[getIndex(x, y)] == 0) return getIndex(x, y);
+                    if (isValid(x, y) && creatures[toIndex(x, y)] == 0) return toIndex(x, y);
                 }
             } else {
                 for (int s = 0; s < i; s++) {
                     x--;
-                    if (isValid(x, y) && creatures[getIndex(x, y)] == 0) return getIndex(x, y);
+                    if (isValid(x, y) && creatures[toIndex(x, y)] == 0) return toIndex(x, y);
                 }
 
                 for (int s = 0; s < i; s++) {
                     y--;
-                    if (isValid(x, y) && creatures[getIndex(x, y)] == 0) return getIndex(x, y);
+                    if (isValid(x, y) && creatures[toIndex(x, y)] == 0) return toIndex(x, y);
                 }
             }
         }
@@ -259,20 +269,14 @@ public final class GameMap {
         return -1;
     }
 
-
-    private static int getIndex(int x, int y) {
-        return x + y * SIZE;
-    }
-
-
     public String debugCreatures() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < creatures.length; i++) {
 
             int it = creatures[i];
-            if (i % SIZE == 0) {
+            if (i % width == 0) {
                 sb.append('\n');
-                sb.append(String.format("%1$-4s", i / SIZE));
+                sb.append(String.format("%1$-4s", i / width + offsetY));
             }
 
             if (it == 0) {
@@ -288,9 +292,16 @@ public final class GameMap {
         return sb.toString();
     }
 
+    @Contract(pure = true) private boolean isValid(int x, int y) {
+        return x >= offsetX && x < (offsetX + width) && y >= offsetY && x < (offsetY + height);
+    }
 
-    @Contract(pure = true) private static boolean isValid(int x, int y) {
-        return x < SIZE && x >= 0 && y <= SIZE && y >= 0;
+    private int toIndex(int x, int y) {
+        return x - offsetX + (y - offsetY) * width;
+    }
+
+    private Coord toCoord(int idx) {
+        return new Coord(idx % width + offsetX, idx / width + offsetY);
     }
 
     @Override public String toString() {
@@ -301,7 +312,7 @@ public final class GameMap {
         npcs.values().removeIf(n -> {
             if (n.isDead()) {
 
-                this.creatures[getIndex(n.getX(), n.getY())] = 0;
+                this.creatures[toIndex(n.getX(), n.getY())] = 0;
                 return true;
             }
 

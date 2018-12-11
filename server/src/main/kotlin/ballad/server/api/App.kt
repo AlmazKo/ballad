@@ -3,6 +3,7 @@ package ballad.server.api
 import ballad.server.game.Game
 import ballad.server.game.GameMap
 import ballad.server.map.Lands
+import ballad.server.map.MapParser
 import ballad.server.toJson
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
@@ -24,7 +25,7 @@ class App(vertx: Vertx) {
 
     init {
         val lands = loadLands()
-        this.map = GameMap(lands.map, lands.tiles)
+        this.map = GameMap(lands)
         this.game = Game(vertx, map)
         val server = vertx.createHttpServer()
 
@@ -42,7 +43,7 @@ class App(vertx: Vertx) {
 
         router.route("/admin").handler { ctx ->
             val ws = ctx.request().upgrade()
-            game.onEndTick{
+            game.onEndTick {
                 ws.writeFinalTextFrame(JsonArray(map.creatures.toList()).toString())
             }
         }
@@ -59,11 +60,13 @@ class App(vertx: Vertx) {
         router.route("/res/*").handler(StaticHandler.create("../resources"))
 
         router.get("/map").handler { req ->
-            val vp = ViewMap(0, 0, lands.map)
-            val vp2 = ViewMap(0, 0, lands.mapObjects)
+            val vp = ViewMap(lands.width, lands.height, lands.offsetX, lands.offsetY, lands.basis, lands.objects)
             req.response().putHeader("content-type", "application/json; charset=utf-8")
             req.response()
-                .end("""{"x":${vp.x}, "y":${vp.y}, "terrain":[${vp.chunk.joinToString(",")}], "objects1":[${vp2.chunk.joinToString(",")}]}""")
+                .end("""{"width":${vp.width}, "height":${vp.heigt},"offsetX":${vp.offsetX}, "offsetY":${vp.offsetY},
+                    |"terrain":[${vp.terrain.joinToString(",")}],
+                    |"objects1":[${vp.objects1.joinToString(",")}]}
+                    |""".trimMargin())
         }
 
         router.get("/tiles").handler { req ->
@@ -100,8 +103,8 @@ class App(vertx: Vertx) {
     }
 
     private fun loadLands(): Lands {
-        val rawTiles = JsonObject(Lands::class.java.getResource("/tileset.json").readText())
-        val layers = JsonObject(Lands::class.java.getResource("/map.json").readText())
-        return Lands.parse(layers, rawTiles)
+        val rawTiles = JsonObject(App::class.java.getResource("/base1.json").readText())
+        val layers = JsonObject(App::class.java.getResource("/map.json").readText())
+        return MapParser.parse(layers, rawTiles)
     }
 }

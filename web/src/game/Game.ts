@@ -19,16 +19,15 @@ export const DEBUG = true;
 
 export class Game {
 
-  private server: Server;
+  private server?: Server;
   // @ts-ignore
   private tp: TilePainter;
   // @ts-ignore
   private proto: Protagonist;
-  private session: Session | null = null;
+  private session: Session | null     = null;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.server = new Server();
-    this.server.subOnAction((name, action) => this.onServerAction(name, action));
+
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
@@ -37,6 +36,12 @@ export class Game {
       this.session.draw(time, p);
       if (DEBUG) this.debug(p);
     }
+
+
+  if(!this.server){
+      this.server = new Server();
+      this.server.subOnAction((name, action) => this.onServerAction(name, action));
+    }
   }
 
   private debug(bp: BasePainter) {
@@ -44,12 +49,12 @@ export class Game {
 
     const pX = p.getX(), pY = p.getY();
     bp.rect(pX - HCELL, pY - HCELL, CELL, CELL, {style: "red"});
-    bp.text(`${p.positionX}x${p.positionY}`, pX + 1, pY + HCELL + 1, {align: 'center', font: "12px sans-serif", style: "#000"});
-    bp.text(`${p.positionX}x${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
+    bp.text(`${p.positionX};${p.positionY}`, pX + 1, pY + HCELL + 1, {align: 'center', font: "12px sans-serif", style: "#000"});
+    bp.text(`${p.positionX};${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
 
     bp.fillRect(20, 0, this.tp.width, 20, "#ffffff88");
     bp.fillRect(0, 0, 20, this.tp.height, "ffffff88");
-    for (let pos = 0; pos < 100; pos++) {
+    for (let pos = -48; pos < 100; pos++) {
       bp.text("" + pos, toX(pos) + 2, 0, style.debugText);
       bp.text("" + pos, 1, toY(pos), style.debugText);
       bp.vline(toX(pos), 0, 20, {style: "white"});
@@ -66,7 +71,7 @@ export class Game {
         a          = action as ApiArrival;
         this.proto = new Protagonist(a.creature, this.moving, this.map, this);
 
-        this.session = new Session(this.server, this.proto, this.map, this.tp);
+        this.session = new Session(this.server!!, this.proto, this.map, this.tp);
         break;
 
       default:
