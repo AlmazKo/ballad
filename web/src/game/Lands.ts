@@ -93,7 +93,7 @@ export class Lands {
     if (!tile) return true;
 
     if (tile.type === 'WATER' && !isFly) return false;
-    if (tile.type === 'WALL'&& !isFly) return false;
+    if (tile.type === 'WALL' && !isFly) return false;
 
     return true;
   }
@@ -175,6 +175,8 @@ export class Lands {
   }
 
   drawTile(p: BasePainter, tileId: uint, x: px, y: px) {
+    if (x < -TILE_SIZE || y < -TILE_SIZE) return;
+    if (x > p.width + TILE_SIZE || y > p.height + TILE_SIZE) return;
 
     const t = this.tiles.get(tileId);
     if (!t) return;
