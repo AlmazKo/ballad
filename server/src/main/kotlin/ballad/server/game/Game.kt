@@ -1,7 +1,10 @@
 package ballad.server.game
 
 import ballad.server.Tsm
-import ballad.server.game.Direction.*
+import ballad.server.game.Direction.EAST
+import ballad.server.game.Direction.NORTH
+import ballad.server.game.Direction.SOUTH
+import ballad.server.game.Direction.WEST
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Arrival
 import ballad.server.game.actions.Damage
@@ -94,6 +97,23 @@ class Game(vertx: Vertx, val map: GameMap) {
 
             }
         }
+        
+        actions.data.forEach {
+            if (it is Death && it.victim is Player) {
+                val p: Player = it.victim
+                val newCoord = map.findFreePlace(-18, 0, 3)!! //fixme
+                map.moveCreature(p.x, p.y, newCoord.x, newCoord.y)
+                p.state.x = newCoord.x
+                p.state.y = newCoord.y
+                p.state.life = 50
+
+                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
+                pActions.add(Arrival(it.x, it.y, time, p))
+            }
+
+        }
+
+
 
         map.players.values.forEach { p ->
             val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
@@ -219,7 +239,7 @@ class Game(vertx: Vertx, val map: GameMap) {
 
                     if (obj !== null && !obj.type.isSteppable()) return false;
 
-                    map.moveCreatures(st.x, st.y, xx, yy)
+                    map.moveCreature(st.x, st.y, xx, yy)
                     st.x = xx
                     st.y = yy
                     return true

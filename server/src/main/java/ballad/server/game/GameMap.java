@@ -208,7 +208,7 @@ public final class GameMap {
         return creatures[toIndex(x, y)] == 0;
     }
 
-    public void moveCreatures(int fromX, int fromY, int toX, int toY) {
+    public void moveCreature(int fromX, int fromY, int toX, int toY) {
         //        if (!isValid(x, y)) return false;
         //todo add validation
 

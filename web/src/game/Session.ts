@@ -81,9 +81,16 @@ export class Session implements Drawable {
     switch (type) {
 
       case "ARRIVAL":
-        a       = action as ApiArrival;
-        const n = new Npc(a.creature);
-        this.map.creatures.set(a.creature.id, n);
+        a = action as ApiArrival;
+        if (a.creature.id === this.proto.id) {
+          this.proto.positionX = a.creature.x;
+          this.proto.positionY = a.creature.y;
+          this.proto.metrics.life = 50;
+        } else {
+          const n = new Npc(a.creature);
+          this.map.creatures.set(a.creature.id, n);
+        }
+
         break;
 
       case "STEP":
@@ -171,7 +178,7 @@ export class Session implements Drawable {
       case PlayerAction.FIRESHOCK:
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
-        const fireshok = new FireShockSpell(time, this.nextId(), this.proto, 400, 2);
+        const fireshok     = new FireShockSpell(time, this.nextId(), this.proto, 400, 2);
         this.server.sendAction(fireshok);
         const act = new FireShock(fireshok);
         this.map.effects.push(act);
