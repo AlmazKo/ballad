@@ -1,7 +1,9 @@
-package ballad.server.game
+package ballad.server.game.actions
 
 import ballad.server.Tsm
-import ballad.server.game.actions.Action
+import ballad.server.game.Creature
+import ballad.server.game.Direction
+import ballad.server.game.Duration
 
 data class Step(
     override val x: Int,

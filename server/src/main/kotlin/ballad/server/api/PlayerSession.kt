@@ -2,13 +2,14 @@ package ballad.server.api
 
 import ballad.server.game.Game
 import ballad.server.game.Player
-import ballad.server.game.Step
+import ballad.server.game.actions.Step
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Arrival
 import ballad.server.game.actions.Damage
 import ballad.server.game.actions.Death
 import ballad.server.game.actions.Fireball
 import ballad.server.game.actions.Hide
+import ballad.server.game.actions.ReSpawn
 import ballad.server.game.actions.SpellAction
 import ballad.server.tsm
 import io.vertx.core.http.WebSocketBase
@@ -52,11 +53,12 @@ class PlayerSession(
                 ws.writeFinalTextFrame("""{"action":"SPELL", "type":"${it.javaClass.simpleName.toUpperCase()}", "id": ${it.id}, "data": $act}""")
             } else {
                 val act = when (it) {
-                    is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), Hide(it))
-                    is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), Arrival(it))
-                    is Step -> JSON.stringify(ballad.server.api.Step.serializer(), Step(it))
-                    is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), Damage(it))
-                    is Death -> JSON.stringify(ballad.server.api.Death.serializer(), Death(it))
+                    is Hide -> JSON.stringify(ballad.server.api.Hide.serializer(), ballad.server.api.Hide(it))
+                    is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
+                    is ReSpawn -> JSON.stringify(ballad.server.api.Respawn.serializer(), ballad.server.api.Respawn(it))
+                    is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
+                    is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
+                    is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
                     else -> return@forEach
                 }
                 ws.writeFinalTextFrame("""{"action":"${it.javaClass.simpleName.toUpperCase()}", "data": $act}""")

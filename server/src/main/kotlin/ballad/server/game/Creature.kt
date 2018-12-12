@@ -2,6 +2,7 @@ package ballad.server.game
 
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Damage
+import ballad.server.game.actions.Step
 import java.util.*
 
 interface Creature {

@@ -1,16 +1,15 @@
 package ballad.server.game
 
 import ballad.server.Tsm
-import ballad.server.game.Direction.EAST
-import ballad.server.game.Direction.NORTH
-import ballad.server.game.Direction.SOUTH
-import ballad.server.game.Direction.WEST
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Arrival
 import ballad.server.game.actions.Damage
 import ballad.server.game.actions.Death
 import ballad.server.game.actions.Fireball
 import ballad.server.game.actions.Hide
+import ballad.server.game.actions.ReSpawn
+import ballad.server.game.actions.Step
+import ballad.server.game.spells.FireballStrategy
 import ballad.server.map.TileType
 import ballad.server.tsm
 import io.vertx.core.Vertx
@@ -24,49 +23,37 @@ class Game(vertx: Vertx, val map: GameMap) {
 
     private var endHandler: (() -> Unit)? = null
 
-    var id = -1
-
-
-    private val steps = HashMap<Int, MutableList<Step>>()
+    var id = 0
 
     init {
-        vertx.setPeriodic(TICK_TIME.toLong()) { onTick() }
+        vertx.setPeriodic(TICK_TIME.toLong()) { onTick(++id, tsm()) }
     }
 
-    private fun onTick() {
+    private val respawns = ArrayList<PlayerReSpawnStrategy>()
 
-        id++
-
-        val time = tsm()
+    private fun onTick(id: Tick, time: Tsm) {
         val actions = ActionConsumer()
 
-        val planned = steps.remove(id)
-
-        if (planned !== null) {
-
-        }
-
+        respawns.removeIf { it.onTick(time, actions, map) }
         addRequestedActions(actions, time)
 
-        handleSteps(time)
+        handleSteps(time, actions)
         handleSpells(time, actions)
 
         map.cleanDeadCreatures()
         map.strategies.forEach { it.onTick(id, time, actions) }
 
-        val playerActions = HashMap<Int, MutableList<Action>>()
+        val playerActions = HashMap<PlayerId, MutableList<Action>>()
         actions.data.forEach {
-            if (it is Step) {
-                map.steps.add(it)
-                //                val plannedId = id + it.duration / TICK_TIME
-                //                steps.computeIfAbsent(plannedId, { ArrayList() }).add(it)
-            } else if (it is Hide) {
-                map.removePlayer(it.creature.id)
+            when (it) {
+                is Step -> map.steps.add(StepStrategy(it))
+                is Hide -> map.removePlayer(it.creature.id)
+                is Death -> {
+                    map.removePlayer(it.victim.id)
+                    respawns.add(PlayerReSpawnStrategy(it))
+                }
             }
-
         }
-
-
 
         actions.data.forEach { a ->
 
@@ -76,6 +63,8 @@ class Game(vertx: Vertx, val map: GameMap) {
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
 
                 when (a) {
+                    is ReSpawn -> if (inZone(a, p, v)) pActions.add(a)
+                    is Arrival -> if (inZone(a, p, v)) pActions.add(a)
                     is Step -> if (inZone(a, p, v)) pActions.add(a)
                     is Damage -> if (inZone(a, p, v)) pActions.add(a)
                     is Death -> if (inZone(a, p, v)) pActions.add(a)
@@ -87,32 +76,15 @@ class Game(vertx: Vertx, val map: GameMap) {
             map.players.values.forEach { p ->
 
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
-                if (s.inZone(p.x, p.y, p.viewDistance)) {
+                if (s.inZone(p)) {
                     if (p.spellZone.put(s.id, s) === null) {
-                        pActions.add(s)
+                        pActions.add(s.action)
                     }
                 } else {
                     p.spellZone.remove(s.id)
                 }
-
             }
         }
-        
-        actions.data.forEach {
-            if (it is Death && it.victim is Player) {
-                val p: Player = it.victim
-                val newCoord = map.findFreePlace(-18, 0, 3)!! //fixme
-                map.moveCreature(p.x, p.y, newCoord.x, newCoord.y)
-                p.state.x = newCoord.x
-                p.state.y = newCoord.y
-                p.state.life = 50
-
-                val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
-                pActions.add(Arrival(it.x, it.y, time, p))
-            }
-
-        }
-
 
 
         map.players.values.forEach { p ->
@@ -138,6 +110,10 @@ class Game(vertx: Vertx, val map: GameMap) {
         playerActions.forEach { pId, acts ->
             playerHandler[pId]?.invoke(acts)
         }
+
+
+
+        endHandler?.invoke()
     }
 
     private fun addRequestedActions(actions: ActionConsumer, time: Tsm) {
@@ -152,7 +128,7 @@ class Game(vertx: Vertx, val map: GameMap) {
                 is Fireball -> {
                     it.startTime = time
                     actions.add(it)
-                    map.spells.add(it)
+                    map.spells.add(FireballStrategy(it))
                 }
                 is Arrival -> actions.add(it)
                 is Hide -> actions.add(it)
@@ -163,92 +139,13 @@ class Game(vertx: Vertx, val map: GameMap) {
     }
 
     private fun handleSpells(time: Tsm, actions: ActionConsumer) {
-        map.spells.forEach { spell ->
-
-            spell as Fireball //fixme
-            val distance = Math.min(spell.distance, Math.round((time - spell.time) / spell.speed.toFloat()))
-            spell.distanceTravelled = distance
-
-            val x = spell.currentX
-            val y = spell.currentY
-
-            val victim = map.getCreature(x, y)
-            if (victim !== null && victim.id != spell.source.id) {
-                val d = Damage(x, y, time, victim, spell.source, 25, spell.id)
-                victim.damage(d)
-                actions.add(d)
-
-                if (victim.state.life == 0) {
-                    actions.add(Death(d))
-                }
-
-                spell.finished = true
-            }
-
-            if (distance >= spell.distance) {
-                spell.finished = true
-            }
-        }
-
-        map.spells.removeIf {
-            it.finished
-        }
+        map.spells.removeIf { it.handle(time, actions, map) }
     }
 
-    private fun handleSteps(time: Tsm) {
-        map.steps.forEach { step ->
-
-
-            val st = step.creature.state
-
-            //            if(step.time == time) {
-            st.direction = step.direction
-            //            }
-            val distance = Math.min(1, Math.round((time - step.time) / step.duration.toFloat()))
-            if (distance > step.distanceTravelled && step(st, step.direction)) {
-                step.distanceTravelled = distance
-            }
-
-            if (time - step.time >= step.duration) {
-                step.finished = true
-            }
-        }
-
-        map.spells.removeIf {
-            it.finished
-        }
-
-        endHandler?.invoke()
+    private fun handleSteps(time: Tsm, actions: ActionConsumer) {
+        map.steps.removeIf { it.handle(time, actions, map) }
     }
 
-    private fun step(st: CreatureState, dir: Direction): Boolean {
-        var xx = st.x
-        var yy = st.y
-        when (dir) {
-            NORTH -> yy--
-            SOUTH -> yy++
-            WEST -> xx--
-            EAST -> xx++
-        }
-
-        val tile = map[xx, yy]
-        if (tile !== null) {
-            if (tile.type.isSteppable()) {
-                if (map.isNoCreatures(xx, yy)) {
-                    val obj = map.getObject(xx, yy)
-
-                    if (obj !== null && !obj.type.isSteppable()) return false;
-
-                    map.moveCreature(st.x, st.y, xx, yy)
-                    st.x = xx
-                    st.y = yy
-                    return true
-                }
-            }
-        }
-
-        return false
-    }
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
         playerHandler[playerId] = handler

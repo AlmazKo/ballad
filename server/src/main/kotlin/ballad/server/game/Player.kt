@@ -1,7 +1,7 @@
 package ballad.server.game
 
 import ballad.server.game.actions.Action
-import ballad.server.game.actions.SpellAction
+import ballad.server.game.spells.SpellStrategy
 import java.util.*
 
 data class Player(
@@ -9,7 +9,7 @@ data class Player(
     override val state: CreatureState
 ) : Creature {
     val zone = HashMap<Int, Creature>()
-    val spellZone = HashMap<Long, SpellAction>()
+    val spellZone = HashMap<Long, SpellStrategy>()
 
     override val actions = ArrayDeque<Action>()
     override val name get() = "Player_$id"

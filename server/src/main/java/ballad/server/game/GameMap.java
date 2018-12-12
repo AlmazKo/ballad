@@ -1,10 +1,9 @@
 package ballad.server.game;
 
-import ballad.server.game.actions.SpellAction;
+import ballad.server.game.spells.SpellStrategy;
 import ballad.server.map.Coord;
 import ballad.server.map.Lands;
 import ballad.server.map.Tile;
-import ballad.server.map.TileType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +31,8 @@ public final class GameMap {
     private final HashMap<Integer, Npc> npcs = new HashMap<>();
 
     final         ArrayList<ReSpawnStrategy> strategies = new ArrayList<>();
-    final         ArrayList<SpellAction>     spells     = new ArrayList<>();
-    final         ArrayList<Step>            steps      = new ArrayList<>();
+    final         ArrayList<SpellStrategy>   spells     = new ArrayList<>();
+    final         ArrayList<StepStrategy>    steps      = new ArrayList<>();
     final         HashMap<Integer, Player>   players    = new HashMap<>();
     private final int                        offsetX;
     private final int                        offsetY;
@@ -151,7 +150,7 @@ public final class GameMap {
         return tiles[objects[idx]];
     }
 
-    @Nullable Creature getCreature(int x, int y) {
+    public @Nullable Creature getCreature(int x, int y) {
         if (!isValid(x, y)) return null;
 
         return _getCreature(x, y);

@@ -1,6 +1,7 @@
 package ballad.server.api
 
 import ballad.server.game.Direction
+import ballad.server.game.actions.Step
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,7 +14,7 @@ data class Step(
     val time: Long
 
 ) {
-    constructor(id: ballad.server.game.Step) : this(
+    constructor(id: Step) : this(
 
         id.x,
         id.y,

@@ -22,6 +22,7 @@ import { style } from './styles';
 import { Drawable } from './Drawable';
 import { tsm, uint } from '../types';
 import { Action } from './actions/Action';
+import { ApiReSpawn } from './api/ApiReSpawn';
 
 
 let INC: uint = 0;
@@ -82,13 +83,18 @@ export class Session implements Drawable {
 
       case "ARRIVAL":
         a = action as ApiArrival;
-        if (a.creature.id === this.proto.id) {
-          this.proto.positionX = a.creature.x;
-          this.proto.positionY = a.creature.y;
-          this.proto.metrics.life = 50;
-        } else {
+        if (a.creature.id !== this.proto.id) {
           const n = new Npc(a.creature);
           this.map.creatures.set(a.creature.id, n);
+        }
+
+        break;
+      case "RESPAWN":
+        a = action as ApiReSpawn;
+        if (a.creature.id === this.proto.id) {
+          this.proto.positionX    = a.creature.x;
+          this.proto.positionY    = a.creature.y;
+          this.proto.metrics.life = a.creature.metrics.life;
         }
 
         break;

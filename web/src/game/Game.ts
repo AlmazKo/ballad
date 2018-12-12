@@ -19,7 +19,7 @@ export enum PlayerAction {
 }
 
 
-export const DEBUG = false;
+export const DEBUG = true;
 
 class Slot {
   constructor(
