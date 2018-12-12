@@ -62,13 +62,26 @@ export class Lands {
     this.offsetY = map.offsetY;
     this.basic   = new Uint16Array(map.terrain);
     this.objects = new Uint16Array(map.objects1);
+    this.initTiles(tiles);
+  }
 
-    tiles.data.forEach(t => {
+  private initTiles(typedTiles: Tiles) {
+
+    typedTiles.data.forEach(t => {
       const tileX = t.id % TILESET_SIZE;
       const tileY = Math.floor(t.id / TILESET_SIZE);
       const sx    = TILE_SIZE * tileX;
       const sy    = TILE_SIZE * tileY;
       this.tiles.set(t.id, new Tile(t.id, t.type, tileX, tileY, sx, sy));
+    });
+
+    this.objects.forEach(tileId => {
+      if (this.tiles.has(tileId)) return;
+      const tileX = tileId % TILESET_SIZE;
+      const tileY = Math.floor(tileId / TILESET_SIZE);
+      const sx    = TILE_SIZE * tileX;
+      const sy    = TILE_SIZE * tileY;
+      this.tiles.set(tileId, new Tile(tileId, null, tileX, tileY, sx, sy));
     })
   }
 
