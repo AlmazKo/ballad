@@ -1,4 +1,4 @@
-import { LoopAnimator } from '../anim/Animator';
+import { Delay, LoopAnimator } from '../anim/Animator';
 import { float, index, int, px, uint } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
@@ -24,11 +24,12 @@ export class Protagonist implements DrawableCreature {
   shiftX = 0;
   shiftY = 0;
 
-  private movement: LoopAnimator | null = null;
-  private lastAnimIdx: index            = 0;
-  private frozen: Dir                   = 0;
-  private rotated                       = false;
-  isDead = false;
+  movement: LoopAnimator | null = null;
+  private lastAnimIdx: index    = 0;
+  private frozen: Dir           = 0;
+  private rotated               = false;
+  isDead                        = false;
+  private showInstantSpell?: Delay;
 
 
   constructor(c: ApiCreature,
@@ -98,6 +99,11 @@ export class Protagonist implements DrawableCreature {
     const y = toY(this.positionY) + this.shiftY;
     sx      = Math.floor(s / 0.25) * 16;
     drawLifeLine(bp.toInDirect(x, y), this);
+
+    if (this.showInstantSpell) {
+      this.showInstantSpell.run(time);
+      sx = 7 * 16;
+    }
     bp.drawTile(RES["character"], sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
     drawName(bp.toInDirect(x, y), this);
@@ -235,4 +241,11 @@ export class Protagonist implements DrawableCreature {
 
     //todo add server sync
   }
+
+  instantSpell() {
+    this.showInstantSpell = new Delay(100, () => {
+      this.showInstantSpell = undefined
+    })
+  }
+
 }

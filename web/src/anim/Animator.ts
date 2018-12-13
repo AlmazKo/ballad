@@ -95,6 +95,50 @@ export class Animator implements Animated {
   }
 }
 
+export class Delay implements Animated {
+  private readonly finishCallback: () => void;
+  private readonly duration: number;
+  private finished = false;
+  private start    = 0;
+  private lastNow  = 0;
+
+  constructor(duration: ms, finishCallback: () => void) {
+    this.duration       = duration;
+    this.finishCallback = finishCallback;
+  }
+
+  /**
+   * @param {number} now
+   * @returns {boolean} finished?
+   */
+  run(now: number): boolean {
+    if (!this.start) this.start = now;
+    this.lastNow = now;
+
+    if(now - this.start > this.duration && !this.finished) {
+      this.finished=true;
+      this.finishCallback();
+      return true
+    }
+    return false;
+  }
+
+  finish() {
+    this.finished = true;
+    this.finishCallback();
+  }
+
+  isFinished(): boolean {
+    return this.finished;
+  }
+
+  reset() {
+    this.start    = this.lastNow;
+    this.finished = false;
+    this.start    = 0;
+  }
+}
+
 export class LoopAnimator implements Animated {
   private readonly interpolator: Interpolator;
   private readonly callback: (f: float, i: index) => void;

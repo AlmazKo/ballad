@@ -155,6 +155,6 @@ export class Game {
   }
 
   onStep(dir: Dir) {
-    this.proto.step(dir)
+    if (this.session) this.session.step(dir)
   }
 }

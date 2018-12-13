@@ -181,16 +181,12 @@ export class Session implements Drawable {
     this.map.creatures.delete(d.victimId);
   }
 
-  onStep(dir: Dir) {
-
-    this.proto.step(dir)
-  }
-
   sendAction(action: PlayerAction): Action | undefined {
 
     const time = Date.now();
     switch (action) {
       case PlayerAction.FIREBALL:
+        if (this.proto.movement) return;
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
         const p            = this.proto;
@@ -199,6 +195,7 @@ export class Session implements Drawable {
 
         this.server.sendAction(fireball);
         this.map.effects.push(new Fireball(fireball, this.map));
+        this.proto.instantSpell();
         return fireball;
 
       case PlayerAction.FIRESHOCK:
@@ -224,4 +221,10 @@ export class Session implements Drawable {
     return (INC++) + 2147483647 * this.proto.id;
   }
 
+  step(dir: Dir) {
+    const step = new Step(this.nextId(), this.proto, 300, dir);
+    this.server.sendAction(step);
+    this.proto.step(dir);
+    return step;
+  }
 }
