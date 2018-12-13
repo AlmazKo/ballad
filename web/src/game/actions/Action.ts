@@ -3,7 +3,7 @@ import { tsm, uint } from '../../types';
 
 export interface Action {
   readonly id: uint,
-  readonly creature: Creature,
+  readonly creatureId: uint,
   readonly time: tsm,
 
 }

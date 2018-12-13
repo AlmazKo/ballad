@@ -28,6 +28,7 @@ export class Protagonist implements DrawableCreature {
   private lastAnimIdx: index            = 0;
   private frozen: Dir                   = 0;
   private rotated                       = false;
+  isDead = false;
 
 
   constructor(c: ApiCreature,

@@ -4,13 +4,14 @@ import { WS_HOST } from '../../util/net';
 import { FireballSpell } from '../actions/FireballSpell';
 import { ApiArrival } from './ApiArrival';
 import { uint } from '../../types';
+import { ApiMessage } from '../actions/ApiMessage';
 
 
 let incId = 0;
 
 export class Server {
   // @ts-ignore
-  private handler: (name: String, action: Action) => void;
+  private handler: (msg: ApiMessage) => void;
   private ws: WebSocket;
   private playerId: uint = 0;
 
@@ -24,7 +25,7 @@ export class Server {
     if (data.action === 'PROTAGONIST_ARRIVAL') {
       this.playerId = (data.data as ApiArrival).creature.id
     }
-    this.handler(data.action, data.data)
+    this.handler(data as ApiMessage)
   }
 
   sendAction(action: Action) {
@@ -50,7 +51,7 @@ export class Server {
 
   }
 
-  subOnAction(handler: (name: String, action: Action) => void) {
+  subOnAction(handler: (msg: ApiMessage) => void) {
     this.handler = handler;
 
   }

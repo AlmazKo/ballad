@@ -10,6 +10,7 @@ import ballad.server.game.actions.Hide
 import ballad.server.game.actions.ReSpawn
 import ballad.server.game.actions.Step
 import ballad.server.game.spells.FireballStrategy
+import ballad.server.game.spells.SpellStrategy
 import ballad.server.map.TileType
 import ballad.server.tsm
 import io.vertx.core.Vertx
@@ -18,8 +19,13 @@ import io.vertx.core.logging.LoggerFactory
 class Game(vertx: Vertx, val map: GameMap) {
 
     private val log = LoggerFactory.getLogger(javaClass)
+
     private val playerHandler = HashMap<Int, (actions: List<Action>) -> Unit>()
     private val playerRequests = ArrayList<Action>()
+    private val respawns = ArrayList<PlayerReSpawnStrategy>()
+    private val npcRespawns = ArrayList<ReSpawnStrategy>()
+    private val spells = ArrayList<SpellStrategy>()
+    private val steps = ArrayList<StepStrategy>()
 
     private var endHandler: (() -> Unit)? = null
 
@@ -27,26 +33,33 @@ class Game(vertx: Vertx, val map: GameMap) {
 
     init {
         vertx.setPeriodic(TICK_TIME.toLong()) { onTick(++id, tsm()) }
+        //        settleMobs()
     }
 
-    private val respawns = ArrayList<PlayerReSpawnStrategy>()
+    private fun settleMobs() {
+        val type = CreatureType(1, "Boar", CreatureResource(1, "", 16, 16, 16, 16))
+
+        repeat(3) {
+            npcRespawns.add(ReSpawnStrategy(type, map))
+        }
+    }
 
     private fun onTick(id: Tick, time: Tsm) {
         val actions = ActionConsumer()
 
         respawns.removeIf { it.onTick(time, actions, map) }
+
         addRequestedActions(actions, time)
 
-        handleSteps(time, actions)
-        handleSpells(time, actions)
+        //players turn
+        processSteps(time, actions)
+        processSpells(time, actions)
 
-        map.cleanDeadCreatures()
-        map.strategies.forEach { it.onTick(id, time, actions) }
+        val playersActions = notifyPlayers(time, actions)
 
-        val playerActions = HashMap<PlayerId, MutableList<Action>>()
         actions.data.forEach {
             when (it) {
-                is Step -> map.steps.add(StepStrategy(it))
+                is Step -> steps.add(StepStrategy(it))
                 is Hide -> map.removePlayer(it.creature.id)
                 is Death -> {
                     map.removePlayer(it.victim.id)
@@ -55,6 +68,22 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
+        //mobs turn
+        npcRespawns.forEach { it.onTick(id, time, actions) }
+
+        map.cleanDeadCreatures()
+
+        //after tick process
+        playersActions.forEach { pId, acts ->
+            playerHandler[pId]?.invoke(acts)
+        }
+
+        endHandler?.invoke()
+    }
+
+    private fun notifyPlayers(time: Tsm, actions: ActionConsumer): Map<PlayerId, List<Action>> {
+
+        val playerActions = HashMap<PlayerId, MutableList<Action>>()
         actions.data.forEach { a ->
 
             map.players.values.forEach { p ->
@@ -72,13 +101,16 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
-        map.spells.forEach { s ->
+        spells.forEach { s ->
             map.players.values.forEach { p ->
 
                 val pActions = playerActions.computeIfAbsent(p.id, { ArrayList() })
                 if (s.inZone(p)) {
                     if (p.spellZone.put(s.id, s) === null) {
-                        pActions.add(s.action)
+                        if (s.action is Fireball) {
+                            val a = s.action as Fireball
+                            pActions.add(a.copy(x = a.currentX, y = a.currentY, distance = a.distance - a.distanceTravelled))
+                        }
                     }
                 } else {
                     p.spellZone.remove(s.id)
@@ -105,15 +137,7 @@ class Game(vertx: Vertx, val map: GameMap) {
             }
         }
 
-
-        //after tick process
-        playerActions.forEach { pId, acts ->
-            playerHandler[pId]?.invoke(acts)
-        }
-
-
-
-        endHandler?.invoke()
+        return playerActions
     }
 
     private fun addRequestedActions(actions: ActionConsumer, time: Tsm) {
@@ -128,7 +152,7 @@ class Game(vertx: Vertx, val map: GameMap) {
                 is Fireball -> {
                     it.startTime = time
                     actions.add(it)
-                    map.spells.add(FireballStrategy(it))
+                    spells.add(FireballStrategy(it))
                 }
                 is Arrival -> actions.add(it)
                 is Hide -> actions.add(it)
@@ -138,14 +162,13 @@ class Game(vertx: Vertx, val map: GameMap) {
         playerRequests.clear()
     }
 
-    private fun handleSpells(time: Tsm, actions: ActionConsumer) {
-        map.spells.removeIf { it.handle(time, actions, map) }
+    private fun processSpells(time: Tsm, actions: ActionConsumer) {
+        spells.removeIf { it.handle(time, actions, map) }
     }
 
-    private fun handleSteps(time: Tsm, actions: ActionConsumer) {
-        map.steps.removeIf { it.handle(time, actions, map) }
+    private fun processSteps(time: Tsm, actions: ActionConsumer) {
+        steps.removeIf { it.handle(time, actions, map) }
     }
-
 
     fun subscribe(playerId: Int, handler: (actions: List<Action>) -> Unit) {
         playerHandler[playerId] = handler

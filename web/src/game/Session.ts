@@ -23,6 +23,8 @@ import { Drawable } from './Drawable';
 import { tsm, uint } from '../types';
 import { Action } from './actions/Action';
 import { ApiReSpawn } from './api/ApiReSpawn';
+import { ApiMessage } from './actions/ApiMessage';
+import { ApiSpellFireball } from './api/ApiSpellFireball';
 
 
 let INC: uint = 0;
@@ -59,8 +61,13 @@ export class Session implements Drawable {
     this.map.effects = this.map.effects.filter(b => !b.isFinished)
   }
 
-
   private drawFog(p: TilePainter) {
+
+    if (this.proto.isDead) {
+      p.fillRect(0, 0, p.width, p.height, style.fog); //LEFT
+      return;
+    }
+
     const radius = (this.proto.viewDistance + 0.5) * CELL;
     const x      = this.proto.getX();
     const y      = this.proto.getY();
@@ -76,13 +83,13 @@ export class Session implements Drawable {
 
   }
 
-  onServerAction(type: String, action: any) {
+  onServerAction(msg: ApiMessage) {
     let a;
 
-    switch (type) {
+    switch (msg.action) {
 
       case "ARRIVAL":
-        a = action as ApiArrival;
+        a = msg.data as ApiArrival;
         if (a.creature.id !== this.proto.id) {
           const n = new Npc(a.creature);
           this.map.creatures.set(a.creature.id, n);
@@ -90,8 +97,9 @@ export class Session implements Drawable {
 
         break;
       case "RESPAWN":
-        a = action as ApiReSpawn;
+        a = msg.data as ApiReSpawn;
         if (a.creature.id === this.proto.id) {
+          this.proto.isDead       = false;
           this.proto.positionX    = a.creature.x;
           this.proto.positionY    = a.creature.y;
           this.proto.metrics.life = a.creature.metrics.life;
@@ -100,7 +108,7 @@ export class Session implements Drawable {
         break;
 
       case "STEP":
-        a       = action as ApiStep;
+        a       = msg.data as ApiStep;
         const c = this.map.creatures.get(a.creatureId);
         if (!c) return;
         const s    = new Step(this.nextId(), c, a.duration, a.direction);
@@ -111,19 +119,19 @@ export class Session implements Drawable {
         break;
 
       case "DAMAGE":
-        this.onDamage(action as ApiDamage);
+        this.onDamage(msg.data as ApiDamage);
         break;
 
       case "SPELL":
-        this.onSpell(action as ApiSpell);
+        this.onSpell(msg.id, msg.type!!, msg.data as ApiSpell);
         break;
 
       case "HIDE":
-        this.onHidden(action as ApiHide);
+        this.onHidden(msg.data as ApiHide);
         break;
 
       case "DEATH":
-        this.onDeath(action as ApiDeath);
+        this.onDeath(msg.data as ApiDeath);
         break;
     }
   }
@@ -147,12 +155,18 @@ export class Session implements Drawable {
       if (ef) ef.stop();
       this.map.effects = this.map.effects.filter(e => !e.isFinished);
     }
-
   }
 
+  private onSpell(id: uint, type: string, spell: ApiSpell) {
+    switch (type) {
+      case "FIREBALL":
+        const s = spell as ApiSpellFireball;
+        if (spell.creatureId !== this.proto.id) {
 
-  private onSpell(action1: ApiSpell) {
-
+          const fireball = new FireballSpell(s.time, id, s.creatureId, s.duration, s.distance, s.x, s.y, s.direction);
+          this.map.effects.push(new Fireball(fireball, this.map));
+        }
+    }
   }
 
   private onHidden(d: ApiHide) {
@@ -160,6 +174,10 @@ export class Session implements Drawable {
   }
 
   private onDeath(d: ApiDeath) {
+    if (d.victimId === this.proto.id) {
+      this.proto.isDead = true
+    }
+
     this.map.creatures.delete(d.victimId);
   }
 
@@ -175,7 +193,9 @@ export class Session implements Drawable {
       case PlayerAction.FIREBALL:
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
-        const fireball     = new FireballSpell(time, this.nextId(), this.proto, 100, 10);
+        const p            = this.proto;
+
+        const fireball = new FireballSpell(time, this.nextId(), p.id, 100, 10, p.positionX, p.positionY, p.direction);
 
         this.server.sendAction(fireball);
         this.map.effects.push(new Fireball(fireball, this.map));

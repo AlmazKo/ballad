@@ -9,17 +9,17 @@ export class Step implements Action {
   readonly direction: Dir;
   readonly duration: ms;
   readonly id: uint;
-  readonly creature: Creature;
+  readonly creatureId: uint;
   readonly time: tsm;
 
   constructor(id: int, source: Creature, duration: uint, direction: Dir = source.direction) {
 
-    this.id        = id;
-    this.time      = Date.now();//fixme take it from performance*
-    this.creature  = source;
-    this.fromPosX  = source.positionX;
-    this.fromPosY  = source.positionY;
-    this.direction = direction;
+    this.id         = id;
+    this.time       = Date.now();//fixme take it from performance*
+    this.creatureId = source.id;
+    this.fromPosX   = source.positionX;
+    this.fromPosY   = source.positionY;
+    this.direction  = direction;
 
     this.duration = duration;
   }

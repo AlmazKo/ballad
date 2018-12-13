@@ -1,10 +1,11 @@
 package ballad.server.api
 
-import ballad.server.game.actions.Step
+import ballad.server.game.Direction
+import ballad.server.game.actions.BackStep
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Step(
+data class BackStep(
     val fromX: Int,
     val fromY: Int,
     val direction: Int,
@@ -13,7 +14,7 @@ data class Step(
     val time: Long
 
 ) {
-    constructor(id: Step) : this(
+    constructor(id: BackStep) : this(
         id.x,
         id.y,
         id.direction.toDir(),
@@ -21,5 +22,4 @@ data class Step(
         id.creature.id,
         id.time
     )
-
 }

@@ -5,6 +5,7 @@ import ballad.server.game.Player
 import ballad.server.game.actions.Step
 import ballad.server.game.actions.Action
 import ballad.server.game.actions.Arrival
+import ballad.server.game.actions.BackStep
 import ballad.server.game.actions.Damage
 import ballad.server.game.actions.Death
 import ballad.server.game.actions.Fireball
@@ -57,6 +58,7 @@ class PlayerSession(
                     is Arrival -> JSON.stringify(ballad.server.api.Arrival.serializer(), ballad.server.api.Arrival(it))
                     is ReSpawn -> JSON.stringify(ballad.server.api.Respawn.serializer(), ballad.server.api.Respawn(it))
                     is Step -> JSON.stringify(ballad.server.api.Step.serializer(), ballad.server.api.Step(it))
+                    is BackStep -> JSON.stringify(ballad.server.api.BackStep.serializer(), ballad.server.api.BackStep(it))
                     is Damage -> JSON.stringify(ballad.server.api.Damage.serializer(), ballad.server.api.Damage(it))
                     is Death -> JSON.stringify(ballad.server.api.Death.serializer(), ballad.server.api.Death(it))
                     else -> return@forEach

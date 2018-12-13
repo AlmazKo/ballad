@@ -1,7 +1,6 @@
 package ballad.server.api
 
 import ballad.server.game.Creature
-import ballad.server.game.Direction
 import ballad.server.game.Player
 import kotlinx.serialization.Serializable
 
@@ -21,12 +20,7 @@ data class Creature(
         id is Player,
         id.x,
         id.y,
-        when (id.state.direction) {
-            Direction.NORTH -> UP
-            Direction.SOUTH -> DOWN
-            Direction.WEST -> LEFT
-            Direction.EAST -> RIGHT
-        },
+        id.state.direction.toDir(),
 
         // todo id.name
         NpcMetrics(id.id.toString(), id.state.life, id.state.life),

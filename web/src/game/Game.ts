@@ -13,6 +13,7 @@ import { RES } from './GameCanvas';
 import { toRGBA } from '../canvas/utils';
 import { Animator } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
+import { ApiMessage } from './actions/ApiMessage';
 
 export enum PlayerAction {
   FIREBALL, FIRESHOCK, STEP
@@ -59,7 +60,7 @@ export class Game {
 
     if (!this.server) {
       this.server = new Server();
-      this.server.subOnAction((name, action) => this.onServerAction(name, action));
+      this.server.subOnAction(msg => this.onServerAction(msg));
     }
   }
 
@@ -124,20 +125,19 @@ export class Game {
     bp.fillRect(0, 0, 20, 20, "#ccc");
   }
 
-  onServerAction(type: String, action: any) {
+  onServerAction(msg: ApiMessage) {
     let a;
 
-    switch (type) {
+    switch (msg.action) {
       case "PROTAGONIST_ARRIVAL":
-        a          = action as ApiArrival;
+        a          = msg.data as ApiArrival;
         this.proto = new Protagonist(a.creature, this.moving, this.map, this);
 
         this.session = new Session(this.server!!, this.proto, this.map, this.tp);
         break;
 
       default:
-        if (this.session) this.session.onServerAction(type, action)
-
+        if (this.session) this.session.onServerAction(msg)
     }
   }
 

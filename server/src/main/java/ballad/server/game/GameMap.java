@@ -30,9 +30,6 @@ public final class GameMap {
 
     private final HashMap<Integer, Npc> npcs = new HashMap<>();
 
-    final         ArrayList<ReSpawnStrategy> strategies = new ArrayList<>();
-    final         ArrayList<SpellStrategy>   spells     = new ArrayList<>();
-    final         ArrayList<StepStrategy>    steps      = new ArrayList<>();
     final         HashMap<Integer, Player>   players    = new HashMap<>();
     private final int                        offsetX;
     private final int                        offsetY;
@@ -46,16 +43,9 @@ public final class GameMap {
         this.objects = lands.getObjects();
         this.creatures = new int[basis.length];
         this.tiles = lands.getTiles();
-        settleMobs();
         debug();
     }
 
-    private void settleMobs() {
-        CreatureType type = new CreatureType(1, "Boar", new CreatureResource(1, "", 16, 16, 16, 16));
-        for (int i = 0; i < 4; i++) {
-            strategies.add(new ReSpawnStrategy(type, this));
-        }
-    }
 
     private void debug() {
         StringBuilder sb = new StringBuilder();

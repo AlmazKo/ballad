@@ -9,7 +9,7 @@ class PlayerReSpawnStrategy(
 ) {
 
 
-    private var respawnTime = death.time + 2000
+    private var respawnTime = death.time + 5000
 
     fun onTick(time: Tsm, consumer: ActionConsumer, map: GameMap): Boolean {
 
