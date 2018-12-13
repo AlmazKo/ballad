@@ -4,7 +4,7 @@ import { float, index, px, uint } from '../types';
 import { RES } from './GameCanvas';
 import { Metrics } from './Metrics';
 import { Step } from './actions/Step';
-import { Animator } from '../anim/Animator';
+import { Animator, Delay } from '../anim/Animator';
 import { TilePainter } from './TilePainter';
 import { ApiCreature } from './api/ApiCreature';
 
@@ -21,6 +21,8 @@ export class Npc implements DrawableCreature {
   shiftY    = 0;
   private movement: Animator | undefined;
   private f = 0;
+
+  private showInstantSpell?: Delay;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
@@ -114,14 +116,20 @@ export class Npc implements DrawableCreature {
     const inZon = true;//inZone(this.positionX, this.positionY, PROTO_X, PROTO_Y, 3)
 
     if (inZon) drawLifeLine(p, this);
-    const sx = Math.floor(this.f * 4) * 16;
+    let sx = Math.floor(this.f * 4) * 16;
 
     let img;
     if (this.isPlayer) {
-      img = RES["character_alien"]
+      img = RES["character_alien"];
+
+      if (this.showInstantSpell) {
+        this.showInstantSpell.run(time);
+        sx = 7 * 16;
+      }
     } else {
       img = RES["NPC_test"]
     }
+
 
     bp.drawTile(img, sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
@@ -129,4 +137,9 @@ export class Npc implements DrawableCreature {
   }
 
 
+  instantSpell() {
+    this.showInstantSpell = new Delay(100, () => {
+      this.showInstantSpell = undefined
+    })
+  }
 }

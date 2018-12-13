@@ -123,7 +123,11 @@ export class Session implements Drawable {
         break;
 
       case "SPELL":
-        this.onSpell(msg.id, msg.type!!, msg.data as ApiSpell);
+        const sp = msg.data as ApiSpell;
+        this.onSpell(msg.id, msg.type!!, sp);
+
+        const n = this.map.creatures.get(sp.creatureId);
+        if (n) n.instantSpell();
         break;
 
       case "HIDE":
