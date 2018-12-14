@@ -33,14 +33,15 @@ export class Fireball implements Effect {
           const to   = this.getPosition(i);
 
           if (!this.map.canMove(from, to, true)) {
-            this.anim.finish();
             this.isFinished = true;
+            return true;
           } else {
             this.lastAnimIndex = i;
           }
         }
 
         if (i >= spec.distance) {
+          this.isFinished = true;
           return true;
         } else {
           this.f     = f;

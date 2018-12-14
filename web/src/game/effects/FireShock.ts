@@ -24,6 +24,7 @@ export class FireShock implements Effect {
     this.anim = new LoopAnimator(spec.duration, (f, i) => {
         this.f = f;
         if (i >= spec.distance) {
+          this.isFinished = true;
           return true;
         } else {
           this.shift = (i + f) * CELL;

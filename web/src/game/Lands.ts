@@ -53,7 +53,6 @@ export class Lands {
   private readonly height: uint;
 
   public creatures = new Map<uint, Npc>();
-  public effects   = [] as Array<Effect>;
 
   constructor(map: ViewMap, tiles: Tiles) {
     this.width   = map.width;

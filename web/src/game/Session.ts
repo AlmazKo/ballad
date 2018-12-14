@@ -25,6 +25,7 @@ import { Action } from './actions/Action';
 import { ApiReSpawn } from './api/ApiReSpawn';
 import { ApiMessage } from './actions/ApiMessage';
 import { ApiSpellFireball } from './api/ApiSpellFireball';
+import { Effects } from './Effects';
 
 
 let INC: uint = 0;
@@ -36,6 +37,7 @@ export class Session implements Drawable {
     private server: Server,
     private proto: Protagonist,
     private map: Lands,
+    private effects: Effects,
     private tp: TilePainter
   ) {
     console.log(tp)
@@ -52,13 +54,6 @@ export class Session implements Drawable {
 
     this.proto.draw(time, this.tp);
     this.drawFog(this.tp);
-
-    this.map.effects.forEach(it => {
-      it.draw(time, this.tp)
-    });
-
-    //fixme optimize?
-    this.map.effects = this.map.effects.filter(b => !b.isFinished)
   }
 
   private drawFog(p: TilePainter) {
@@ -152,12 +147,11 @@ export class Session implements Drawable {
       c.metrics.life -= d.amount;
     }
 
-    this.map.effects.push(new DamageEffect(d));
+    this.effects.push(new DamageEffect(d));
 
     if (d.spellId > 0) {
-      const ef = this.map.effects.find(e => e.id == d.spellId);
+      const ef = this.effects.find(d.spellId);
       if (ef) ef.stop();
-      this.map.effects = this.map.effects.filter(e => !e.isFinished);
     }
   }
 
@@ -168,7 +162,7 @@ export class Session implements Drawable {
         if (spell.creatureId !== this.proto.id) {
 
           const fireball = new FireballSpell(s.time, id, s.creatureId, s.duration, s.distance, s.x, s.y, s.direction);
-          this.map.effects.push(new Fireball(fireball, this.map));
+          this.effects.push(new Fireball(fireball, this.map));
         }
     }
   }
@@ -197,7 +191,7 @@ export class Session implements Drawable {
         const fireball     = new FireballSpell(time, this.nextId(), p.id, 100, 10, p.positionX, p.positionY, p.direction);
 
         this.server.sendAction(fireball);
-        this.map.effects.push(new Fireball(fireball, this.map));
+        this.effects.push(new Fireball(fireball, this.map));
         p.instantSpell();
         return fireball;
 
@@ -215,7 +209,7 @@ export class Session implements Drawable {
         const fireshok     = new FireShockSpell(time, this.nextId(), p, 400, 2);
         this.server.sendAction(fireshok);
         const act = new FireShock(fireshok);
-        this.map.effects.push(act);
+        this.effects.push(act);
         return fireshok;
 
       case PlayerAction.STEP:

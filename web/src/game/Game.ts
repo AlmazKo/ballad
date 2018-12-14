@@ -14,6 +14,7 @@ import { toRGBA } from '../canvas/utils';
 import { Animator } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
 import { ApiMessage } from './actions/ApiMessage';
+import { Effects } from './Effects';
 
 export enum PlayerAction {
   FIREBALL, FIRESHOCK, STEP, MELEE
@@ -26,7 +27,7 @@ class Slot {
   constructor(
     public readonly img: HTMLImageElement,
     public readonly  button: string,
-    public readonly  spell: PlayerAction) {
+    public readonly  action: PlayerAction) {
 
   }
 }
@@ -42,10 +43,13 @@ export class Game {
   private animators                 = new Animators();
   private coolDownFraction          = 1;
   private slots: Array<Slot | null> = [null, null, null, null, null];
+  private effects                   = new Effects();
+  private lastRequestedAction?: PlayerAction;
+  private slotAnimatedFraction      = 0;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.slots[0] = new Slot(RES['ico_melee'], "1", PlayerAction.FIREBALL);
-    this.slots[1] = new Slot(RES['ico_fireball'], "2", PlayerAction.FIRESHOCK);
+    this.slots[0] = new Slot(RES['ico_melee'], "1", PlayerAction.MELEE);
+    this.slots[1] = new Slot(RES['ico_fireball'], "2", PlayerAction.FIREBALL);
     this.slots[2] = new Slot(RES['ico_fireshock'], "3", PlayerAction.FIRESHOCK);
   }
 
@@ -55,6 +59,8 @@ export class Game {
     if (this.session) {
       this.session.draw(time, p);
       if (DEBUG) this.debug(p);
+
+      this.effects.draw(time, this.tp);
       this.drawPanels(p)
     }
 
@@ -97,7 +103,12 @@ export class Game {
       }
 
 
-      p.circle(x, y, 25, {style: "white", width: 2});
+      if (slot && this.lastRequestedAction === slot.action && this.slotAnimatedFraction) {
+        p.circle(x, y, 23.5, {style: "yellow", width: 4});
+      } else {
+        p.circle(x, y, 25, {style: "white", width: 2});
+
+      }
 
       if (slot) {
         p.fillRect(x - 8, y + 17, 16, 16, "#cc0100");
@@ -131,10 +142,9 @@ export class Game {
 
     switch (msg.action) {
       case "PROTAGONIST_ARRIVAL":
-        a          = msg.data as ApiArrival;
-        this.proto = new Protagonist(a.creature, this.moving, this.map, this);
-
-        this.session = new Session(this.server!!, this.proto, this.map, this.tp);
+        a            = msg.data as ApiArrival;
+        this.proto   = new Protagonist(a.creature, this.moving, this.map, this);
+        this.session = new Session(this.server!!, this.proto, this.map, this.effects, this.tp);
         break;
 
       default:
@@ -144,9 +154,12 @@ export class Game {
 
   sendAction(action: PlayerAction): Action | undefined {
     if (this.session) {
-      const a = this.session.sendAction(action);
-      if (a && (action === PlayerAction.FIREBALL || action === PlayerAction.FIRESHOCK)) {
-        this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f))
+      const a                  = this.session.sendAction(action);
+      this.lastRequestedAction = action;
+      this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
+
+      if (a && action !== PlayerAction.STEP) {
+        this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
       }
 
       return a;
