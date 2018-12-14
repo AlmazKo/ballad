@@ -96,36 +96,24 @@ export class Animator implements Animated {
 }
 
 export class Delay implements Animated {
-  private readonly finishCallback: () => void;
   private readonly duration: number;
   private finished = false;
   private start    = 0;
   private lastNow  = 0;
 
-  constructor(duration: ms, finishCallback: () => void) {
-    this.duration       = duration;
-    this.finishCallback = finishCallback;
+  constructor(duration: ms) {
+    this.duration = duration;
   }
 
-  /**
-   * @param {number} now
-   * @returns {boolean} finished?
-   */
   run(now: number): boolean {
     if (!this.start) this.start = now;
     this.lastNow = now;
-
-    if(now - this.start > this.duration && !this.finished) {
-      this.finished=true;
-      this.finishCallback();
-      return true
-    }
-    return false;
+    this.finished = now - this.start > this.duration;
+    return this.finished;
   }
 
   finish() {
     this.finished = true;
-    this.finishCallback();
   }
 
   isFinished(): boolean {
@@ -141,7 +129,7 @@ export class Delay implements Animated {
 
 export class LoopAnimator implements Animated {
   private readonly interpolator: Interpolator;
-  private readonly callback: (f: float, i: index) => void;
+  private readonly callback: (f: float, i: index) => boolean;
   private readonly duration: number;
   private finished = false;
 
@@ -149,7 +137,7 @@ export class LoopAnimator implements Animated {
   private times: index               = 0;
 
 
-  constructor(duration: ms, callback: (f: float, i: index) => void, interpolator: Interpolator = linear) {
+  constructor(duration: ms, callback: (f: float, i: index) => boolean, interpolator: Interpolator = linear) {
     this.duration     = duration;
     this.callback     = callback;
     this.interpolator = interpolator;
@@ -169,9 +157,9 @@ export class LoopAnimator implements Animated {
       fraction -= 1;
     }
 
-    this.callback(fraction, this.times);
+    this.finished = this.callback(fraction, this.times);
 
-    return false;
+    return this.finished;
   }
 
   /**

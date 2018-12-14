@@ -16,7 +16,7 @@ import { Animators } from '../anim/Animators';
 import { ApiMessage } from './actions/ApiMessage';
 
 export enum PlayerAction {
-  FIREBALL, FIRESHOCK, STEP
+  FIREBALL, FIRESHOCK, STEP, MELEE
 }
 
 
@@ -44,8 +44,9 @@ export class Game {
   private slots: Array<Slot | null> = [null, null, null, null, null];
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.slots[0] = new Slot(RES['ico_fireball'], "1", PlayerAction.FIREBALL);
-    this.slots[1] = new Slot(RES['ico_fireshock'], "2", PlayerAction.FIRESHOCK);
+    this.slots[0] = new Slot(RES['ico_melee'], "1", PlayerAction.FIREBALL);
+    this.slots[1] = new Slot(RES['ico_fireball'], "2", PlayerAction.FIRESHOCK);
+    this.slots[2] = new Slot(RES['ico_fireshock'], "3", PlayerAction.FIRESHOCK);
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {

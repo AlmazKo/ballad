@@ -1,4 +1,4 @@
-import { Delay, LoopAnimator } from '../anim/Animator';
+import { Animator, Delay, LoopAnimator } from '../anim/Animator';
 import { float, index, int, px, uint } from '../types';
 import { CELL, Dir, HCELL, QCELL } from './types';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
@@ -11,6 +11,7 @@ import { Lands } from './Lands';
 import { TilePainter, toX, toY } from './TilePainter';
 import { style } from './styles';
 import { Game, PlayerAction } from './Game';
+import { Animators } from '../anim/Animators';
 
 export class Protagonist implements DrawableCreature {
 
@@ -24,12 +25,13 @@ export class Protagonist implements DrawableCreature {
   shiftX = 0;
   shiftY = 0;
 
-  movement: LoopAnimator | null = null;
-  private lastAnimIdx: index    = 0;
-  private frozen: Dir           = 0;
-  private rotated               = false;
-  isDead                        = false;
-  private showInstantSpell?: Delay;
+  private animators          = new Animators();
+  private lastAnimIdx: index = 0;
+  private frozen: Dir        = 0;
+  private rotated            = false;
+  isDead                     = false;
+  private showInstantSpell   = false;
+  private meleeFactor: float = 0;
 
 
   constructor(c: ApiCreature,
@@ -59,9 +61,7 @@ export class Protagonist implements DrawableCreature {
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
-    if (this.movement) {
-      this.movement.run(time);
-    }
+    this.animators.run(time);
 
     const actualCellX = this.shiftX < -HCELL ? this.positionX - 1 : (this.shiftX < HCELL ? this.positionX : this.positionX + 1);
     const actualCellY = this.shiftY < -HCELL ? this.positionY - 1 : (this.shiftY < HCELL ? this.positionY : this.positionY + 1);
@@ -100,11 +100,16 @@ export class Protagonist implements DrawableCreature {
     sx      = Math.floor(s / 0.25) * 16;
     drawLifeLine(bp.toInDirect(x, y), this);
 
+    let sw = 16, sh = 32;
     if (this.showInstantSpell) {
-      this.showInstantSpell.run(time);
       sx = 7 * 16;
+    } else if (this.meleeFactor) {
+      sy += 32 * 4;
+      sw = 16;
+      sx = Math.floor(this.meleeFactor * 4) * 32 + 8;
     }
-    bp.drawTile(RES["character"], sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
+
+    bp.drawTile(RES["character"], sx, sy, sw, sh, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
     drawName(bp.toInDirect(x, y), this);
   }
@@ -132,7 +137,7 @@ export class Protagonist implements DrawableCreature {
 
     this.moving.add(direction);
 
-    if (this.movement) return;
+    if (this.animators.has("step")) return;
 
     const dr = this.moving.next();
     this.doStep(dr);
@@ -148,10 +153,9 @@ export class Protagonist implements DrawableCreature {
       return
     }
 
-
     const step = this.game.sendAction(PlayerAction.STEP) as Step;
 
-    this.movement = new LoopAnimator(step.duration, (f, i) => {
+    const movement = new LoopAnimator(step.duration, (f, i) => {
       let isActionContinue = true;
       let next             = 0;
       const isNewPos       = i > this.lastAnimIdx;
@@ -206,15 +210,17 @@ export class Protagonist implements DrawableCreature {
           this.lastAnimIdx = i;
         } else {
           this.lastAnimIdx = 0;
-          this.movement!!.finish();
-          this.movement = null;
-
           if (next) this.doStep(next);
+
+          return true;
         }
       }
 
+      return false;
+
     });
 
+    this.animators.set("step", movement);
   }
 
   updMoving(curr: Dir, f: float) {
@@ -242,10 +248,19 @@ export class Protagonist implements DrawableCreature {
     //todo add server sync
   }
 
+  melee() {
+    this.animators.set("melee", new Animator(250, f => {
+      this.meleeFactor = f
+    }), () => {
+      this.meleeFactor = 0
+    });
+  }
+
   instantSpell() {
-    this.showInstantSpell = new Delay(100, () => {
-      this.showInstantSpell = undefined
-    })
+    this.showInstantSpell = true;
+    this.animators.set("instant_spell", new Delay(100), () => {
+      this.showInstantSpell = false
+    });
   }
 
 }

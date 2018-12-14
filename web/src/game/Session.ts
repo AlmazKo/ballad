@@ -188,31 +188,38 @@ export class Session implements Drawable {
   sendAction(action: PlayerAction): Action | undefined {
 
     const time = Date.now();
+    const p    = this.proto;
     switch (action) {
       case PlayerAction.FIREBALL:
-        if (this.proto.movement) return;
+        // if (p.movement) return;
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
-        const p            = this.proto;
-
-        const fireball = new FireballSpell(time, this.nextId(), p.id, 100, 10, p.positionX, p.positionY, p.direction);
+        const fireball     = new FireballSpell(time, this.nextId(), p.id, 100, 10, p.positionX, p.positionY, p.direction);
 
         this.server.sendAction(fireball);
         this.map.effects.push(new Fireball(fireball, this.map));
-        this.proto.instantSpell();
+        p.instantSpell();
         return fireball;
+
+      case PlayerAction.MELEE:
+        // if (p.movement) return;
+        if (time - this.lastSpellTime < 1000) return undefined;
+        this.lastSpellTime = time;
+
+        p.melee();
+        return undefined;
 
       case PlayerAction.FIRESHOCK:
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
-        const fireshok     = new FireShockSpell(time, this.nextId(), this.proto, 400, 2);
+        const fireshok     = new FireShockSpell(time, this.nextId(), p, 400, 2);
         this.server.sendAction(fireshok);
         const act = new FireShock(fireshok);
         this.map.effects.push(act);
         return fireshok;
 
       case PlayerAction.STEP:
-        const step = new Step(this.nextId(), this.proto, 300);
+        const step = new Step(this.nextId(), p, 300);
         this.server.sendAction(step);
         return step;
 

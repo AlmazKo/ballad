@@ -41,11 +41,11 @@ export class Fireball implements Effect {
         }
 
         if (i >= spec.distance) {
-          this.anim.finish();
-          this.isFinished = true;
+          return true;
         } else {
           this.f     = f;
           this.shift = (i + f) * CELL;
+          return false;
         }
       }
     );

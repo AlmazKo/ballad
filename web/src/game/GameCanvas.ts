@@ -1,7 +1,7 @@
 import { CanvasComposer, Pressable, Registrar } from '../canvas/CanvasComposer';
 import { px, uint } from '../types';
 import { BasePainter } from '../draw/BasePainter';
-import { Dir, FIRST, SECOND } from './types';
+import { BTN_1, BTN_2, BTN_3, Dir, } from './types';
 import { Resources } from './Resources';
 import { Game, PlayerAction } from './Game';
 import { Lands } from './Lands';
@@ -119,12 +119,15 @@ export class GameCanvas implements CanvasComposer, Pressable {
       case 40:
         g.onStep(Dir.SOUTH);
         break;
-      case FIRST:
+      case BTN_1:
+        g.sendAction(PlayerAction.MELEE);
+        break;
+      case BTN_2:
         g.sendAction(PlayerAction.FIREBALL);
         break;
-      case SECOND:
+      case BTN_3:
         g.sendAction(PlayerAction.FIRESHOCK);
-      //   break;
+        break;
       // case 70: //f
       //   player.onFreezeDirection(true);
       //   break;

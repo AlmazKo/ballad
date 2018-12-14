@@ -8,6 +8,7 @@ export const RESOURCES = [
   'character',
   'character_alien',
   'ico_fireball',
+  'ico_melee',
   'ico_fireshock'
 ];
 

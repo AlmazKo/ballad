@@ -7,6 +7,7 @@ import { Step } from './actions/Step';
 import { Animator, Delay } from '../anim/Animator';
 import { TilePainter } from './TilePainter';
 import { ApiCreature } from './api/ApiCreature';
+import { Animators } from '../anim/Animators';
 
 export class Npc implements DrawableCreature {
 
@@ -17,12 +18,11 @@ export class Npc implements DrawableCreature {
   readonly metrics: Metrics;
   readonly isPlayer: boolean;
 
-  shiftX    = 0;
-  shiftY    = 0;
-  private movement: Animator | undefined;
-  private f = 0;
-
-  private showInstantSpell?: Delay;
+  shiftX                   = 0;
+  shiftY                   = 0;
+  private animators        = new Animators();
+  private showInstantSpell = false;
+  private f                = 0;
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
@@ -43,14 +43,14 @@ export class Npc implements DrawableCreature {
     this.positionX = step.fromPosX;
     this.positionY = step.fromPosY;
 
-    if (this.movement && !this.movement.isFinished()) {
-      this.movement.reset();
+    if (this.animators.has("step")) {
+      this.animators.interrupt("step")
       this.shiftY = 0;
       this.shiftX = 0;
       this.f      = 0;
     }
 
-    this.movement = new Animator(step.duration, f => {
+    const movement = new Animator(step.duration, f => {
       this.f = f;
       if (f >= 1) {
 
@@ -78,15 +78,16 @@ export class Npc implements DrawableCreature {
         if (step.direction === Dir.NORTH) this.shiftY = -f * CELL;
         if (step.direction === Dir.SOUTH) this.shiftY = f * CELL;
       }
-
-
     });
+
+    this.animators.set("step", movement)
 
   }
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
-    if (this.movement && !this.movement.isFinished()) this.movement.run(time);
+    this.animators.run(time);
+
     let sy: px;
 
     switch (this.direction) {
@@ -123,7 +124,6 @@ export class Npc implements DrawableCreature {
       img = RES["character_alien"];
 
       if (this.showInstantSpell) {
-        this.showInstantSpell.run(time);
         sx = 7 * 16;
       }
     } else {
@@ -138,8 +138,9 @@ export class Npc implements DrawableCreature {
 
 
   instantSpell() {
-    this.showInstantSpell = new Delay(100, () => {
-      this.showInstantSpell = undefined
-    })
+    this.showInstantSpell = true;
+    this.animators.set("instant_spell", new Delay(100), () => {
+      this.showInstantSpell = false
+    });
   }
 }
