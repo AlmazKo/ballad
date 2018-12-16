@@ -8,11 +8,14 @@ import ballad.server.toJson
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerOptions
 import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CorsHandler
+import io.vertx.ext.web.handler.LoggerFormat
+import io.vertx.ext.web.handler.LoggerHandler
 import io.vertx.ext.web.handler.StaticHandler
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -27,17 +30,28 @@ class App(vertx: Vertx) {
         val lands = loadLands()
         this.map = GameMap(lands)
         this.game = Game(vertx, map)
-        val server = vertx.createHttpServer()
+        val opts = HttpServerOptions().apply {
+            port = 80
+        }
+        val server = vertx.createHttpServer(opts)
 
         initApi(vertx, lands, server)
 
         server.listen {
-            log.info("Started!")
+            if (it.failed()) {
+                log.info("Fail!", it.cause())
+                vertx.close()
+            } else {
+                log.info("Started!")
+            }
+
         }
     }
 
     private fun initApi(vertx: Vertx, lands: Lands, server: HttpServer) {
         val router = Router.router(vertx)
+        router.route().handler(LoggerHandler.create(LoggerFormat.SHORT))
+
         initCors(router)
 
 
@@ -63,10 +77,12 @@ class App(vertx: Vertx) {
             val vp = ViewMap(lands.width, lands.height, lands.offsetX, lands.offsetY, lands.basis, lands.objects)
             req.response().putHeader("content-type", "application/json; charset=utf-8")
             req.response()
-                .end("""{"width":${vp.width}, "height":${vp.heigt},"offsetX":${vp.offsetX}, "offsetY":${vp.offsetY},
+                .end(
+                    """{"width":${vp.width}, "height":${vp.heigt},"offsetX":${vp.offsetX}, "offsetY":${vp.offsetY},
                     |"terrain":[${vp.terrain.joinToString(",")}],
                     |"objects1":[${vp.objects1.joinToString(",")}]}
-                    |""".trimMargin())
+                    |""".trimMargin()
+                )
         }
 
         router.get("/tiles").handler { req ->
