@@ -1,8 +1,7 @@
-import { px } from '../types';
 import { BasePainter } from '../draw/BasePainter';
+import { FillStyle } from '../draw/FillStyle';
 import { FontStyle } from '../draw/FontStyleAcceptor';
 import { Painter, StringStokeStyle } from '../draw/Painter';
-import { FillStyle } from '../draw/FillStyle';
 
 export class InTilePainter implements Painter {
 

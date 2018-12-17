@@ -1,9 +1,8 @@
 import { CanvasComposer } from '../canvas/CanvasComposer';
-import { int, px, uint } from '../types';
 import { BasePainter } from '../draw/BasePainter';
-import { ajax, WS_HOST } from '../util/net';
-import { coord } from '../game/types';
 import { ViewMap } from '../game/api/ViewMap';
+import { coord } from '../game/constants';
+import { ajax, WS_HOST } from '../util/net';
 
 const PAD = 20;
 

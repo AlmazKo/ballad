@@ -1,4 +1,3 @@
-import { Locale, ms, ts, tsm } from 'types';
 
 function prepare(dt: Date | tsm): Date | ms {
   if (typeof dt === 'number' && dt < 10000000000) {
@@ -18,7 +17,7 @@ export class DateTimeFormatter {
   private hFmt: Intl.DateTimeFormat;
   private mFmt: Intl.DateTimeFormat;
 
-  constructor(locale: Locale) {
+  constructor(locale: string) {
     this.hmsFmt    = new Intl.DateTimeFormat(locale, {
       hour  : 'numeric',
       minute: 'numeric',

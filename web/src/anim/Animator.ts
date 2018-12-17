@@ -1,5 +1,3 @@
-import { DOMHighResTimeStamp, float, index, ms, uint } from '../types';
-
 export interface Interpolator {
   (t: number): number;
 }

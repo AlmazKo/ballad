@@ -12,7 +12,10 @@
     "skipLibCheck"          : true,
     "traceResolution"       : true,
     "target"                : "es2016",
-    "baseUrl"               : "./src"
+    "baseUrl"               : "./src",
+    "types": [
+      "./src/globals.d.ts"
+    ]
   },
   "include"        : ["./src/**/*"],
   "exclude"        : ["./node_modules"]

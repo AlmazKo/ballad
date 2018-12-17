@@ -1,6 +1,5 @@
-import { index, tsm, uint } from '../../types';
-import { Action } from './Action';
 import { Creature } from '../Creature';
+import { Action } from './Action';
 
 export class FireShockSpell implements Action {
   readonly posX: index;

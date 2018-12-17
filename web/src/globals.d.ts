@@ -1,62 +1,60 @@
 /**
  * Amount of pixels
  */
-export type px = number;
+declare type px = number;
 
 /**
  * int
  */
-export type int = number;
+declare type int = number;
 
 /**
  * float
  */
-export type float = number;
+declare type float = number;
 
 /**
  * unsigned int
  */
-export type uint = int;
+declare type uint = int;
 
 /**
  * index
  */
-export type index = uint;
+declare type index = uint;
 
 /**
  * Color:
  * @example '#fff', 'red', 'rgba(0,0,0,0)'
  */
-export type color = string;
+declare type color = string;
 
 /**
  * Milliseconds
  */
-export type ms = int;
+declare type ms = int;
 
 /**
  * Seconds with ms
  */
-export type secm = float;
+declare type secm = float;
 /**
  * Seconds
  */
-export type sec = int;
+declare type sec = int;
 
 /**
  * timestamp (sec)
  */
-export type ts = sec;
+declare type ts = sec;
 
 /**
  * timestamp with milliseconds
  */
-export type tsm = secm;
+declare type tsm = secm;
 
 /**
  * A double-precision floating-point number which describes the number of milliseconds
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp}
  */
-export type DOMHighResTimeStamp = number;
-
-export type Locale = 'cn' | 'en' | 'es' | 'hi' | 'id' | 'pt' | 'ru' | 'vi';
+declare type DOMHighResTimeStamp = number;

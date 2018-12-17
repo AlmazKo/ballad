@@ -1,7 +1,6 @@
 import { Effect } from './Effect';
 import { TileDrawable } from './TileDrawable';
 import { TilePainter } from './TilePainter';
-import { uint } from '../types';
 
 export class Effects implements TileDrawable {
   private effects = [] as Array<Effect>;

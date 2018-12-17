@@ -1,4 +1,3 @@
-import { DOMHighResTimeStamp, px, uint } from '../types';
 import { CanvasComposer, Clickable, CursorChange, Draggable, Pressable, Support, ZoomChange } from './CanvasComposer';
 
 class FpsMeter {

@@ -1,5 +1,3 @@
-import { int, uint } from '../../types';
-
 export interface ViewMap {
   readonly width: uint,
   readonly height: uint,

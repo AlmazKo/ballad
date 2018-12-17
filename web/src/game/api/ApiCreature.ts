@@ -1,6 +1,5 @@
-import { index, uint } from '../../types';
+import { Dir } from '../constants';
 import { Metrics } from '../Metrics';
-import { Dir } from '../types';
 
 export interface ApiCreature {
   id: uint;

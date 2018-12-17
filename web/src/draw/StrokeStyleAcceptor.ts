@@ -1,5 +1,3 @@
-import { color, px } from "../types";
-
 export type StrokeJoinType = 'bevel' | 'round' | 'miter'
 
 export interface StrokeStyle {

@@ -1,7 +1,6 @@
-import { index, int, ms, tsm, uint } from '../../types';
-import { Action } from './Action';
+import { Dir } from '../constants';
 import { Creature } from '../Creature';
-import { Dir } from '../types';
+import { Action } from './Action';
 
 export class Step implements Action {
   fromPosX: index;

@@ -1,5 +1,4 @@
-import { index, uint } from '../../types';
-import { Dir } from '../types';
+import { Dir } from '../constants';
 
 export interface ApiMeleeAttack {
   creatureId: uint;

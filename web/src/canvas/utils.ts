@@ -1,4 +1,3 @@
-import { color, float, px } from '../types';
 
 /**
  * Special for canvas x axis

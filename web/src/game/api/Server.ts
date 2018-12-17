@@ -1,10 +1,9 @@
-import { Action } from '../actions/Action';
-import { Step } from '../actions/Step';
 import { WS_HOST } from '../../util/net';
-import { FireballSpell } from '../actions/FireballSpell';
-import { ApiArrival } from './ApiArrival';
-import { uint } from '../../types';
+import { Action } from '../actions/Action';
 import { ApiMessage } from '../actions/ApiMessage';
+import { FireballSpell } from '../actions/FireballSpell';
+import { Step } from '../actions/Step';
+import { ApiArrival } from './ApiArrival';
 
 
 let incId = 0;

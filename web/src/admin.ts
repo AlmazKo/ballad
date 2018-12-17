@@ -1,5 +1,5 @@
-import { Ballad } from './canvas/Ballad';
 import { AdminCanvas } from './admin/AdminCanvas';
+import { Ballad } from './canvas/Ballad';
 
 window.onload = () => {
   let div = document.getElementById("game")!!;

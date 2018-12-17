@@ -1,10 +1,9 @@
-import { Effect } from '../Effect';
-import { float, index, px, uint } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
-import { CELL, QCELL } from '../types';
+import { FireShockSpell } from '../actions/FireShockSpell';
+import { CELL, QCELL } from '../constants';
+import { Effect } from '../Effect';
 import { RES } from '../GameCanvas';
 import { TilePainter } from '../TilePainter';
-import { FireShockSpell } from '../actions/FireShockSpell';
 
 export class FireShock implements Effect {
   private posX: index;

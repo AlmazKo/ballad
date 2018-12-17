@@ -1,5 +1,3 @@
-import { color, px } from "../types";
-
 export type FontAlignType = 'left' | 'right' | 'center' | 'start' | 'end';
 //baseline explanation: {@link https://html.spec.whatwg.org/images/baselines.png}
 export type FontBaselineType = 'top' | 'hanging' | 'middle' | 'alphabetic' | /*'ideographic' it isn't work in FF | */ 'bottom';

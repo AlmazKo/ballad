@@ -1,4 +1,3 @@
-import { int } from '../types';
 import { ApiMetrics } from './api/ApiMetrics';
 
 export class Metrics {

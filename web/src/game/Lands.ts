@@ -1,15 +1,13 @@
-import { index, int, px, uint } from '../types';
 import { BasePainter } from '../draw/BasePainter';
-import { CELL, coord, Dir } from './types';
-import { RES } from './GameCanvas';
-import { style } from './styles';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
-import { DrawableCreature } from './Creature';
-import { TilePainter, toX, toY } from './TilePainter';
-import { Npc } from './Npc';
-import { Effect } from './Effect';
-import { ViewMap } from './api/ViewMap';
 import { Tiles } from './api/Tiles';
+import { ViewMap } from './api/ViewMap';
+import { CELL, coord, Dir } from './constants';
+import { DrawableCreature } from './Creature';
+import { RES } from './GameCanvas';
+import { Npc } from './Npc';
+import { style } from './styles';
+import { TilePainter, toX, toY } from './TilePainter';
 
 
 export declare var POS_X: coord;

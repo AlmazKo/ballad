@@ -1,17 +1,16 @@
 import { Animator, Delay, LoopAnimator } from '../anim/Animator';
-import { float, index, int, px, uint } from '../types';
-import { CELL, Dir, HCELL, QCELL } from './types';
-import { DrawableCreature, drawLifeLine, drawName } from './Creature';
-import { Step } from './actions/Step';
-import { Metrics } from './Metrics';
-import { RES } from './GameCanvas';
-import { ApiCreature } from './api/ApiCreature';
-import { MovingKeys } from './MovingKeys';
-import { Lands } from './Lands';
-import { TilePainter, toX, toY } from './TilePainter';
-import { style } from './styles';
-import { Game, PlayerAction } from './Game';
 import { Animators } from '../anim/Animators';
+import { Step } from './actions/Step';
+import { ApiCreature } from './api/ApiCreature';
+import { CELL, Dir, HCELL, QCELL } from './constants';
+import { DrawableCreature, drawLifeLine, drawName } from './Creature';
+import { Game, PlayerAction } from './Game';
+import { RES } from './GameCanvas';
+import { Lands } from './Lands';
+import { Metrics } from './Metrics';
+import { MovingKeys } from './MovingKeys';
+import { style } from './styles';
+import { TilePainter, toX, toY } from './TilePainter';
 
 export class Protagonist implements DrawableCreature {
 
@@ -22,14 +21,13 @@ export class Protagonist implements DrawableCreature {
   positionX: int;
   positionY: int;
 
-  shiftX = 0;
-  shiftY = 0;
-
+  shiftX                     = 0;
+  shiftY                     = 0;
+  isDead                     = false;
   private animators          = new Animators();
   private lastAnimIdx: index = 0;
   private frozen: Dir        = 0;
   private rotated            = false;
-  isDead                     = false;
   private showInstantSpell   = false;
   private meleeFactor: float = 0;
 

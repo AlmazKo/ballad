@@ -1,4 +1,4 @@
-import { Animated, Animator } from './Animator';
+import { Animated } from './Animator';
 
 export class Animators {
 

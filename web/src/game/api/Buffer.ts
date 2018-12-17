@@ -1,5 +1,3 @@
-import { int } from '../../types';
-
 export class Buffer {
 
   getInt(): int {

@@ -1,20 +1,20 @@
-import { Lands } from './Lands';
-import { Server } from './api/Server';
-import { MovingKeys } from './MovingKeys';
-import { BasePainter } from '../draw/BasePainter';
-import { Protagonist } from './Protagonist';
-import { CELL, Dir, HCELL } from './types';
-import { ApiArrival } from './api/ApiArrival';
-import { style } from './styles';
-import { TilePainter, toX, toY } from './TilePainter';
-import { Session } from './Session';
-import { Action } from './actions/Action';
-import { RES } from './GameCanvas';
-import { toRGBA } from '../canvas/utils';
 import { Animator } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
+import { toRGBA } from '../canvas/utils';
+import { BasePainter } from '../draw/BasePainter';
+import { Action } from './actions/Action';
 import { ApiMessage } from './actions/ApiMessage';
+import { ApiArrival } from './api/ApiArrival';
+import { Server } from './api/Server';
+import { CELL, Dir, HCELL } from './constants';
 import { Effects } from './Effects';
+import { RES } from './GameCanvas';
+import { Lands } from './Lands';
+import { MovingKeys } from './MovingKeys';
+import { Protagonist } from './Protagonist';
+import { Session } from './Session';
+import { style } from './styles';
+import { TilePainter, toX, toY } from './TilePainter';
 
 export enum PlayerAction {
   FIREBALL, FIRESHOCK, STEP, MELEE
@@ -158,7 +158,7 @@ export class Game {
       this.lastRequestedAction = action;
       this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
 
-      if (a && action !== PlayerAction.STEP) {
+      if (a) {
         this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
       }
 

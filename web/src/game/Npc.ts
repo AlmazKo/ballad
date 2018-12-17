@@ -1,13 +1,12 @@
+import { Animator, Delay } from '../anim/Animator';
+import { Animators } from '../anim/Animators';
+import { Step } from './actions/Step';
+import { ApiCreature } from './api/ApiCreature';
+import { CELL, Dir, QCELL } from './constants';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
-import { CELL, Dir, QCELL } from './types';
-import { float, index, px, uint } from '../types';
 import { RES } from './GameCanvas';
 import { Metrics } from './Metrics';
-import { Step } from './actions/Step';
-import { Animator, Delay } from '../anim/Animator';
 import { TilePainter } from './TilePainter';
-import { ApiCreature } from './api/ApiCreature';
-import { Animators } from '../anim/Animators';
 
 export class Npc implements DrawableCreature {
 
@@ -24,10 +23,6 @@ export class Npc implements DrawableCreature {
   private showInstantSpell = false;
   private f                = 0;
 
-  getLifeShare(): float {
-    return this.metrics.life / this.metrics.maxLife;
-  }
-
   constructor(c: ApiCreature) {
     this.id        = c.id;
     this.metrics   = c.metrics;
@@ -37,6 +32,9 @@ export class Npc implements DrawableCreature {
     this.isPlayer  = c.isPlayer;
   }
 
+  getLifeShare(): float {
+    return this.metrics.life / this.metrics.maxLife;
+  }
 
   onStep(step: Step) {
     this.direction = step.direction;
@@ -44,7 +42,7 @@ export class Npc implements DrawableCreature {
     this.positionY = step.fromPosY;
 
     if (this.animators.has("step")) {
-      this.animators.interrupt("step")
+      this.animators.interrupt("step");
       this.shiftY = 0;
       this.shiftX = 0;
       this.f      = 0;

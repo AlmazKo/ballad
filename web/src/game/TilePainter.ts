@@ -1,10 +1,9 @@
-import { px } from '../types';
-import { CELL, coord, QCELL } from './types';
 import { BasePainter } from '../draw/BasePainter';
-import { Painter, StringStokeStyle } from '../draw/Painter';
-import { InTilePainter } from './InTilePainter';
 import { FillStyle } from '../draw/FillStyle';
 import { FontStyle } from '../draw/FontStyleAcceptor';
+import { Painter, StringStokeStyle } from '../draw/Painter';
+import { CELL, coord, QCELL } from './constants';
+import { InTilePainter } from './InTilePainter';
 import { POS_X, POS_Y, SHIFT_X, SHIFT_Y } from './Lands';
 
 
@@ -17,7 +16,7 @@ export class TilePainter implements Painter {
 
   private readonly bp: BasePainter;
   private readonly bp2: InTilePainter;
-   readonly ctx: CanvasRenderingContext2D;
+  readonly ctx: CanvasRenderingContext2D;
 
   width: px;
   height: px;

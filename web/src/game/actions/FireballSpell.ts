@@ -1,4 +1,4 @@
-import { tsm, uint } from '../../types';
+import { Dir } from '../constants';
 import { Action } from './Action';
 
 export class FireballSpell implements Action {
@@ -10,7 +10,7 @@ export class FireballSpell implements Action {
     public readonly distance: uint,
     public readonly posX: uint,
     public readonly posY: uint,
-    public readonly direction: uint,
+    public readonly direction: Dir,
   ) {
 
   }

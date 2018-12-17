@@ -1,14 +1,13 @@
 import { CanvasComposer, Pressable, Registrar } from '../canvas/CanvasComposer';
-import { px, uint } from '../types';
 import { BasePainter } from '../draw/BasePainter';
-import { BTN_1, BTN_2, BTN_3, Dir, } from './types';
-import { Resources } from './Resources';
+import { ajax } from '../util/net';
+import { Tiles } from './api/Tiles';
+import { ViewMap } from './api/ViewMap';
+import { BTN_1, BTN_2, BTN_3, Dir } from './constants';
 import { Game, PlayerAction } from './Game';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
-import { ajax } from '../util/net';
-import { ViewMap } from './api/ViewMap';
-import { Tiles } from './api/Tiles';
+import { Resources } from './Resources';
 
 export declare var RES: { [index: string]: HTMLImageElement };
 

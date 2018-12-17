@@ -1,11 +1,9 @@
-import { float, index, px, uint } from '../types';
-import { Dir, HCELL, QCELL } from './types';
-import { style } from './styles';
-import { Metrics } from './Metrics';
-import { Step } from './actions/Step';
 import { Painter } from '../draw/Painter';
+import { Step } from './actions/Step';
+import { Dir, HCELL, QCELL } from './constants';
+import { Metrics } from './Metrics';
+import { style } from './styles';
 import { TileDrawable } from './TileDrawable';
-
 
 export interface Creature {
   id: uint;

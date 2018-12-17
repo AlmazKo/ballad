@@ -1,5 +1,4 @@
-import { int } from '../types';
-import { Dir } from './types';
+import { Dir } from './constants';
 
 export class KeyQueue {
   readonly data: int[];

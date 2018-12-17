@@ -1,10 +1,9 @@
-import { Effect } from '../Effect';
-import { float, index, px, uint } from '../../types';
 import { LoopAnimator } from '../../anim/Animator';
-import { CELL, Dir } from '../types';
-import { Lands } from '../Lands';
 import { FireballSpell } from '../actions/FireballSpell';
+import { CELL, Dir } from '../constants';
+import { Effect } from '../Effect';
 import { RES } from '../GameCanvas';
+import { Lands } from '../Lands';
 import { TilePainter } from '../TilePainter';
 
 export class Fireball implements Effect {

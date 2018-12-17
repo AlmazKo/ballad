@@ -1,6 +1,3 @@
-import { DOMHighResTimeStamp, px, uint } from '../types';
-
-
 export interface Support {
   drag: Draggable;
   zoom: ZoomChange;

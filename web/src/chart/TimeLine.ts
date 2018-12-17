@@ -1,4 +1,3 @@
-import { px, sec, ts } from '../types';
 import { DateTimeFormatter } from '../util/DateTimeFormatter';
 
 const INTERVALS: sec[] = [1, 5, 15, 30, 60, 300, 900, 1800, 3600, 7200, 21600, 43200, 86400];

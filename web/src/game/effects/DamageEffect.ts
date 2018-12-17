@@ -1,10 +1,9 @@
-import { Effect } from '../Effect';
-import { float, index, int, px } from '../../types';
 import { Animator } from '../../anim/Animator';
-import { TilePainter } from '../TilePainter';
 import { ApiDamage } from '../api/ApiDamage';
+import { HCELL } from '../constants';
+import { Effect } from '../Effect';
 import { style } from '../styles';
-import { HCELL } from '../types';
+import { TilePainter } from '../TilePainter';
 
 export class DamageEffect implements Effect {
   readonly id = 0;
