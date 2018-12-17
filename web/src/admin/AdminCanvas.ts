@@ -2,7 +2,8 @@ import { CanvasComposer } from '../canvas/CanvasComposer';
 import { BasePainter } from '../draw/BasePainter';
 import { ViewMap } from '../game/api/ViewMap';
 import { coord } from '../game/constants';
-import { ajax, WS_HOST } from '../util/net';
+import { WS_HOST } from '../index';
+import { ajax } from '../util/net';
 
 const PAD = 20;
 
@@ -29,7 +30,7 @@ export class AdminCanvas implements CanvasComposer {
   constructor() {
     this.ws           = new WebSocket(WS_HOST + '/admin');
     this.ws.onmessage = (event) => this.onRawData(JSON.parse(event.data));
-    ajax('/map', map => this.map = map)
+    ajax('/map').then(map => this.map = map as ViewMap)
   }
 
   private onRawData(data: any) {

@@ -1,4 +1,4 @@
-import { WS_HOST } from '../../util/net';
+import { WS_HOST } from '../../index';
 import { Action } from '../actions/Action';
 import { ApiMessage } from '../actions/ApiMessage';
 import { FireballSpell } from '../actions/FireballSpell';

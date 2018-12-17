@@ -31,17 +31,14 @@ export class GameCanvas implements CanvasComposer, Pressable {
   constructor() {
     // const game = new Game();
 
-    new Resources().onLoad(r => {
-      RES = r;
-      ajax('/map', map => {
-        ajax('/tiles', tiles => {
+    Promise.all([new Resources().loadBasic(), ajax('/map'), ajax('/tiles')])
+      .then(([res, map, tiles]) => {
+          RES          = res;
           const lands  = new Lands(map as ViewMap, tiles as Tiles);
           this.game    = new Game(lands, moving);
           this.loading = false;
-
-        })
-      })
-    })
+        }
+      );
   }
 
   changeSize(width: px, height: px): void {

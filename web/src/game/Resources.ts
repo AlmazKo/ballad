@@ -1,6 +1,6 @@
-import { HOST } from '../util/net';
+import { HOST } from '../index';
 
-export const RESOURCES = [
+const BASIC_RESOURCES: string[] = [
   'NPC_test',
   'objects',
   'fireball_32',
@@ -15,25 +15,28 @@ export const RESOURCES = [
 
 export class Resources {
 
-  private data: { [index: string]: HTMLImageElement } & object = {};
+  private data: { [index: string]: HTMLImageElement } = {};
 
-  private load(name: string, onLoaded: () => void) {
+  loadBasic(): Promise<{ [index: string]: HTMLImageElement }> {
+    return Promise
+      .all(BASIC_RESOURCES.map(n =>
+          loadImage(n)
+            .then(i => this.data[n] = i)
+        )
+      )
+      .then(_ => this.data)
+  }
+}
+
+
+export function loadImage(name: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+
     let img         = new Image();
     img.crossOrigin = "Anonymous";
     img.src         = `${HOST}/res/${name}.png`;
     img.onload      = () => {
-      this.data[name] = img;
-      onLoaded();
+      resolve(img)
     };
-  }
-
-  onLoad(fun: (data: { [index: string]: HTMLImageElement }) => void) {
-
-    RESOURCES.forEach(name => this.load(name, () => {
-      if (Object.keys(this.data).length === RESOURCES.length) {
-        fun(this.data);
-      }
-    }))
-
-  }
+  });
 }

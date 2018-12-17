@@ -1,4 +1,5 @@
 const path = require('path');
+const rxPaths = require('rxjs/_esm2015/path-mapping');
 
 module.exports = {
     entry: {
@@ -22,7 +23,7 @@ module.exports = {
             }]
     },
     optimization: {
-        minimize: false
+        minimize: true
     },
     devtool: 'source-map'
 };
