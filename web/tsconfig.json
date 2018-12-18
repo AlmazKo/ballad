@@ -11,7 +11,8 @@
     "jsx": "react",
     "baseUrl": "./src",
     "target": "es2016",
-    "lib": [ "es6", "dom"]
+    "lib": [ "es6", "dom"],
+    "types": ["./promiser/types"]
   },
   "include": ["./src/**/*"],
   "exclude": ["./node_modules"]
