@@ -1,15 +1,6 @@
 import { HOST } from '../index';
 
 const basicResources: string[] = [
-  // 'NPC_test',
-  // 'objects',
-  // 'fireball_32',
-  // 'map1',
-  // 'character',
-  // 'character_alien',
-  // 'ico_fireball',
-  // 'ico_melee',
-  // 'ico_fireshock'
 ];
 
 enum Loading {
