@@ -9,11 +9,18 @@ Promise.prototype.do = function <T>(handler: (f: T) => void): Promise<T> {
   })
 };
 
-Promise.prototype.delay = function <T>(time: ms): Promise<T> {
+Promise.prototype.doOnError = function <T>(consumer: (error: any) => void): Promise<T> {
+  return this.then(() => this, (err: any) => {
+    consumer(err);
+    return this;
+  })
+};
+
+Promise.prototype.delay = function <T>(time: number): Promise<T> {
   return this.then((from: T) => Promise.timer(time).then(() => from))
 };
 
-Promise.prototype.timeout = function <T>(time: ms): Promise<T> {
+Promise.prototype.timeout = function <T>(time: number): Promise<T> {
   const timer = Promise.timer(time).flatMap(() => Promise.error("Timeout error"));
   return Promise.race([this, timer])
 };
@@ -22,8 +29,12 @@ Promise.prototype.flatMap = function <T, TO>(mapper: (v: T) => Promise<TO>): Pro
   return this.then((from: T) => mapper(from))
 };
 
+Promise.prototype.onErrorResume = function <T, TO>(mapper: (v: T) => Promise<TO>): Promise<TO> {
+  return this.catch((from: T) => mapper(from))
+};
+
 Promise.prototype.ignore = function (): Promise<void> {
-  return this;
+  return this.then(() => Promise.resolve());
 };
 
 Promise.constructor.prototype.of = function <T>(value: T): Promise<T> {
@@ -32,6 +43,10 @@ Promise.constructor.prototype.of = function <T>(value: T): Promise<T> {
 
 Promise.constructor.prototype.error = function (error: any): Promise<void> {
   return Promise.reject(error)
+};
+
+Promise.constructor.prototype.never = function (): Promise<void> {
+  return new Promise(() => {})
 };
 
 Promise.constructor.prototype.zip = function <T1, T2, T3, R>(v1: Promise<T1>, v2: Promise<T2>, v3: Promise<T3>, accum: (a1: T1, a2: T2, a3: T3) => R): Promise<R> {

@@ -24,7 +24,6 @@ export class Resources {
     return Promise
       .all(basicResources.map(n => loadImage(n).do(i => this.data[n] = i)))
       .ignore()
-
   }
 
   get(name: string): HTMLImageElement | undefined {
@@ -44,7 +43,7 @@ export class Resources {
   }
 }
 
-function loadImage(name: string): Promise<HTMLImageElement> {
+export function loadImage(name: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     let img         = new Image();
     img.crossOrigin = "Anonymous";

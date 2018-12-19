@@ -1,5 +1,4 @@
 const path = require('path');
-const rxPaths = require('rxjs/_esm2015/path-mapping');
 
 module.exports = {
     entry: {

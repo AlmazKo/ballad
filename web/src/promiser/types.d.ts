@@ -21,6 +21,8 @@ interface Promise<T> {
 
   doOnError<FROM = T>(consumer: (error: any) => void): Promise<T>;
 
+  onErrorResume<FROM = T>(consumer: (error: any) =>  Promise<T>): Promise<T>;
+
   delay<TO = T>(ms: number): Promise<TO>;
 
   ignore(): Promise<void>;
@@ -28,6 +30,4 @@ interface Promise<T> {
   timeout<TO = T>(ms: number): Promise<TO>;
 
   flatMap<TO>(mapper: (v: T) => Promise<TO>): Promise<TO>;
-
-  retryWhen<TO = T>(mapper: (error: any) => Promise<TO>): Promise<TO>;
 }
