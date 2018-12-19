@@ -23,6 +23,8 @@ interface Promise<T> {
 
   delay<TO = T>(ms: number): Promise<TO>;
 
+  ignore(): Promise<void>;
+
   timeout<TO = T>(ms: number): Promise<TO>;
 
   flatMap<TO>(mapper: (v: T) => Promise<TO>): Promise<TO>;

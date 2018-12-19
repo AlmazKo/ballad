@@ -22,6 +22,10 @@ Promise.prototype.flatMap = function <T, TO>(mapper: (v: T) => Promise<TO>): Pro
   return this.then((from: T) => mapper(from))
 };
 
+Promise.prototype.ignore = function (): Promise<void> {
+  return this;
+};
+
 Promise.constructor.prototype.of = function <T>(value: T): Promise<T> {
   return Promise.resolve(value)
 };

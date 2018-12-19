@@ -191,7 +191,9 @@ export class Lands {
     const t = this.tiles.get(tileId);
     if (!t) return;
 
-    const img = RES['map1'];
+    const img = RES.get('map1');
+    if (!img) return;
+
     p.ctx.drawImage(img, t.sx, t.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
   }
 

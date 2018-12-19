@@ -25,7 +25,7 @@ export const DEBUG = true;
 
 class Slot {
   constructor(
-    public readonly img: HTMLImageElement,
+    public readonly resName: string,
     public readonly  button: string,
     public readonly  action: PlayerAction) {
 
@@ -48,9 +48,9 @@ export class Game {
   private slotAnimatedFraction      = 0;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.slots[0] = new Slot(RES['ico_melee'], "1", PlayerAction.MELEE);
-    this.slots[1] = new Slot(RES['ico_fireball'], "2", PlayerAction.FIREBALL);
-    this.slots[2] = new Slot(RES['ico_fireshock'], "3", PlayerAction.FIRESHOCK);
+    this.slots[0] = new Slot('ico_melee', "1", PlayerAction.MELEE);
+    this.slots[1] = new Slot('ico_fireball', "2", PlayerAction.FIREBALL);
+    this.slots[2] = new Slot('ico_fireshock', "3", PlayerAction.FIRESHOCK);
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
@@ -86,7 +86,9 @@ export class Game {
 
       const slot = this.slots[i];
       if (slot) {
-        ctx.drawImage(slot.img, 0, 0, slot.img.width, slot.img.height, x - 25, y - 25, 50, 50);
+        const slotImg = RES.get(slot.resName);
+        if (slotImg)
+          ctx.drawImage(slotImg, 0, 0, slotImg.width, slotImg.height, x - 25, y - 25, 50, 50);
 
         if (this.coolDownFraction != 0) {
           p.fill(toRGBA("#000", 0.66));

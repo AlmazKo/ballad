@@ -30,7 +30,9 @@ export class TilePainter implements Painter {
   }
 
 
-  drawTile(img: CanvasImageSource, sx: px, sy: px, sw: px, sh: px, posX: coord, posY: coord, shiftX: px = 0, shiftY: px = 0) {
+  drawTile(img: CanvasImageSource | undefined, sx: px, sy: px, sw: px, sh: px, posX: coord, posY: coord, shiftX: px = 0, shiftY: px = 0) {
+    if (!img) return;
+
     const x = toX(posX) + shiftX;
     const y = toY(posY) + shiftY;
 

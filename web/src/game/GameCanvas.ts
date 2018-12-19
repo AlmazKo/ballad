@@ -9,7 +9,7 @@ import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
 import { Resources } from './Resources';
 
-export declare var RES: { [index: string]: HTMLImageElement };
+export declare var RES: Resources;
 
 const moving = new MovingKeys();
 
@@ -29,8 +29,8 @@ export class GameCanvas implements CanvasComposer, Pressable {
 
 
   constructor() {
-    Promise.zip(new Resources().loadBasic(), ajax('/map'), ajax('/tiles'), (res, map, tiles) => {
-          RES          = res;
+    RES = new Resources();
+    Promise.zip(RES.loadBasic(), ajax('/map'), ajax('/tiles'), (_, map, tiles) => {
           const lands  = new Lands(map as ViewMap, tiles as Tiles);
           this.game    = new Game(lands, moving);
           this.loading = false;

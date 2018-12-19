@@ -107,7 +107,7 @@ export class Protagonist implements DrawableCreature {
       sx = Math.floor(this.meleeFactor * 4) * 32 + 8;
     }
 
-    bp.drawTile(RES["character"], sx, sy, sw, sh, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
+    bp.drawTile(RES.get("character"), sx, sy, sw, sh, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
 
     drawName(bp.toInDirect(x, y), this);
   }

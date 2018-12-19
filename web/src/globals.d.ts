@@ -57,4 +57,4 @@ declare type tsm = secm;
  * A double-precision floating-point number which describes the number of milliseconds
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp}
  */
-declare type DOMHighResTimeStamp = number;
+declare type DOMHighResTimeStamp = tsm;

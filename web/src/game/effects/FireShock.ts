@@ -37,7 +37,7 @@ export class FireShock implements Effect {
 
     this.anim.run(time);
 
-    const fire1    = RES["objects"];
+    const fire1    = RES.get("objects");
     const size: px = 16;
     const sy: px   = 48;
     const sx: px   = 64 + Math.floor(this.f * 6) * size;

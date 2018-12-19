@@ -92,7 +92,7 @@ export class Fireball implements Effect {
     }
 
     const sx: px = 32 * Math.floor(this.f * 4);
-    const fire1  = RES["fireball_32"];
+    const fire1  = RES.get("fireball_32");
 
     bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
   }

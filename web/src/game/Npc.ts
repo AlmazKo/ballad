@@ -119,13 +119,13 @@ export class Npc implements DrawableCreature {
 
     let img;
     if (this.isPlayer) {
-      img = RES["character_alien"];
+      img = RES.get("character_alien");
 
       if (this.showInstantSpell) {
         sx = 7 * 16;
       }
     } else {
-      img = RES["NPC_test"]
+      img = RES.get("NPC_test")
     }
 
 
