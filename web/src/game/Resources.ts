@@ -1,6 +1,8 @@
 import { HOST } from '../index';
 
 const basicResources: string[] = [
+
+  // todo characters & spell images
 ];
 
 enum Loading {

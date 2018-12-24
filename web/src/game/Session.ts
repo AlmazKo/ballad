@@ -13,18 +13,19 @@ import { ApiSpell } from './api/ApiSpell';
 import { ApiSpellFireball } from './api/ApiSpellFireball';
 import { ApiStep } from './api/ApiStep';
 import { Server } from './api/Server';
-import { CELL, Dir } from './constants';
+import { CELL } from './constants';
 import { Drawable } from './Drawable';
 import { Effects } from './Effects';
 import { DamageEffect } from './effects/DamageEffect';
 import { Fireball } from './effects/Fireball';
 import { FireShock } from './effects/FireShock';
-import { PlayerAction } from './Game';
 import { Lands } from './Lands';
+import { Orientation } from './MovingKeys';
 import { Npc } from './Npc';
 import { Protagonist } from './Protagonist';
 import { style } from './styles';
 import { TilePainter } from './TilePainter';
+import { PlayerAction } from './Trait';
 
 
 let INC: uint = 0;
@@ -46,6 +47,9 @@ export class Session implements Drawable {
 
 
     if (this.proto) this.map.updateFocus(this.tp, this.proto);
+    if (!this.proto.orientation.moving) {
+
+    }
     this.map.draw(p);
     this.map.creatures.forEach(it => {
       it.draw(time, this.tp)
@@ -225,10 +229,15 @@ export class Session implements Drawable {
     return (INC++) + 2147483647 * this.proto.id;
   }
 
-  step(dir: Dir) {
-    const step = new Step(this.nextId(), this.proto, 300, dir);
+  sendOrientation(ot: Orientation) {
+    const p = this.proto;
+    if (!this.map.canStep([p.positionX, p.positionY], p.direction)) {
+      console.warn("Forbidden direction " + ot.moving);
+      return;
+    }
+    const step = new Step(this.nextId(), p, 300, ot.moving);
+    console.log("STEP", step);
     this.server.sendAction(step);
-    this.proto.step(dir);
-    return step;
+    p.step(step);
   }
 }

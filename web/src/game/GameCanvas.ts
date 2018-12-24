@@ -3,15 +3,14 @@ import { BasePainter } from '../draw/BasePainter';
 import { ajax } from '../util/net';
 import { Tiles } from './api/Tiles';
 import { ViewMap } from './api/ViewMap';
-import { BTN_1, BTN_2, BTN_3, Dir } from './constants';
-import { Game, PlayerAction } from './Game';
+import { Game } from './Game';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
 import { Resources } from './Resources';
+import { Buttons } from './Slot';
 
-export declare var RES: Resources;
-
-const moving = new MovingKeys();
+export const RES = new Resources();
+const moving     = new MovingKeys();
 
 export class GameCanvas implements CanvasComposer, Pressable {
 
@@ -29,13 +28,13 @@ export class GameCanvas implements CanvasComposer, Pressable {
 
 
   constructor() {
-    RES = new Resources();
     Promise.zip(RES.loadBasic(), ajax('/map'), ajax('/tiles'), (_, map, tiles) => {
-          const lands  = new Lands(map as ViewMap, tiles as Tiles);
-          this.game    = new Game(lands, moving);
-          this.loading = false;
-        }
-      );
+
+        const lands  = new Lands(map as ViewMap, tiles as Tiles);
+        this.game    = new Game(lands, moving);
+        this.loading = false;
+      }
+    );
   }
 
   changeSize(width: px, height: px): void {
@@ -72,64 +71,13 @@ export class GameCanvas implements CanvasComposer, Pressable {
   }
 
   keyUp(e: KeyboardEvent): void {
-
-    switch (e.keyCode) {
-      case 37:
-        moving.remove(Dir.WEST);
-        break;
-      case 39:
-        moving.remove(Dir.EAST);
-        break;
-      case 38:
-        moving.remove(Dir.NORTH);
-        break;
-      case 40:
-        moving.remove(Dir.SOUTH);
-        break;
-      // case 70:
-      //   player.onFreezeDirection(false);
-      //   break;
-      // case 82: //r
-      //   player.onRotated(false);
-      //   break;
-
-    }
+    const btn = Buttons[e.keyCode];
+    if (btn) this.game.keyUp(btn)
   }
 
   keydown(e: KeyboardEvent): void {
-
-    const g = this.game;
-    switch (e.keyCode) {
-      case 37:
-        g.onStep(Dir.WEST);
-        break;
-      case 39:
-        g.onStep(Dir.EAST);
-        break;
-      case 38:
-        g.onStep(Dir.NORTH);
-        break;
-      case 40:
-        g.onStep(Dir.SOUTH);
-        break;
-      case BTN_1:
-        g.sendAction(PlayerAction.MELEE);
-        break;
-      case BTN_2:
-        g.sendAction(PlayerAction.FIREBALL);
-        break;
-      case BTN_3:
-        g.sendAction(PlayerAction.FIRESHOCK);
-        break;
-      // case 70: //f
-      //   player.onFreezeDirection(true);
-      //   break;
-      // case 82: //r
-      //   player.onRotated(true);
-      //   break;
-    }
-
-
+    const btn = Buttons[e.keyCode];
+    if (btn) this.game.keyDown(btn)
   }
 
   keypress(e: KeyboardEvent): void {

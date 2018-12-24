@@ -6,31 +6,21 @@ import { Action } from './actions/Action';
 import { ApiMessage } from './actions/ApiMessage';
 import { ApiArrival } from './api/ApiArrival';
 import { Server } from './api/Server';
-import { CELL, Dir, HCELL } from './constants';
+import { CELL, HCELL } from './constants';
 import { Effects } from './Effects';
 import { RES } from './GameCanvas';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
 import { Protagonist } from './Protagonist';
 import { Session } from './Session';
+import { BTN_1, BTN_2, BTN_3, hotKeys, Key, MovingButtons, Slot } from './Slot';
 import { style } from './styles';
 import { TilePainter, toX, toY } from './TilePainter';
+import { PlayerAction, Traits } from './Trait';
 
-export enum PlayerAction {
-  FIREBALL, FIRESHOCK, STEP, MELEE
-}
 
 
 export const DEBUG = true;
-
-class Slot {
-  constructor(
-    public readonly resName: string,
-    public readonly  button: string,
-    public readonly  action: PlayerAction) {
-
-  }
-}
 
 export class Game {
 
@@ -48,15 +38,22 @@ export class Game {
   private slotAnimatedFraction      = 0;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.slots[0] = new Slot('ico_melee', "1", PlayerAction.MELEE);
-    this.slots[1] = new Slot('ico_fireball', "2", PlayerAction.FIREBALL);
-    this.slots[2] = new Slot('ico_fireshock', "3", PlayerAction.FIRESHOCK);
+    this.slots[0] = new Slot(0, BTN_1, Traits.melee);
+    this.slots[1] = new Slot(1, BTN_2, Traits.fireball);
+    this.slots[2] = new Slot(2, BTN_3, Traits.fireshock);
   }
 
   onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
     if (!this.tp) this.tp = new TilePainter(p);
     this.animators.run(time);
     if (this.session) {
+
+      if (!this.proto.orientation.moving) {
+        const nextOrientation = this.moving.next2();
+        if (nextOrientation) {
+          this.session.sendOrientation(nextOrientation)
+        }
+      }
       this.session.draw(time, p);
       if (DEBUG) this.debug(p);
 
@@ -86,7 +83,7 @@ export class Game {
 
       const slot = this.slots[i];
       if (slot) {
-        const slotImg = RES.get(slot.resName);
+        const slotImg = RES.get(slot.trait.resName);
         if (slotImg)
           ctx.drawImage(slotImg, 0, 0, slotImg.width, slotImg.height, x - 25, y - 25, 50, 50);
 
@@ -105,16 +102,16 @@ export class Game {
       }
 
 
-      if (slot && this.lastRequestedAction === slot.action && this.slotAnimatedFraction) {
-        p.circle(x, y, 23.5, {style: "yellow", width: 4});
-      } else {
-        p.circle(x, y, 25, {style: "white", width: 2});
-
-      }
+      // if (slot && this.lastRequestedAction === slot.action && this.slotAnimatedFraction) {
+      //   p.circle(x, y, 23.5, {style: "yellow", width: 4});
+      // } else {
+      //   p.circle(x, y, 25, {style: "white", width: 2});
+      //
+      // }
 
       if (slot) {
         p.fillRect(x - 8, y + 17, 16, 16, "#cc0100");
-        p.text(slot.button, x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"});
+        p.text(slot.key + "", x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"});
       }
     }
   }
@@ -129,7 +126,7 @@ export class Game {
     bp.text(`${p.positionX};${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
 
     bp.fillRect(20, 0, this.tp.width, 20, "#ffffff88");
-    bp.fillRect(0, 0, 20, this.tp.height, "ffffff88");
+    bp.fillRect(0, 0, 20, this.tp.height, "#ffffff88");
     for (let pos = -48; pos < 100; pos++) {
       bp.text("" + pos, toX(pos) + 2, 0, style.debugText);
       bp.text("" + pos, 1, toY(pos), style.debugText);
@@ -145,7 +142,7 @@ export class Game {
     switch (msg.action) {
       case "PROTAGONIST_ARRIVAL":
         a            = msg.data as ApiArrival;
-        this.proto   = new Protagonist(a.creature, this.moving, this.map, this);
+        this.proto   = new Protagonist(a.creature);
         this.session = new Session(this.server!!, this.proto, this.map, this.effects, this.tp);
         break;
 
@@ -170,7 +167,26 @@ export class Game {
     return undefined;
   }
 
-  onStep(dir: Dir) {
-    if (this.session) this.session.step(dir)
+  // onStep(dir: Dir) {
+  //   if (this.session) this.session.step(dir)
+  // }
+
+  keyUp(btn: Key) {
+    const idx = MovingButtons.indexOf(btn.code);
+
+    if (idx !== -1) {
+      this.moving.remove(btn.code);
+    }
+
+  }
+
+  keyDown(btn: Key) {
+    const idx = MovingButtons.indexOf(btn.code);
+
+    if (idx !== -1) {
+      this.moving.add(btn.code);
+    } else if (hotKeys.has(btn)) {
+
+    }
   }
 }

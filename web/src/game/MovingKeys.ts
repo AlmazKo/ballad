@@ -69,49 +69,70 @@ export class KeyQueue {
 
 }
 
+export interface Orientation {
+  moving: Dir,
+  sight: Dir
+}
+
+
 export class MovingKeys {
 
-  private _next1: Dir = 0;
-  private _next2: Dir = 0;
-  private queue       = new KeyQueue();
+  private currentMoving: Dir = 0;
+  private currentSight: Dir  = 0;
+  private _next?: Orientation;
+  private queue              = new KeyQueue();
 
 
   add(direction: Dir) {
-
-    if (this.queue.add(direction)) {
-      if (this._next1 === 0) {
-        this._next1 = direction;
-      } else if (this._next2 === 0) {
-        this._next2 = direction;
-      } else {
-        console.warn(`Ignore '${direction}'`);
-        return;
-      }
-      console.debug(`Moving: add '${direction}', data: ${this.queue.data}, next: ${this._next1} -> ${this._next2}`)
+    this.currentSight  = this.currentMoving;
+    this.currentMoving = direction;
+    if (!this._next) {
+      this._next = {moving: direction, sight: direction}
     }
   }
 
   remove(direction: Dir) {
-    if (this.queue.remove(direction)) {
-      console.debug(`Moving: remove '${direction}', data: ${this.queue.data}`)
+    if (this.currentSight === direction) {
+      this.currentSight = 0
     } else {
-      console.warn(`Moving: nothing remove '${direction}', data: ${this.queue.data}`)
+      this.currentMoving = this.currentSight;
+      this.currentSight  = 0;
     }
   }
 
+  /**
+   * @deprecated
+   */
   next(): Dir {
-    const result = this._next1;
+    const result = this.currentMoving;
     if (result !== 0) {
-      this._next1 = this._next2;
-      this._next2 = 0;
+      this.currentMoving = this.currentSight;
+      this.currentSight  = 0;
       return result;
     }
 
     return this.queue.peek();
   }
 
+  next2(): Orientation | undefined {
+
+    if (!this._next) return undefined;
+
+    const result =  this._next;
+    if (!this.currentMoving) {
+      this._next = undefined;
+    } else if (this._next.moving !== this.currentMoving || this._next.sight !== this.currentMoving) {
+      const sight = this.currentSight ? this.currentSight : this.currentMoving;
+      this._next  = {moving: this.currentMoving, sight: sight};
+    } else {
+      this._next = undefined;
+    }
+
+    return result;
+  }
+
   toString() {
-    return `next: ${this._next1} -> ${this._next2}`
+    return `next: ${this.currentMoving} -> ${this.currentSight}`
   }
 
 }

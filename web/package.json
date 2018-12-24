@@ -6,17 +6,17 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "23.3.9",
+    "@types/jest": "^23.3.9",
+    "jest": "23.6.0",
     "source-map-loader": "^0.2.4",
+    "ts-jest": "^23.10.4",
     "ts-loader": "^5.3.0",
     "typescript": "3.2.2",
     "webpack": "4.25.1",
-    "webpack-cli": "^3.1.2",
-    "jest": "23.6.0",
-    "ts-jest": "^23.10.4"
+    "webpack-cli": "^3.1.2"
   },
   "jest": {
-    "preset": "./jest-preset.json"
+    "preset": "ts-jest"
   },
   "repository": {
     "type": "git",

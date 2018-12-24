@@ -1,14 +1,12 @@
-import { Animator, Delay, LoopAnimator } from '../anim/Animator';
+import { Animator, Delay } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
 import { Step } from './actions/Step';
 import { ApiCreature } from './api/ApiCreature';
 import { CELL, Dir, HCELL, QCELL } from './constants';
 import { DrawableCreature, drawLifeLine, drawName } from './Creature';
-import { Game, PlayerAction } from './Game';
 import { RES } from './GameCanvas';
-import { Lands } from './Lands';
 import { Metrics } from './Metrics';
-import { MovingKeys } from './MovingKeys';
+import { Orientation } from './MovingKeys';
 import { style } from './styles';
 import { TilePainter, toX, toY } from './TilePainter';
 
@@ -18,6 +16,7 @@ export class Protagonist implements DrawableCreature {
   readonly viewDistance: uint;
   readonly metrics: Metrics;
   direction: Dir;
+  orientation: Orientation;
   positionX: int;
   positionY: int;
 
@@ -25,25 +24,19 @@ export class Protagonist implements DrawableCreature {
   shiftY                     = 0;
   isDead                     = false;
   private animators          = new Animators();
-  private lastAnimIdx: index = 0;
-  private frozen: Dir        = 0;
   private rotated            = false;
   private showInstantSpell   = false;
   private meleeFactor: float = 0;
 
-
-  constructor(c: ApiCreature,
-              private moving: MovingKeys,
-              private map: Lands,
-              private game: Game) {
+  constructor(c: ApiCreature) {
     this.id           = c.id;
     this.metrics      = c.metrics;
     this.direction    = c.direction;
+    this.orientation  = {moving: 0, sight: c.direction};
     this.positionX    = c.x;
     this.positionY    = c.y;
     this.viewDistance = c.viewDistance;
   }
-
 
   getLifeShare(): float {
     return this.metrics.life / this.metrics.maxLife;
@@ -112,58 +105,12 @@ export class Protagonist implements DrawableCreature {
     drawName(bp.toInDirect(x, y), this);
   }
 
-
-  nextPos(dr: Dir): [index, index] {
-    switch (dr) {
-      case Dir.WEST:
-        return [this.positionX - 1, this.positionY];
-      case Dir.EAST:
-        return [this.positionX + 1, this.positionY];
-      case Dir.NORTH:
-        return [this.positionX, this.positionY - 1];
-      case Dir.SOUTH:
-        return [this.positionX, this.positionY + 1];
-    }
-  }
-
-  step(direction: number) {
-
-    if (this.rotated) {
-      this.direction = direction;
-      return;
-    }
-
-    this.moving.add(direction);
-
-    if (this.animators.has("step")) return;
-
-    const dr = this.moving.next();
-    this.doStep(dr);
-  }
-
-  doStep(dr: Dir) {
-    this.direction = this.frozen ? this.frozen : dr;
-
-    if (this.map.canStep([this.positionX, this.positionY], this.direction)) {
-      console.info("START NEW " + dr);
-    } else {
-      console.warn("Forbidden direction " + dr);
-      return
-    }
-
-    const step = this.game.sendAction(PlayerAction.STEP) as Step;
-
-    const movement = new LoopAnimator(step.duration, (f, i) => {
-      let isActionContinue = true;
-      let next             = 0;
-      const isNewPos       = i > this.lastAnimIdx;
-
-      if (isNewPos) {
-        next = this.moving.next();
-        console.warn("NEXT " + next);
-
-        isActionContinue = dr === next;
-
+  step(step: Step) {
+    this.animators.interrupt("step");
+    const dr       = step.direction;
+    const movement = new Animator(step.duration, f => {
+      console.log(f);
+      if (f >= 1) {
         switch (dr) {
           case Dir.WEST:
             this.positionX--;
@@ -178,63 +125,17 @@ export class Protagonist implements DrawableCreature {
             this.positionY++;
             break;
         }
-
-        if (isActionContinue && !this.map.canStep([this.positionX, this.positionY], next)) {
-          isActionContinue = false
-        }
-
-        if (isActionContinue) {
-          this.game.sendAction(PlayerAction.STEP);
-        }
-
-        console.log(`Stop movement, isContinue=${isActionContinue}, next=${next}`);
-      }
-
-
-      if (isActionContinue) {
+      } else {
         if (dr == Dir.WEST) this.shiftX = -f * CELL;
         if (dr == Dir.EAST) this.shiftX = f * CELL;
         if (dr == Dir.NORTH) this.shiftY = -f * CELL;
         if (dr == Dir.SOUTH) this.shiftY = f * CELL;
-      } else {
-        this.shiftX = 0;
-        this.shiftY = 0;
       }
-
-
-      if (isNewPos) {
-
-        if (isActionContinue) {
-          this.lastAnimIdx = i;
-        } else {
-          this.lastAnimIdx = 0;
-          if (next) this.doStep(next);
-
-          return true;
-        }
-      }
-
-      return false;
-
     });
 
     this.animators.set("step", movement);
   }
 
-  updMoving(curr: Dir, f: float) {
-    if (curr == Dir.WEST) this.shiftX = -f * CELL;
-    if (curr == Dir.EAST) this.shiftX = f * CELL;
-    if (curr == Dir.NORTH) this.shiftY = -f * CELL;
-    if (curr == Dir.SOUTH) this.shiftY = f * CELL;
-  }
-
-  onFreezeDirection(frozen: boolean) {
-    if (frozen) {
-      this.frozen = this.direction;
-    } else {
-      this.frozen = 0;
-    }
-  }
 
   onRotated(rotated: boolean) {
     this.rotated = rotated;
