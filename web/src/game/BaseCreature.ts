@@ -7,9 +7,9 @@ import { DrawableCreature, drawLifeLine, drawName } from './Creature';
 import { RES } from './GameCanvas';
 import { Metrics } from './Metrics';
 import { Orientation2 } from './Orientation';
-import { TilePainter } from './TilePainter';
+import { TilePainter, toX1, toY1 } from './TilePainter';
 
-export class Npc implements DrawableCreature {
+export class BaseCreature implements DrawableCreature {
 
   readonly id: int;
   readonly metrics: Metrics;
@@ -17,41 +17,39 @@ export class Npc implements DrawableCreature {
 
   private animators        = new Animators();
   private showInstantSpell = false;
-  private f                = 0;
+  private meleeFactor: float = 0;
 
   constructor(c: ApiCreature) {
     this.id        = c.id;
     this.metrics   = c.metrics;
-    this.direction = c.direction;
-    this.positionX = c.x;
-    this.positionY = c.y;
-  }
-
-  getLifeShare(): float {
-    return this.metrics.life / this.metrics.maxLife;
+    this.orientation  = {moving: 0, sight: c.direction, posX: c.x, posY: c.y, shift: 0};
   }
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
     this.animators.run(time);
 
-    let sy: px;
-
-    switch (this.direction) {
+    let s: float, sx: px, sy: px;
+    const o = this.orientation;
+    switch (o.sight) {
       case Dir.NORTH:
         sy = 64;
+        s  = -o.shift / CELL;
         break;
 
       case Dir.SOUTH:
         sy = 0;
+        s  = o.shift / CELL;
         break;
 
       case Dir.EAST:
         sy = 32;
+        s  = o.shift / CELL;
         break;
 
       case Dir.WEST:
         sy = 96;
+        s  = -o.shift / CELL;
         break;
 
       default:
@@ -59,35 +57,36 @@ export class Npc implements DrawableCreature {
     }
 
 
-    const p = bp.toInTile(this.positionX, this.positionY, this.shiftX, this.shiftY);
+    const x = toX1(o);
+    const y = toY1(o);
+    sx      = Math.floor(s / 0.25) * 16;
+    // drawLifeLine(bp.toInDirect(x, y), this);
 
-    const inZon = true;//inZone(this.positionX, this.positionY, PROTO_X, PROTO_Y, 3)
-
-    if (inZon) drawLifeLine(p, this);
-    let sx = Math.floor(this.f * 4) * 16;
-
-    let img;
-    if (this.isPlayer) {
-      img = RES.get("character_alien");
-
-      if (this.showInstantSpell) {
-        sx = 7 * 16;
-      }
-    } else {
-      img = RES.get("NPC_test")
+    let sw = 16, sh = 32;
+    if (this.showInstantSpell) {
+      sx = 7 * 16;
+    } else if (this.meleeFactor) {
+      sy += 32 * 4;
+      sw = 16;
+      sx = Math.floor(this.meleeFactor * 4) * 32 + 8;
     }
 
+    bp.drawTile(RES.get("character"), sx, sy, sw, sh, x + QCELL, y);
 
-    bp.drawTile(img, sx, sy, 16, 32, this.positionX, this.positionY, this.shiftX + QCELL, this.shiftY);
-
-    if (inZon) drawName(p, this);
   }
 
+
+  melee() {
+    this.animators.set("melee",
+      new Animator(250, f => this.meleeFactor = f),
+      () => this.meleeFactor = 0);
+  }
 
   instantSpell() {
     this.showInstantSpell = true;
-    this.animators.set("instant_spell", new Delay(100), () => {
-      this.showInstantSpell = false
-    });
+    this.animators.set("instant_spell",
+      new Delay(100),
+      () => this.showInstantSpell = false);
   }
+
 }

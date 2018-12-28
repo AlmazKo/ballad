@@ -3,14 +3,16 @@ import { Animators } from '../anim/Animators';
 import { toRGBA } from '../canvas/utils';
 import { BasePainter } from '../draw/BasePainter';
 import { ApiMessage } from './actions/ApiMessage';
+import { Step } from './actions/Step';
 import { ApiArrival } from './api/ApiArrival';
 import { Server } from './api/Server';
+import { Dir } from './constants';
+import { Controller } from './Controller';
+import { Creature } from './Creature';
 import { Effects } from './Effects';
 import { RES } from './GameCanvas';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
-import { Protagonist } from './Protagonist';
-import { Controller } from './Controller';
 import { BTN_1, BTN_2, BTN_3, hotKeys, Key, MovingButtons, Slot } from './Slot';
 import { TilePainter } from './TilePainter';
 import { Trait, Traits, TraitStep } from './Trait';
@@ -64,6 +66,40 @@ export class Game {
       this.server = new Server();
       this.server.subOnAction(msg => this.onServerAction(msg));
     }
+  }
+
+
+  step(step: Step, c: Creature) {
+    this.animators.interrupt("step_" + c.id);
+    const dr = step.direction;
+    const o  = c.orientation;
+    o.moving = dr;
+
+    let moved      = false;
+    const movement = new Animator(step.duration, f => {
+      o.shift = f;
+
+      if (!moved && f >= .5) {
+        moved = true;
+        switch (dr) {
+          case Dir.WEST:
+            o.posX++;
+            break;
+          case Dir.EAST:
+            o.posX++;
+            break;
+          case Dir.NORTH:
+            o.posY--;
+            break;
+          case Dir.SOUTH:
+            o.posY++;
+            break;
+        }
+      }
+
+    });
+
+    this.animators.set("step", movement);
   }
 
 
@@ -141,7 +177,7 @@ export class Game {
     switch (msg.action) {
       case "PROTAGONIST_ARRIVAL":
         a            = msg.data as ApiArrival;
-        this.proto   = new Protagonist(a.creature);
+        // this.proto   = new Protagonist(a.creature);
         this.session = new Controller(this.server!!, this.proto, this.map, this.effects, this.tp);
         break;
 

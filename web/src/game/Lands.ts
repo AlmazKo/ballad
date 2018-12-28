@@ -5,7 +5,7 @@ import { ViewMap } from './api/ViewMap';
 import { CELL, coord, Dir } from './constants';
 import { DrawableCreature } from './Creature';
 import { RES } from './GameCanvas';
-import { Npc } from './Npc';
+import { BaseCreature } from './BaseCreature';
 import { style } from './styles';
 import { TilePainter, toX, toY } from './TilePainter';
 
@@ -50,7 +50,7 @@ export class Lands {
   private readonly offsetY: int;
   private readonly height: uint;
 
-  public creatures = new Map<uint, Npc>();
+  public creatures = new Map<uint, BaseCreature>();
 
   constructor(map: ViewMap, tiles: Tiles) {
     this.width   = map.width;

@@ -1,3 +1,5 @@
+import { Animator } from '../anim/Animator';
+import { Animators } from '../anim/Animators';
 import { BasePainter } from '../draw/BasePainter';
 import { Action } from './actions/Action';
 import { ApiMessage } from './actions/ApiMessage';
@@ -14,6 +16,7 @@ import { ApiSpellFireball } from './api/ApiSpellFireball';
 import { ApiStep } from './api/ApiStep';
 import { Server } from './api/Server';
 import { CELL } from './constants';
+import { Creature } from './Creature';
 import { Drawable } from './Drawable';
 import { Effects } from './Effects';
 import { DamageEffect } from './effects/DamageEffect';
@@ -21,7 +24,7 @@ import { Fireball } from './effects/Fireball';
 import { FireShock } from './effects/FireShock';
 import { Lands } from './Lands';
 import { Orientation } from './MovingKeys';
-import { Npc } from './Npc';
+import { BaseCreature } from './BaseCreature';
 import { Protagonist } from './Protagonist';
 import { style } from './styles';
 import { TilePainter } from './TilePainter';
@@ -88,7 +91,7 @@ export class Controller implements Drawable {
       case "ARRIVAL":
         a = msg.data as ApiArrival;
         if (a.creature.id !== this.proto.id) {
-          const n = new Npc(a.creature);
+          const n = new BaseCreature(a.creature);
           this.map.creatures.set(a.creature.id, n);
         }
 
@@ -235,4 +238,9 @@ export class Controller implements Drawable {
     this.server.sendAction(step);
     p.step(step);
   }
+
+
+
+
+
 }

@@ -8,7 +8,7 @@ import { Metrics } from './Metrics';
 import { Orientation2 } from './Orientation';
 import { TilePainter, toX1, toY1 } from './TilePainter';
 
-export class Protagonist implements DrawableCreature {
+export class Protagonist222 implements DrawableCreature {
 
   readonly id: int;
   readonly viewDistance: uint;
