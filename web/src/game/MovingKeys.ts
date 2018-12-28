@@ -74,7 +74,6 @@ export interface Orientation {
   sight: Dir
 }
 
-
 export class MovingKeys {
 
   private currentMoving: Dir = 0;
@@ -118,7 +117,7 @@ export class MovingKeys {
 
     if (!this._next) return undefined;
 
-    const result =  this._next;
+    const result = this._next;
     if (!this.currentMoving) {
       this._next = undefined;
     } else if (this._next.moving !== this.currentMoving || this._next.sight !== this.currentMoving) {

@@ -10,7 +10,7 @@ Promise.prototype.do = function <T>(handler: (f: T) => void): Promise<T> {
 };
 
 Promise.prototype.doOnError = function <T>(consumer: (error: any) => void): Promise<T> {
-  return this.then(() => this, (err: any) => {
+  return this.catch((err: any) => {
     consumer(err);
     return this;
   })

@@ -14,6 +14,11 @@ declare type int = number;
 declare type float = number;
 
 /**
+ * 0..1
+ */
+declare type floatShare = float;
+
+/**
  * unsigned int
  */
 declare type uint = int;

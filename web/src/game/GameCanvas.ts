@@ -22,7 +22,7 @@ export class GameCanvas implements CanvasComposer, Pressable {
   // @ts-ignore
   private p: BasePainter;
   // @ts-ignore
-  private loading = true;
+  private loading = 1;
   // @ts-ignore
   private game: Game;
 
@@ -32,9 +32,9 @@ export class GameCanvas implements CanvasComposer, Pressable {
 
         const lands  = new Lands(map as ViewMap, tiles as Tiles);
         this.game    = new Game(lands, moving);
-        this.loading = false;
+        this.loading = 0;
       }
-    );
+    ).doOnError(() => this.loading = -1);
   }
 
   changeSize(width: px, height: px): void {
@@ -56,8 +56,10 @@ export class GameCanvas implements CanvasComposer, Pressable {
 
     const p = this.p;
 
-    if (this.loading) {
+    if (this.loading === 1) {
       p.text("Loading...", 30, 30)
+    } else if (this.loading === -1) {
+      p.text("ERROR", 30, 30)
     } else {
       this.game.onFrame(time, p)
     }

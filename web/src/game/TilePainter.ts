@@ -5,10 +5,13 @@ import { Painter, StringStokeStyle } from '../draw/Painter';
 import { CELL, coord, QCELL } from './constants';
 import { InTilePainter } from './InTilePainter';
 import { POS_X, POS_Y, SHIFT_X, SHIFT_Y } from './Lands';
+import { Orientation2 } from './Orientation';
 
 
 export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
-export var toY: (pos: coord) => px = (pos: coord) => (pos - POS_Y) * CELL - SHIFT_Y;
+export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
+export var toX1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y + o.shift;
+export var toY1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y;
 
 
 export class TilePainter implements Painter {
@@ -30,11 +33,8 @@ export class TilePainter implements Painter {
   }
 
 
-  drawTile(img: CanvasImageSource | undefined, sx: px, sy: px, sw: px, sh: px, posX: coord, posY: coord, shiftX: px = 0, shiftY: px = 0) {
+  drawTile(img: CanvasImageSource | undefined, sx: px, sy: px, sw: px, sh: px, x: px, y: px) {
     if (!img) return;
-
-    const x = toX(posX) + shiftX;
-    const y = toY(posY) + shiftY;
 
     this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw, sh)
   }

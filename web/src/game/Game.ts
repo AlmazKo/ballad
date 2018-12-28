@@ -2,22 +2,18 @@ import { Animator } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
 import { toRGBA } from '../canvas/utils';
 import { BasePainter } from '../draw/BasePainter';
-import { Action } from './actions/Action';
 import { ApiMessage } from './actions/ApiMessage';
 import { ApiArrival } from './api/ApiArrival';
 import { Server } from './api/Server';
-import { CELL, HCELL } from './constants';
 import { Effects } from './Effects';
 import { RES } from './GameCanvas';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
 import { Protagonist } from './Protagonist';
-import { Session } from './Session';
+import { Controller } from './Controller';
 import { BTN_1, BTN_2, BTN_3, hotKeys, Key, MovingButtons, Slot } from './Slot';
-import { style } from './styles';
-import { TilePainter, toX, toY } from './TilePainter';
-import { PlayerAction, Traits } from './Trait';
-
+import { TilePainter } from './TilePainter';
+import { Trait, Traits, TraitStep } from './Trait';
 
 
 export const DEBUG = true;
@@ -29,13 +25,13 @@ export class Game {
   private tp: TilePainter;
   // @ts-ignore
   private proto: Protagonist;
-  private session: Session | null   = null;
-  private animators                 = new Animators();
-  private coolDownFraction          = 1;
-  private slots: Array<Slot | null> = [null, null, null, null, null];
-  private effects                   = new Effects();
-  private lastRequestedAction?: PlayerAction;
-  private slotAnimatedFraction      = 0;
+  private session: Controller | null = null;
+  private animators                  = new Animators();
+  private coolDownFraction           = 1;
+  private slots: Array<Slot | null>  = [null, null, null, null, null];
+  private effects                    = new Effects();
+  private lastRequestedAction?: Trait;
+  private slotAnimatedFraction       = 0;
 
   constructor(private map: Lands, private moving: MovingKeys) {
     this.slots[0] = new Slot(0, BTN_1, Traits.melee);
@@ -54,6 +50,8 @@ export class Game {
           this.session.sendOrientation(nextOrientation)
         }
       }
+
+
       this.session.draw(time, p);
       if (DEBUG) this.debug(p);
 
@@ -87,7 +85,7 @@ export class Game {
         if (slotImg)
           ctx.drawImage(slotImg, 0, 0, slotImg.width, slotImg.height, x - 25, y - 25, 50, 50);
 
-        if (this.coolDownFraction != 0) {
+        if (this.coolDownFraction) {
           p.fill(toRGBA("#000", 0.66));
           ctx.beginPath();
           ctx.arc(x, y, 25, 1.5 * Math.PI, (1.5 + this.coolDownFraction * 2) * Math.PI, true);
@@ -102,38 +100,39 @@ export class Game {
       }
 
 
-      // if (slot && this.lastRequestedAction === slot.action && this.slotAnimatedFraction) {
-      //   p.circle(x, y, 23.5, {style: "yellow", width: 4});
-      // } else {
-      //   p.circle(x, y, 25, {style: "white", width: 2});
-      //
-      // }
+      if (slot && this.lastRequestedAction === slot.trait && this.slotAnimatedFraction) {
+        p.circle(x, y, 23.5, {style: "yellow", width: 4});
+      } else {
+        p.circle(x, y, 25, {style: "white", width: 2});
 
-      if (slot) {
+      }
+
+      if (slot && slot.key) {
         p.fillRect(x - 8, y + 17, 16, 16, "#cc0100");
-        p.text(slot.key + "", x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"});
+        p.text(slot.key.name, x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"})
+        ;
       }
     }
   }
 
 
   private debug(bp: BasePainter) {
-    const p = this.proto;
-
-    const pX = p.getX(), pY = p.getY();
-    bp.rect(pX - HCELL, pY - HCELL, CELL, CELL, {style: "red"});
-    bp.text(`${p.positionX};${p.positionY}`, pX + 1, pY + HCELL + 1, {align: 'center', font: "12px sans-serif", style: "#000"});
-    bp.text(`${p.positionX};${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
-
-    bp.fillRect(20, 0, this.tp.width, 20, "#ffffff88");
-    bp.fillRect(0, 0, 20, this.tp.height, "#ffffff88");
-    for (let pos = -48; pos < 100; pos++) {
-      bp.text("" + pos, toX(pos) + 2, 0, style.debugText);
-      bp.text("" + pos, 1, toY(pos), style.debugText);
-      bp.vline(toX(pos), 0, 20, {style: "white"});
-      bp.hline(0, 20, toY(pos), {style: "white"});
-    }
-    bp.fillRect(0, 0, 20, 20, "#ccc");
+    // const p = this.proto;
+    //
+    // const pX = p.getX(), pY = p.getY();
+    // bp.rect(pX - HCELL, pY - HCELL, CELL, CELL, {style: "red"});
+    // bp.text(`${p.positionX};${p.positionY}`, pX + 1, pY + HCELL + 1, {align: 'center', font: "12px sans-serif", style: "#000"});
+    // bp.text(`${p.positionX};${p.positionY}`, pX, pY + HCELL, {align: 'center', font: "12px sans-serif", style: "#fff"});
+    //
+    // bp.fillRect(20, 0, this.tp.width, 20, "#ffffff88");
+    // bp.fillRect(0, 0, 20, this.tp.height, "#ffffff88");
+    // for (let pos = -48; pos < 100; pos++) {
+    //   bp.text("" + pos, toX(pos) + 2, 0, style.debugText);
+    //   bp.text("" + pos, 1, toY(pos), style.debugText);
+    //   bp.vline(toX(pos), 0, 20, {style: "white"});
+    //   bp.hline(0, 20, toY(pos), {style: "white"});
+    // }
+    // bp.fillRect(0, 0, 20, 20, "#ccc");
   }
 
   onServerAction(msg: ApiMessage) {
@@ -143,7 +142,7 @@ export class Game {
       case "PROTAGONIST_ARRIVAL":
         a            = msg.data as ApiArrival;
         this.proto   = new Protagonist(a.creature);
-        this.session = new Session(this.server!!, this.proto, this.map, this.effects, this.tp);
+        this.session = new Controller(this.server!!, this.proto, this.map, this.effects, this.tp);
         break;
 
       default:
@@ -151,21 +150,22 @@ export class Game {
     }
   }
 
-  sendAction(action: PlayerAction): Action | undefined {
-    if (this.session) {
-      const a                  = this.session.sendAction(action);
-      this.lastRequestedAction = action;
-      this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
-
-      if (a) {
-        this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
-      }
-
-      return a;
-    }
-
-    return undefined;
-  }
+  //
+  // sendAction(action: Trait): Action | undefined {
+  //   if (this.session) {
+  //     const a                  = this.session.sendAction(action);
+  //     this.lastRequestedAction = action;
+  //     this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
+  //
+  //     if (a) {
+  //       this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
+  //     }
+  //
+  //     return a;
+  //   }
+  //
+  //   return undefined;
+  // }
 
   // onStep(dir: Dir) {
   //   if (this.session) this.session.step(dir)
@@ -181,12 +181,18 @@ export class Game {
   }
 
   keyDown(btn: Key) {
+
+    const hk = hotKeys.get(btn);
+    if (hk === undefined) return;
+
     const idx = MovingButtons.indexOf(btn.code);
-
+    console.log(`Activate  `, hk.trait);
     if (idx !== -1) {
-      this.moving.add(btn.code);
-    } else if (hotKeys.has(btn)) {
-
+      this.moving.add((hk.trait as TraitStep).dir);
+    } else if (this.session!!.sendAction(hk.trait)) {
+      this.lastRequestedAction = hk.trait;
+      this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
+      this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
     }
   }
 }

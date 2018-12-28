@@ -39,6 +39,11 @@ export const BTN_DOWN  = new Key(40, "v");
 export const MovingButtons = [BTN_LEFT.code, BTN_RIGHT.code, BTN_UP.code, BTN_DOWN.code];
 
 export const hotKeys = new Map<Key, HotKey>();
+hotKeys.set(BTN_UP, new HotKey(BTN_UP, Traits.stepNorth));
+hotKeys.set(BTN_DOWN, new HotKey(BTN_DOWN, Traits.stepSouth));
+hotKeys.set(BTN_LEFT, new HotKey(BTN_LEFT, Traits.stepWest));
+hotKeys.set(BTN_RIGHT, new HotKey(BTN_RIGHT, Traits.stepEast));
+
 hotKeys.set(BTN_1, new HotKey(BTN_1, Traits.melee));
 hotKeys.set(BTN_2, new HotKey(BTN_2, Traits.fireball));
 hotKeys.set(BTN_3, new HotKey(BTN_3, Traits.fireshock));

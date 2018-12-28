@@ -25,12 +25,11 @@ import { Npc } from './Npc';
 import { Protagonist } from './Protagonist';
 import { style } from './styles';
 import { TilePainter } from './TilePainter';
-import { PlayerAction } from './Trait';
-
+import { Trait, TraitFireball, TraitFireshock, TraitMelee } from './Trait';
 
 let INC: uint = 0;
 
-export class Session implements Drawable {
+export class Controller implements Drawable {
   private lastSpellTime: tsm = 0;
 
   constructor(
@@ -62,7 +61,7 @@ export class Session implements Drawable {
   private drawFog(p: TilePainter) {
 
     if (this.proto.isDead) {
-      p.fillRect(0, 0, p.width, p.height, style.fog); //LEFT
+      p.fillRect(0, 0, p.width, p.height, style.fog);
       return;
     }
 
@@ -182,12 +181,12 @@ export class Session implements Drawable {
     this.map.creatures.delete(d.victimId);
   }
 
-  sendAction(action: PlayerAction): Action | undefined {
+  sendAction(action: Trait): Action | undefined {
 
     const time = Date.now();
     const p    = this.proto;
-    switch (action) {
-      case PlayerAction.FIREBALL:
+    switch (action.constructor) {
+      case TraitFireball:
         // if (p.movement) return;
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
@@ -198,7 +197,7 @@ export class Session implements Drawable {
         p.instantSpell();
         return fireball;
 
-      case PlayerAction.MELEE:
+      case TraitMelee:
         // if (p.movement) return;
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
@@ -206,7 +205,7 @@ export class Session implements Drawable {
         p.melee();
         return undefined;
 
-      case PlayerAction.FIRESHOCK:
+      case TraitFireshock:
         if (time - this.lastSpellTime < 1000) return undefined;
         this.lastSpellTime = time;
         const fireshok     = new FireShockSpell(time, this.nextId(), p, 400, 2);
@@ -215,13 +214,9 @@ export class Session implements Drawable {
         this.effects.push(act);
         return fireshok;
 
-      case PlayerAction.STEP:
-        const step = new Step(this.nextId(), p, 300);
-        this.server.sendAction(step);
-        return step;
-
+      default:
+        return undefined;
     }
-    return null!!;
   }
 
 
