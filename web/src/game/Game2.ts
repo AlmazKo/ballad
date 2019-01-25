@@ -1,6 +1,5 @@
 import { Animator } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
-import { toRGBA } from '../canvas/utils';
 import { BasePainter } from '../draw/BasePainter';
 import { ApiMessage } from './actions/ApiMessage';
 import { Step } from './actions/Step';
@@ -9,18 +8,17 @@ import { Server } from './api/Server';
 import { Dir } from './constants';
 import { Controller } from './Controller';
 import { Creature } from './Creature';
+import { Drawable } from './Drawable';
 import { Effects } from './Effects';
-import { RES } from './GameCanvas';
 import { Lands } from './Lands';
 import { MovingKeys } from './MovingKeys';
-import { BTN_1, BTN_2, BTN_3, hotKeys, Key, MovingButtons, Slot } from './Slot';
 import { TilePainter } from './TilePainter';
-import { Trait, Traits, TraitStep } from './Trait';
+import { Trait } from './Trait';
 
 
 export const DEBUG = true;
 
-export class Game {
+export class Game2 implements Drawable {
 
   private server?: Server;
   // @ts-ignore
@@ -30,42 +28,39 @@ export class Game {
   private session: Controller | null = null;
   private animators                  = new Animators();
   private coolDownFraction           = 1;
-  private slots: Array<Slot | null>  = [null, null, null, null, null];
   private effects                    = new Effects();
   private lastRequestedAction?: Trait;
   private slotAnimatedFraction       = 0;
 
   constructor(private map: Lands, private moving: MovingKeys) {
-    this.slots[0] = new Slot(0, BTN_1, Traits.melee);
-    this.slots[1] = new Slot(1, BTN_2, Traits.fireball);
-    this.slots[2] = new Slot(2, BTN_3, Traits.fireshock);
+
   }
 
-  onFrame(time: DOMHighResTimeStamp, p: BasePainter) {
+  draw(time: DOMHighResTimeStamp, p: BasePainter) {
     if (!this.tp) this.tp = new TilePainter(p);
-    this.animators.run(time);
-    if (this.session) {
-
-      if (!this.proto.orientation.moving) {
-        const nextOrientation = this.moving.next2();
-        if (nextOrientation) {
-          this.session.sendOrientation(nextOrientation)
-        }
-      }
-
-
-      this.session.draw(time, p);
-      if (DEBUG) this.debug(p);
-
-      this.effects.draw(time, this.tp);
-      this.drawPanels(p)
-    }
-
-
-    if (!this.server) {
-      this.server = new Server();
-      this.server.subOnAction(msg => this.onServerAction(msg));
-    }
+  //   this.animators.run(time);
+  //   if (this.session) {
+  //
+  //     if (!this.proto.orientation.moving) {
+  //       const nextOrientation = this.moving.next2();
+  //       if (nextOrientation) {
+  //         this.session.sendOrientation(nextOrientation)
+  //       }
+  //     }
+  //
+  //
+  //     this.session.draw(time, p);
+  //     if (DEBUG) this.debug(p);
+  //
+  //     this.effects.draw(time, this.tp);
+  //     this.drawPanels(p)
+  //   }
+  //
+  //
+  //   if (!this.server) {
+  //     this.server = new Server();
+  //     this.server.subOnAction(msg => this.onServerAction(msg));
+  //   }
   }
 
 
@@ -103,55 +98,6 @@ export class Game {
   }
 
 
-  private drawPanels(p: BasePainter) {
-
-    const ctx = this.tp.ctx;
-
-    const [width, height] = [this.tp.ctx.canvas.clientWidth, this.tp.ctx.canvas.clientHeight];
-
-    let x   = 60;
-    const y = height - 45;
-    for (let i = 0; i < 5; i++) {
-
-      x = 60 + 60 * i;
-
-      const slot = this.slots[i];
-      if (slot) {
-        const slotImg = RES.get(slot.trait.resName);
-        if (slotImg)
-          ctx.drawImage(slotImg, 0, 0, slotImg.width, slotImg.height, x - 25, y - 25, 50, 50);
-
-        if (this.coolDownFraction) {
-          p.fill(toRGBA("#000", 0.66));
-          ctx.beginPath();
-          ctx.arc(x, y, 25, 1.5 * Math.PI, (1.5 + this.coolDownFraction * 2) * Math.PI, true);
-          ctx.lineTo(x, y);
-          ctx.fill();
-        }
-      } else {
-        p.fill(toRGBA("#000", 0.2));
-        ctx.beginPath();
-        ctx.arc(x, y, 25, 0, 2 * Math.PI);
-        ctx.fill();
-      }
-
-
-      if (slot && this.lastRequestedAction === slot.trait && this.slotAnimatedFraction) {
-        p.circle(x, y, 23.5, {style: "yellow", width: 4});
-      } else {
-        p.circle(x, y, 25, {style: "white", width: 2});
-
-      }
-
-      if (slot && slot.key) {
-        p.fillRect(x - 8, y + 17, 16, 16, "#cc0100");
-        p.text(slot.key.name, x, y + 18, {align: 'center', font: "bold 12px sans-serif", style: "#fff"})
-        ;
-      }
-    }
-  }
-
-
   private debug(bp: BasePainter) {
     // const p = this.proto;
     //
@@ -178,7 +124,7 @@ export class Game {
       case "PROTAGONIST_ARRIVAL":
         a            = msg.data as ApiArrival;
         // this.proto   = new Protagonist(a.creature);
-        this.session = new Controller(this.server!!, this.proto, this.map, this.effects, this.tp);
+        this.session = new Controller(this.server!!, this.map, this.effects);
         break;
 
       default:
@@ -206,29 +152,29 @@ export class Game {
   // onStep(dir: Dir) {
   //   if (this.session) this.session.step(dir)
   // }
-
-  keyUp(btn: Key) {
-    const idx = MovingButtons.indexOf(btn.code);
-
-    if (idx !== -1) {
-      this.moving.remove(btn.code);
-    }
-
-  }
-
-  keyDown(btn: Key) {
-
-    const hk = hotKeys.get(btn);
-    if (hk === undefined) return;
-
-    const idx = MovingButtons.indexOf(btn.code);
-    console.log(`Activate  `, hk.trait);
-    if (idx !== -1) {
-      this.moving.add((hk.trait as TraitStep).dir);
-    } else if (this.session!!.sendAction(hk.trait)) {
-      this.lastRequestedAction = hk.trait;
-      this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
-      this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
-    }
-  }
+  //
+  // keyUp(btn: Key) {
+  //   const idx = MovingButtons.indexOf(btn.code);
+  //
+  //   if (idx !== -1) {
+  //     this.moving.remove(btn.code);
+  //   }
+  //
+  // }
+  //
+  // keyDown(btn: Key) {
+  //
+  //   const hk = hotKeys.get(btn);
+  //   if (hk === undefined) return;
+  //
+  //   const idx = MovingButtons.indexOf(btn.code);
+  //   console.log(`Activate  `, hk.trait);
+  //   if (idx !== -1) {
+  //     this.moving.add((hk.trait as TraitStep).dir);
+  //   } else if (this.session!!.sendAction(hk.trait)) {
+  //     this.lastRequestedAction = hk.trait;
+  //     this.animators.set("slot_activate", new Animator(200, f => this.slotAnimatedFraction = f), () => this.slotAnimatedFraction = 0);
+  //     this.animators.set("global_cooldown", new Animator(500, f => this.coolDownFraction = f));
+  //   }
+  // }
 }

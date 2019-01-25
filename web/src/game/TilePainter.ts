@@ -9,7 +9,7 @@ import { Orientation2 } from './Orientation';
 
 
 export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
-export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
+export var toY: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
 export var toX1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y + o.shift;
 export var toY1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y;
 

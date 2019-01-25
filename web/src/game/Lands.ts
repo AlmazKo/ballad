@@ -1,13 +1,14 @@
 import { BasePainter } from '../draw/BasePainter';
 import { StrokeStyle } from '../draw/StrokeStyleAcceptor';
 import { Tiles } from './api/Tiles';
-import { ViewMap } from './api/ViewMap';
+import { MapPiece } from './api/MapPiece';
 import { CELL, coord, Dir } from './constants';
-import { DrawableCreature } from './Creature';
-import { RES } from './GameCanvas';
-import { BaseCreature } from './BaseCreature';
+import { Creature } from './Creature';
+import { Drawable } from './Drawable';
+import { RES } from './layers/GameCanvas';
+import { Orientation } from './MovingKeys';
 import { style } from './styles';
-import { TilePainter, toX, toY } from './TilePainter';
+import { toX, toY } from './TilePainter';
 
 
 export declare var POS_X: coord;
@@ -19,7 +20,7 @@ export declare var SHIFT_X: px;
 export declare var SHIFT_Y: px;
 
 
-class Tile {
+export class Tile {
   id: index;
   type: string | null;
   posX: int;
@@ -41,7 +42,7 @@ const TILE_SIZE: px    = 32;//fixme remove. take from api
 const TILESET_SIZE: px = 23;//fixme remove. take from api
 
 
-export class Lands {
+export class Lands implements Drawable {
   private readonly tiles = new Map<index, Tile>();
   private readonly basic: Uint16Array;
   private readonly objects: Uint16Array;
@@ -50,13 +51,13 @@ export class Lands {
   private readonly offsetY: int;
   private readonly height: uint;
 
-  public creatures = new Map<uint, BaseCreature>();
+  public creatures = new Map<uint, Creature>();
 
-  constructor(map: ViewMap, tiles: Tiles) {
+  constructor(map: MapPiece, tiles: Tiles) {
     this.width   = map.width;
     this.height  = map.height;
-    this.offsetX = map.offsetX;
-    this.offsetY = map.offsetY;
+    this.offsetX = map.x;
+    this.offsetY = map.y;
     this.basic   = new Uint16Array(map.terrain);
     this.objects = new Uint16Array(map.objects1);
     this.initTiles(tiles);
@@ -108,6 +109,10 @@ export class Lands {
     return true;
   }
 
+  canStep2(o: Orientation, to: Dir, isFly: boolean = false) {
+    //implements
+  }
+
   canStep(from: [index, index], to: Dir, isFly: boolean = false): boolean {
 
     let [x, y] = from;
@@ -130,7 +135,7 @@ export class Lands {
     if (!canMv) return false;
 
     for (const c of this.creatures.values()[Symbol.iterator]()) {
-      if (c.positionX === x && c.positionY === y) return false;
+      if (c.orientation.posX === x && c.orientation.posY === y) return false;
     }
 
     return true;
@@ -145,17 +150,17 @@ export class Lands {
   // }
 
 
-  updateFocus(p: TilePainter, proto: DrawableCreature) {
+  // updateFocus(p: TilePainter, proto: DrawableCreature) {
+  //
+  //   POS_X   = proto.positionX - Math.floor(p.width / CELL / 4);
+  //   POS_Y   = proto.positionY - Math.floor(p.height / CELL / 4);
+  //   PROTO_X = proto.positionX;
+  //   PROTO_Y = proto.positionY;
+  //   SHIFT_X = proto.shiftX;
+  //   SHIFT_Y = proto.shiftY;
+  // }
 
-    POS_X   = proto.positionX - Math.floor(p.width / CELL / 4);
-    POS_Y   = proto.positionY - Math.floor(p.height / CELL / 4);
-    PROTO_X = proto.positionX;
-    PROTO_Y = proto.positionY;
-    SHIFT_X = proto.shiftX;
-    SHIFT_Y = proto.shiftY;
-  }
-
-  draw(p: BasePainter) {
+  draw(time: DOMHighResTimeStamp, p: BasePainter) {
 
     this.basic.forEach((tileId: uint, idx: index) => {
       if (tileId === 0) return;

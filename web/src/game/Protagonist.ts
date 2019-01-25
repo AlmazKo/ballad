@@ -3,7 +3,7 @@ import { Animators } from '../anim/Animators';
 import { ApiCreature } from './api/ApiCreature';
 import { CELL, Dir, QCELL } from './constants';
 import { DrawableCreature, drawName } from './Creature';
-import { RES } from './GameCanvas';
+import { RES } from './layers/GameCanvas';
 import { Metrics } from './Metrics';
 import { Orientation2 } from './Orientation';
 import { TilePainter, toX1, toY1 } from './TilePainter';

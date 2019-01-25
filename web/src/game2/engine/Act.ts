@@ -1,6 +1,6 @@
-export interface Action {
+export interface Act {
   readonly id: uint,
   readonly creature: uint,
-  readonly time: tsm,
+  readonly startTime: tsm,
 
 }

@@ -1,5 +1,6 @@
 import { ApiCreature } from './ApiCreature';
+import { ApiEvent } from './ApiEvent';
 
-export interface ApiArrival {
+export interface ApiArrival extends ApiEvent {
   creature: ApiCreature
 }

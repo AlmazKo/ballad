@@ -2,7 +2,7 @@ import { LoopAnimator } from '../../anim/Animator';
 import { FireShockSpell } from '../actions/FireShockSpell';
 import { CELL, QCELL } from '../constants';
 import { Effect } from '../Effect';
-import { RES } from '../GameCanvas';
+import { RES } from '../layers/GameCanvas';
 import { TilePainter } from '../TilePainter';
 
 export class FireShock implements Effect {

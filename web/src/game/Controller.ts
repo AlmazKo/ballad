@@ -1,5 +1,3 @@
-import { Animator } from '../anim/Animator';
-import { Animators } from '../anim/Animators';
 import { BasePainter } from '../draw/BasePainter';
 import { Action } from './actions/Action';
 import { ApiMessage } from './actions/ApiMessage';
@@ -15,8 +13,6 @@ import { ApiSpell } from './api/ApiSpell';
 import { ApiSpellFireball } from './api/ApiSpellFireball';
 import { ApiStep } from './api/ApiStep';
 import { Server } from './api/Server';
-import { CELL } from './constants';
-import { Creature } from './Creature';
 import { Drawable } from './Drawable';
 import { Effects } from './Effects';
 import { DamageEffect } from './effects/DamageEffect';
@@ -24,64 +20,59 @@ import { Fireball } from './effects/Fireball';
 import { FireShock } from './effects/FireShock';
 import { Lands } from './Lands';
 import { Orientation } from './MovingKeys';
-import { BaseCreature } from './BaseCreature';
-import { Protagonist } from './Protagonist';
-import { style } from './styles';
-import { TilePainter } from './TilePainter';
 import { Trait, TraitFireball, TraitFireshock, TraitMelee } from './Trait';
 
 let INC: uint = 0;
 
-export class Controller implements Drawable {
+export class Controller {
   private lastSpellTime: tsm = 0;
 
   constructor(
     private server: Server,
-    private proto: Protagonist,
     private map: Lands,
-    private effects: Effects,
-    private tp: TilePainter
+    private effects: Effects
   ) {
-    console.log(tp)
-  }
-
-  draw(time: DOMHighResTimeStamp, p: BasePainter) {
-
-
-    if (this.proto) this.map.updateFocus(this.tp, this.proto);
-    if (!this.proto.orientation.moving) {
-
-    }
-    this.map.draw(p);
-    this.map.creatures.forEach(it => {
-      it.draw(time, this.tp)
-    });
-
-    this.proto.draw(time, this.tp);
-    this.drawFog(this.tp);
-  }
-
-  private drawFog(p: TilePainter) {
-
-    if (this.proto.isDead) {
-      p.fillRect(0, 0, p.width, p.height, style.fog);
-      return;
-    }
-
-    const radius = (this.proto.viewDistance + 0.5) * CELL;
-    const x      = this.proto.getX();
-    const y      = this.proto.getY();
-    const xL     = x - radius;
-    const xR     = x + radius;
-    const yU     = y - radius;
-    const yD     = y + radius;
-
-    p.fillRect(0, 0, xL, p.height, style.fog); //LEFT
-    p.fillRect(xL, 0, radius + radius, yU, style.fog);// TOP
-    p.fillRect(xR, 0, p.width - xR, p.height, style.fog);//RIGHT
-    p.fillRect(xL, yD, radius + radius, p.height - yD, style.fog);//BOTTOM
 
   }
+
+  // draw(time: DOMHighResTimeStamp, p: BasePainter) {
+  //
+  //
+  //   if (this.proto) this.map.updateFocus(this.tp, this.proto);
+  //   if (!this.proto.orientation.moving) {
+  //
+  //   }
+  //   this.map.draw(p);
+  //   // this.map.creatures.forEach(it => {
+  //   //   it.draw(time, this.tp)
+  //   // });
+  //
+  //   // this.proto.draw(time, this.tp);
+  //   // this.drawFog(this.tp);
+  // }
+
+  //
+  // private drawFog(p: TilePainter) {
+  //
+  //   if (this.proto.isDead) {
+  //     p.fillRect(0, 0, p.width, p.height, style.fog);
+  //     return;
+  //   }
+  //
+  //   const radius = (this.proto.viewDistance + 0.5) * CELL;
+  //   const x      = this.proto.getX();
+  //   const y      = this.proto.getY();
+  //   const xL     = x - radius;
+  //   const xR     = x + radius;
+  //   const yU     = y - radius;
+  //   const yD     = y + radius;
+  //
+  //   p.fillRect(0, 0, xL, p.height, style.fog); //LEFT
+  //   p.fillRect(xL, 0, radius + radius, yU, style.fog);// TOP
+  //   p.fillRect(xR, 0, p.width - xR, p.height, style.fog);//RIGHT
+  //   p.fillRect(xL, yD, radius + radius, p.height - yD, style.fog);//BOTTOM
+  //
+  // }
 
   onServerAction(msg: ApiMessage) {
     let a;
@@ -238,9 +229,6 @@ export class Controller implements Drawable {
     this.server.sendAction(step);
     p.step(step);
   }
-
-
-
 
 
 }

@@ -1,13 +1,13 @@
-import { CanvasComposer, Pressable, Registrar } from '../canvas/CanvasComposer';
-import { BasePainter } from '../draw/BasePainter';
-import { ajax } from '../util/net';
-import { Tiles } from './api/Tiles';
-import { ViewMap } from './api/ViewMap';
-import { Game } from './Game';
-import { Lands } from './Lands';
-import { MovingKeys } from './MovingKeys';
-import { Resources } from './Resources';
-import { Buttons } from './Slot';
+import { CanvasComposer, Pressable, Registrar } from '../../canvas/CanvasComposer';
+import { BasePainter } from '../../draw/BasePainter';
+import { ajax } from '../../util/net';
+import { Tiles } from '../api/Tiles';
+import { MapPiece } from '../api/MapPiece';
+import { Game } from '../Game';
+import { Lands } from '../Lands';
+import { MovingKeys } from '../MovingKeys';
+import { Resources } from '../Resources';
+import { Buttons } from '../Slot';
 
 export const RES = new Resources();
 const moving     = new MovingKeys();
@@ -30,7 +30,7 @@ export class GameCanvas implements CanvasComposer, Pressable {
   constructor() {
     Promise.zip(RES.loadBasic(), ajax('/map'), ajax('/tiles'), (_, map, tiles) => {
 
-        const lands  = new Lands(map as ViewMap, tiles as Tiles);
+        const lands  = new Lands(map as MapPiece, tiles as Tiles);
         this.game    = new Game(lands, moving);
         this.loading = 0;
       }

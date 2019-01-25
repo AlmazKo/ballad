@@ -2,7 +2,7 @@ import { LoopAnimator } from '../../anim/Animator';
 import { FireballSpell } from '../actions/FireballSpell';
 import { CELL, Dir } from '../constants';
 import { Effect } from '../Effect';
-import { RES } from '../GameCanvas';
+import { RES } from '../layers/GameCanvas';
 import { Lands } from '../Lands';
 import { TilePainter } from '../TilePainter';
 

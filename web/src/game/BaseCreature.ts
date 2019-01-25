@@ -1,28 +1,23 @@
 import { Animator, Delay } from '../anim/Animator';
 import { Animators } from '../anim/Animators';
-import { Step } from './actions/Step';
 import { ApiCreature } from './api/ApiCreature';
 import { CELL, Dir, QCELL } from './constants';
-import { DrawableCreature, drawLifeLine, drawName } from './Creature';
-import { RES } from './GameCanvas';
-import { Metrics } from './Metrics';
+import { RES } from './layers/GameCanvas';
 import { Orientation2 } from './Orientation';
+import { TileDrawable } from './TileDrawable';
 import { TilePainter, toX1, toY1 } from './TilePainter';
 
-export class BaseCreature implements DrawableCreature {
+export class DrawableCreature implements TileDrawable {
 
-  readonly id: int;
-  readonly metrics: Metrics;
   readonly orientation: Orientation2;
 
-  private animators        = new Animators();
-  private showInstantSpell = false;
+  private animators          = new Animators();
+  private showInstantSpell   = false;
   private meleeFactor: float = 0;
 
   constructor(c: ApiCreature) {
-    this.id        = c.id;
-    this.metrics   = c.metrics;
-    this.orientation  = {moving: 0, sight: c.direction, posX: c.x, posY: c.y, shift: 0};
+
+    this.orientation = {moving: 0, sight: c.direction, posX: c.x, posY: c.y, shift: 0};
   }
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {

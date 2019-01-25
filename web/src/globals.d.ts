@@ -49,6 +49,11 @@ declare type secm = float;
 declare type sec = int;
 
 /**
+ * Map position
+ */
+declare type pos = int;
+
+/**
  * timestamp (sec)
  */
 declare type ts = sec;
@@ -57,9 +62,3 @@ declare type ts = sec;
  * timestamp with milliseconds
  */
 declare type tsm = secm;
-
-/**
- * A double-precision floating-point number which describes the number of milliseconds
- * {@link https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp}
- */
-declare type DOMHighResTimeStamp = tsm;

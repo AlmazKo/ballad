@@ -12,10 +12,10 @@ export interface Creature {
   metrics: Metrics;
 }
 
-export interface DrawableCreature extends Creature, TileDrawable {
-
-  // getLifeShare(): float
-}
+// export interface DrawableCreature extends TileDrawable {
+//
+//   // getLifeShare(): float
+// }
 
 
 export function drawLifeLine(p: Painter, c: DrawableCreature) {

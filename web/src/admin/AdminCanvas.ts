@@ -1,6 +1,6 @@
 import { CanvasComposer } from '../canvas/CanvasComposer';
 import { BasePainter } from '../draw/BasePainter';
-import { ViewMap } from '../game/api/ViewMap';
+import { MapPiece } from '../game/api/MapPiece';
 import { coord } from '../game/constants';
 import { WS_HOST } from '../index';
 import { ajax } from '../util/net';
@@ -24,13 +24,13 @@ export class AdminCanvas implements CanvasComposer {
   private creatures: int[] = [];
   private npcs             = 0;
   private players          = 0;
-  private map?: ViewMap;
+  private map?: MapPiece;
 
 
   constructor() {
     this.ws           = new WebSocket(WS_HOST + '/admin');
     this.ws.onmessage = (event) => this.onRawData(JSON.parse(event.data));
-    ajax('/map').then(map => this.map = map as ViewMap)
+    ajax('/map').then(map => this.map = map as MapPiece)
   }
 
   private onRawData(data: any) {
@@ -93,12 +93,12 @@ export class AdminCanvas implements CanvasComposer {
 
     for (let pos = 0; pos < m.width; pos++) {
       p.vline(toX(pos), PAD, toY(m.height), {style: "#22222222"});
-      p.text("" + (pos + m.offsetX), toX(pos) + 2, 0, {align: "left", font: "7px sans-serif"});
+      p.text("" + (pos + m.x), toX(pos) + 2, 0, {align: "left", font: "7px sans-serif"});
     }
 
     for (let pos = 0; pos < m.height; pos++) {
       p.hline(PAD, width + PAD, toY(pos), {style: "#22222222"});
-      p.text("" + (pos + m.offsetY), PAD - 2, toX(pos) + 2, {align: "right", font: "7px sans-serif"});
+      p.text("" + (pos + m.y), PAD - 2, toX(pos) + 2, {align: "right", font: "7px sans-serif"});
     }
 
     p.vline(toX(m.width), PAD, toY(m.height), {style: "#22222222"});
