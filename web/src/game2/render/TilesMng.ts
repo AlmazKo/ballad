@@ -1,7 +1,7 @@
 import { Tiles } from '../../game/api/Tiles';
-import { Tile } from '../../game/Lands';
-import { ajax } from '../../util/net';
-import { Loading } from '../engine/World';
+import { Api } from '../server/Api';
+import { floor, Loading } from '../world/World';
+import { Tile } from './Tile';
 
 
 const TILE_SIZE: px    = 32;//fixme remove. take from api
@@ -11,9 +11,14 @@ export class TilesMng {
 
   private readonly data = Array<Map<index, Tile> | Loading>();
 
+  constructor(private readonly api: Api) {
+
+  }
+
+
   get(id: int): Tile | undefined {
 
-    const tileSetId = id % 4086;
+    const tileSetId = floor(id % 4086);
     const ts        = this.getTileSet(tileSetId);
     if (ts === undefined) return;
 
@@ -53,6 +58,6 @@ export class TilesMng {
   }
 
   private loadTileSet(id: uint): Promise<Map<index, Tile>> {
-    return ajax('/tile-set?id=' + id).map((t: Tiles) => this.read(t))
+    return this.api.getTileSet(id).map((t: Tiles) => this.read(t))
   }
 }

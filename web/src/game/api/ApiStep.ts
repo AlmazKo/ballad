@@ -1,4 +1,4 @@
-import { Dir } from '../constants';
+import { Dir } from '../../game2/render/constants';
 
 export interface ApiStep {
   creatureId: uint;

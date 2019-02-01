@@ -1,7 +1,7 @@
 import { CanvasComposer } from '../canvas/CanvasComposer';
 import { BasePainter } from '../draw/BasePainter';
 import { MapPiece } from '../game/api/MapPiece';
-import { coord } from '../game/constants';
+import { coord } from '../game2/render/constants';
 import { WS_HOST } from '../index';
 import { ajax } from '../util/net';
 

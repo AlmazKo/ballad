@@ -1,10 +1,14 @@
-import { LoopAnimator } from '../../anim/Animator';
-import { FireballSpell } from '../actions/FireballSpell';
+import { LoopAnimator } from '../../../anim/Animator';
+
+import { FireballSpell } from '../../../game/actions/FireballSpell';
+import { Effect } from '../../../game/Effect';
+import { TilePainter } from '../../../game/TilePainter';
+import { get } from '../../../Module';
+import { Images } from '../../Images';
+import { World } from '../../world/World';
 import { CELL, Dir } from '../constants';
-import { Effect } from '../Effect';
-import { RES } from '../layers/GameCanvas';
-import { Lands } from '../Lands';
-import { TilePainter } from '../TilePainter';
+
+export const RES: Images = get('images');
 
 export class Fireball implements Effect {
   private readonly posX: index;
@@ -16,22 +20,22 @@ export class Fireball implements Effect {
   private readonly anim: LoopAnimator;
   isFinished            = false;
   private f: float      = 0;
-  private map: Lands;
+  private world: World;
   id: uint;
 
-  constructor(spec: FireballSpell, map: Lands) {
+  constructor(spec: FireballSpell, world: World) {
     this.id        = spec.id;
     this.direction = spec.direction;
-    this.posX      = spec.posX;
-    this.posY      = spec.posY;
-    this.map       = map;
+    this.posX      = spec.initX;
+    this.posY      = spec.initY;
+    this.world     = world;
     this.anim      = new LoopAnimator(spec.duration, (f, i) => {
 
         if (i > this.lastAnimIndex) {
           const from = this.getPosition(this.lastAnimIndex);
           const to   = this.getPosition(i);
 
-          if (!this.map.canMove(from, to, true)) {
+          if (!this.world.canStep(from, to, true)) {
             this.isFinished = true;
             return true;
           } else {
@@ -53,6 +57,7 @@ export class Fireball implements Effect {
 
   getPosition(animIdx: index): [px, px] {
     switch (this.direction) {
+
       case Dir.NORTH:
         return [this.posX, this.posY - animIdx];
       case Dir.SOUTH:
@@ -94,7 +99,7 @@ export class Fireball implements Effect {
     const sx: px = 32 * Math.floor(this.f * 4);
     const fire1  = RES.get("fireball_32");
 
-    bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
+    //fixme bp.drawTile(fire1, sx, sy, 32, 32, this.posX, this.posY, shiftX, shiftY);
   }
 
   stop(): void {

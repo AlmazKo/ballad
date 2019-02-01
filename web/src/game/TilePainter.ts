@@ -2,16 +2,15 @@ import { BasePainter } from '../draw/BasePainter';
 import { FillStyle } from '../draw/FillStyle';
 import { FontStyle } from '../draw/FontStyleAcceptor';
 import { Painter, StringStokeStyle } from '../draw/Painter';
-import { CELL, coord, QCELL } from './constants';
+import { Orientation } from '../game2/engine/Orientation';
+import { CELL, coord, QCELL } from '../game2/render/constants';
 import { InTilePainter } from './InTilePainter';
-import { POS_X, POS_Y, SHIFT_X, SHIFT_Y } from './Lands';
-import { Orientation2 } from './Orientation';
 
 
-export var toX: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
-export var toY: (pos: coord) => px = (pos: coord) => (pos - POS_X) * CELL - SHIFT_X;
-export var toX1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y + o.shift;
-export var toY1                    = (o: Orientation2) => (o.posY - POS_Y) * CELL - SHIFT_Y;
+export var toX: (pos: coord) => px = (pos: coord) => 0;
+export var toY: (pos: coord) => px = (pos: coord) => 0;
+export var toX1                    = (o: Orientation) => 0;
+export var toY1                    = (o: Orientation) => 0;
 
 
 export class TilePainter implements Painter {

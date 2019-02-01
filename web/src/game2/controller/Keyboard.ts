@@ -1,19 +1,7 @@
-import { Trait, Traits } from './Trait';
-
-export class Slot {
-  constructor(
-    public readonly id: index,
-    public readonly key: Key | undefined,
-    public readonly trait: Trait) {
-  }
-}
-
-export class HotKey {
-  constructor(
-    public readonly key: Key,
-    public readonly trait: Trait) {
-  }
-}
+import { HotKey } from '../../game/Slot';
+import { Traits } from '../../game/Trait';
+import { Game } from '../engine/Game';
+import { KeyboardMoving } from './KeyboardMoving';
 
 export class Key {
   constructor(
@@ -58,3 +46,44 @@ export const Buttons: { [index: number]: Key } = {
   39: BTN_RIGHT,
   40: BTN_DOWN
 };
+
+
+export class Keyboard {
+  private moving: KeyboardMoving;
+
+  constructor(private readonly game: Game) {
+    window.addEventListener('keypress', e => this.onKeypress(e));
+    window.addEventListener('keyup', e => this.onKeyup(e));
+    window.addEventListener('keydown', e => this.onKeydown(e));
+
+    this.moving = new KeyboardMoving()
+  }
+
+  private onKeypress(e: KeyboardEvent) {
+    console.log('PRESS', e.key, e.keyCode)
+  }
+
+  private onKeyup(e: KeyboardEvent) {
+
+    const btn = Buttons[e.keyCode]
+    if (btn == undefined) return;
+    console.log('UP   ', btn)
+
+    if (MovingButtons.contains(btn.code)) {
+      this.moving.add(btn.code)
+    }
+  }
+
+  private onKeydown(e: KeyboardEvent) {
+    const btn = Buttons[e.keyCode]
+    if (btn == undefined) return;
+    console.log('DOWN ', e.key, e.keyCode)
+
+
+    if (MovingButtons.contains(btn.code)) {
+      this.moving.add(btn.code)
+    }
+
+  }
+
+}

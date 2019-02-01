@@ -1,23 +1,26 @@
-import { Animator, Delay } from '../anim/Animator';
-import { Animators } from '../anim/Animators';
-import { ApiCreature } from './api/ApiCreature';
+import { Animator, Delay } from '../../anim/Animator';
+import { Animators } from '../../anim/Animators';
+import { get } from '../../Module';
+import { TileDrawable } from '../../game/TileDrawable';
+import { TilePainter, toX1, toY1 } from '../../game/TilePainter';
+import { Creature } from '../engine/Creature';
+import { Orientation } from '../engine/Orientation';
+import { Images } from '../Images';
 import { CELL, Dir, QCELL } from './constants';
-import { RES } from './layers/GameCanvas';
-import { Orientation2 } from './Orientation';
-import { TileDrawable } from './TileDrawable';
-import { TilePainter, toX1, toY1 } from './TilePainter';
+
+
+export const RES = get<Images>('images');
 
 export class DrawableCreature implements TileDrawable {
 
-  readonly orientation: Orientation2;
+  readonly orientation: Orientation;
 
   private animators          = new Animators();
   private showInstantSpell   = false;
   private meleeFactor: float = 0;
 
-  constructor(c: ApiCreature) {
-
-    this.orientation = {moving: 0, sight: c.direction, posX: c.x, posY: c.y, shift: 0};
+  constructor(c: Creature) {
+    this.orientation = c.orientation;
   }
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {

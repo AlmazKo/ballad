@@ -1,8 +1,14 @@
 import { Package } from '../../game/actions/Package';
-import { Api } from '../Api';
+import { ApiArrival } from '../../game/api/ApiArrival';
+import { ApiCreature } from '../../game/api/ApiCreature';
+import { Dir } from '../render/constants';
+import { Metrics } from '../../game/Metrics';
+import { Api } from '../server/Api';
 import { Act } from './Act';
-import { Vision } from './Vision';
-import { World } from './World';
+import { Creature } from './Creature';
+import { Orientation } from './Orientation';
+import { Player } from './Player';
+import { World } from '../world/World';
 
 
 const NOTHING: Act[] = [];
@@ -10,7 +16,10 @@ const NOTHING: Act[] = [];
 
 export class Game {
 
-  private lastTick = 0;
+  private lastTick       = 0;
+  private proto: Player | undefined;
+  private creatures      = new Map<uint, Creature>();
+  private actions: Act[] = NOTHING;
 
   constructor(
     private readonly api: Api,
@@ -19,16 +28,25 @@ export class Game {
     api.listen(p => this.onData(p))
   }
 
+
+  getProto(): Player | undefined {
+    return this.proto;
+  }
+
   private onData(pkg: Package) {
 
     // if (p.tick > this.lastTick) {
     //
     // }
 
-    pkg.messages.forEach(msg => {
-      msg.action
-    })
+    if (!this.proto) {
+      const arrival = pkg.messages[0].data as ApiArrival;
+      this.proto    = this.addCreature(arrival.creature);
+    }
 
+    pkg.messages.forEach(msg => {
+      // actions.push()msg.action
+    })
 
   }
 
@@ -40,12 +58,20 @@ export class Game {
     return NOTHING;
   }
 
-  request(req: Request): boolean {
+  // request(req: Request): boolean {
+  //
+  // }
+  //
+  //
+  // getVision(): Vision {
+  //
+  // }
 
-  }
+  private addCreature(ac: ApiCreature): Creature {
 
-
-  getVision(): Vision {
-
+    //fixme
+    const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(Dir.SOUTH, Dir.SOUTH, 0, ac.x, ac.y))
+    this.creatures.set(c.id, c)
+    return c;
   }
 }

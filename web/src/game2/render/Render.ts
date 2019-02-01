@@ -1,72 +1,51 @@
 import { Animators } from '../../anim/Animators';
-import { BasePainter } from '../../draw/BasePainter';
+import { CanvasContext } from '../../draw/CanvasContext';
 import { Game } from '../engine/Game';
+import { Camera } from './Camera';
 import { LandsLayer } from './LandsLayer';
 
-export class Camera {
-
-  constructor(
-    public offset: floatShare,
-    public posX: pos,
-    public posY: pos) {
-
-  }
-
-  toX(pos: pos): px {
-
-  }
-
-  toY(pos: pos): px {
-
-  }
-
-
-}
 
 export class Render {
 
-
-  private width: px;
-  private height: px;
-  private p: BasePainter;
-  private game: Game;
-  private animators = new Animators();
-  private lands: LandsLayer;
+  private width: px  = 100;
+  private height: px = 100;
+  private p: CanvasContext | undefined;
+  private animators  = new Animators();
 
   private readonly camera: Camera;
 
 
-  constructor(game: Game) {
-    this.game   = game;
-    this.lands  = new LandsLayer(game.world);
-    this.camera = {offset: 0, posX: 15, posY: 15}
+  constructor(
+    private readonly game: Game,
+    private readonly lands: LandsLayer) {
+    this.camera = new Camera(0, 20, 20);
   }
 
 
   updateContext(ctx: CanvasRenderingContext2D, width: px, height: px): void {
     this.width  = width;
     this.height = height;
-    this.p      = new BasePainter(ctx);
-    this.lands.init(ctx, width, height)
+    this.p      = new CanvasContext(ctx);
+    this.lands.init(this.p)
   }
 
 
   onFrame(time: DOMHighResTimeStamp) {
-    const actions = this.game.getActions();
-    if (actions.length > 0) return;
+
+    const player = this.game.getProto();
+    if (!player) return;
 
 
-    if (!this.camera) {
-      const arrival = actions[0];
+    // const actions = this.game.getActions();
+    // if (actions.length > 0) return;
 
-
-    }
 
     //start actions
 
     //?
     this.animators.run(time);
 
+    if (this.p) this.p.clear();
 
     this.lands.draw(time, this.camera)
     //draw lands

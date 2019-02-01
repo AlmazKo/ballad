@@ -1,7 +1,6 @@
-import { HOST } from '../index';
+import { Images } from '../Images';
 
 const basicResources: string[] = [
-
   // todo characters & spell images
 ];
 
@@ -9,13 +8,17 @@ enum Loading {
   REQUESTING, FAIL
 }
 
-export class Resources {
+
+export class ImageAssets implements Images {
 
   private data: { [index: string]: HTMLImageElement | Loading } = {};
 
+  constructor(private readonly host: string) {
+
+  }
   loadBasic(): Promise<void> {
     return Promise
-      .all(basicResources.map(n => loadImage(n).do(i => this.data[n] = i)))
+      .all(basicResources.map(n => this.load(n).do(i => this.data[n] = i)))
       .ignore()
   }
 
@@ -27,23 +30,25 @@ export class Resources {
     } else {
       if (data === undefined) {
         this.data[name] = Loading.REQUESTING;
-        loadImage(name)
+        this.load(name)
           .then(i => this.data[name] = i)
           .catch(() => this.data[name] = Loading.FAIL)
       }
       return undefined;
     }
   }
+
+  load(name: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      let img         = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src         = `${this.host}/res/${name}.png`;
+      img.onerror     = reject;
+      img.onload      = () => {
+        resolve(img)
+      };
+    });
+  }
 }
 
-export function loadImage(name: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    let img         = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src         = `${HOST}/res/${name}.png`;
-    img.onerror     = reject;
-    img.onload      = () => {
-      resolve(img)
-    };
-  });
-}
+

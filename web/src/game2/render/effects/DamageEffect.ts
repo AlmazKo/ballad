@@ -1,9 +1,9 @@
-import { Animator } from '../../anim/Animator';
-import { ApiDamage } from '../api/ApiDamage';
+import { Animator } from '../../../anim/Animator';
+import { ApiDamage } from '../../../game/api/ApiDamage';
 import { HCELL } from '../constants';
-import { Effect } from '../Effect';
-import { style } from '../styles';
-import { TilePainter } from '../TilePainter';
+import { Effect } from '../../../game/Effect';
+import { style } from '../../../game/styles';
+import { TilePainter } from '../../../game/TilePainter';
 
 export class DamageEffect implements Effect {
   readonly id = 0;

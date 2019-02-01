@@ -10,8 +10,7 @@
     "removeComments": true,
     "baseUrl": "./src",
     "target": "es2016",
-    "lib": [ "es6", "dom"],
-    "types": ["promiser/types"]
+    "lib": [ "es6", "dom"]
   },
   "include": ["./src/**/*"],
   "exclude": ["./node_modules"]

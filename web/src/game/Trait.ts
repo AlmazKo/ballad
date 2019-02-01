@@ -1,4 +1,4 @@
-import { Dir } from './constants';
+import { Dir } from '../game2/render/constants';
 
 export interface Trait {
   readonly resName: string
@@ -6,7 +6,6 @@ export interface Trait {
   readonly  isMoving: boolean
 }
 
-3
 
 export class TraitStep implements Trait {
   readonly resName  = "";

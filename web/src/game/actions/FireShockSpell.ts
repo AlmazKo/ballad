@@ -1,10 +1,10 @@
-import { Creature } from '../Creature';
+import { Creature } from '../../game2/engine/Creature';
 import { Action } from './Action';
 
 export class FireShockSpell implements Action {
-  readonly posX: index;
-  readonly posY: index;
-  readonly creatureId: uint;
+  readonly posX: pos;
+  readonly posY: pos;
+  readonly creature: Creature;
 
   constructor(
     public readonly time: tsm,
@@ -13,9 +13,9 @@ export class FireShockSpell implements Action {
     public readonly duration: uint,
     public readonly distance: uint) {
 
-    this.creatureId = creature.id;
-    this.posX       = creature.positionX;
-    this.posY       = creature.positionY;
+    this.creature = creature;
+    this.posX     = creature.orientation.x;
+    this.posY     = creature.orientation.y;
   }
 
 }

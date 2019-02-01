@@ -1,5 +1,7 @@
+import { CanvasContext } from '../../draw/CanvasContext';
+
 export interface Layer {
-  init(ctx: CanvasRenderingContext2D, width: px, height: px): void;
+  init(ctx: CanvasContext): void;
 
   changeSize(width: px, height: px): void;
 }

@@ -1,5 +1,5 @@
 import { MapPiece } from '../../game/api/MapPiece';
-import { ajax } from '../../util/net';
+import { Api } from '../server/Api';
 import { Land } from './Land';
 
 
@@ -28,6 +28,11 @@ export class World {
 
   private peices: Array<Array<Piece | Loading>> = [[]];
 
+
+  constructor(private readonly api: Api) {
+
+  }
+
   iterateLands(posX: pos, posY: pos, radius: uint, handler: (p: Piece | undefined) => void) {
 
     const fromX = floor((posX - radius) / PIECE_SIZE);
@@ -37,7 +42,7 @@ export class World {
     const toY = floor((posY + radius) / PIECE_SIZE);
 
     for (let x = fromX; x <= toX; x++) {
-      for (let y = fromY; y <= toY; x++) {
+      for (let y = fromY; y <= toY; y++) {
         handler(this.getPiece(x, y))
       }
     }
@@ -80,14 +85,15 @@ export class World {
   }
 
   loadPiece(x: piecePos, y: piecePos): Promise<Piece> {
-    return ajax(`/map-piece?x=${x}&y=${y}`).map((d: MapPiece) => {
+
+    return this.api.getMapPiece(x, y).map((d: MapPiece) => {
 
       const lands = [];
       const b1    = d.terrain;
       const b2    = d.objects1;
 
       for (let i = 0; i < d.terrain.length; i++) {
-        lands[i] = new Land(b1[i], b2[i], d.x + i % d.height, d.y + floor(i/d.width))
+        lands[i] = new Land(b1[i], b2[i], d.x + i % d.height, d.y + floor(i / d.width))
       }
 
       return new Piece(d.x, d.y, lands)
@@ -95,4 +101,7 @@ export class World {
   }
 
 
+  canStep(from: [px, px], to: [px, px], b: boolean) {
+    return false;
+  }
 }

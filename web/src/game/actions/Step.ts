@@ -1,24 +1,24 @@
-import { Dir } from '../constants';
-import { Creature } from '../Creature';
+import { Creature } from '../../game2/engine/Creature';
+import { Dir } from '../../game2/render/constants';
 import { Action } from './Action';
 
 export class Step implements Action {
-  fromPosX: index;
-  fromPosY: index;
+  initX: index;
+  initY: index;
   readonly direction: Dir;
   readonly duration: ms;
   readonly id: uint;
-  readonly creatureId: uint;
+  readonly creature: Creature;
   readonly time: tsm;
 
-  constructor(id: int, source: Creature, duration: uint, direction: Dir = source.direction) {
+  constructor(id: int, source: Creature, duration: uint, direction: Dir = source.orientation.moving) {
 
-    this.id         = id;
-    this.time       = Date.now();//fixme take it from performance*
-    this.creatureId = source.id;
-    this.fromPosX   = source.positionX;
-    this.fromPosY   = source.positionY;
-    this.direction  = direction;
+    this.id        = id;
+    this.time      = Date.now();//fixme take it from performance*
+    this.creature  = source;
+    this.initX     = source.orientation.x;
+    this.initY     = source.orientation.y;
+    this.direction = direction;
 
     this.duration = duration;
   }
