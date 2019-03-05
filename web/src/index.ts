@@ -13,9 +13,3 @@ window.onload = () => {
   const gc = get(GameCanvas);
   p.start(gc);
 };
-
-if ((window as any).File && (window as any).FileReader && (window as any).FileList && (window as any).Blob) {
-  // Great success! All the File APIs are supported.
-} else {
-  alert('The File APIs are not fully supported in this browser.');
-}

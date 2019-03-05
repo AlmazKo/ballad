@@ -1,14 +1,16 @@
 import { Package } from '../../game/actions/Package';
 import { ApiArrival } from '../../game/api/ApiArrival';
 import { ApiCreature } from '../../game/api/ApiCreature';
-import { Dir } from '../render/constants';
 import { Metrics } from '../../game/Metrics';
+import { Keyboard } from '../controller/Keyboard';
+import { Dir } from '../render/constants';
 import { Api } from '../server/Api';
+import { World } from '../world/World';
 import { Act } from './Act';
+import { ProtoArrival } from './actions/ProtoArrival';
 import { Creature } from './Creature';
 import { Orientation } from './Orientation';
 import { Player } from './Player';
-import { World } from '../world/World';
 
 
 const NOTHING: Act[] = [];
@@ -23,9 +25,11 @@ export class Game {
 
   constructor(
     private readonly api: Api,
-    readonly world: World
+    private readonly world: World,
+    private readonly keyboard: Keyboard,
   ) {
     api.listen(p => this.onData(p))
+    // keyboard.listenOrientation(o => this.on)
   }
 
 
@@ -35,6 +39,7 @@ export class Game {
 
   private onData(pkg: Package) {
 
+    console.log("onData", pkg)
     // if (p.tick > this.lastTick) {
     //
     // }
@@ -42,6 +47,8 @@ export class Game {
     if (!this.proto) {
       const arrival = pkg.messages[0].data as ApiArrival;
       this.proto    = this.addCreature(arrival.creature);
+
+      this.actions.push(new ProtoArrival(1, this.proto, Date.now()))
     }
 
     pkg.messages.forEach(msg => {
@@ -51,11 +58,12 @@ export class Game {
   }
 
   private onTick() {
+
   }
 
 
   getActions(): Act[] {
-    return NOTHING;
+    return this.actions.splice(0);
   }
 
   // request(req: Request): boolean {
@@ -70,8 +78,8 @@ export class Game {
   private addCreature(ac: ApiCreature): Creature {
 
     //fixme
-    const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(Dir.SOUTH, Dir.SOUTH, 0, ac.x, ac.y))
-    this.creatures.set(c.id, c)
+    const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(Dir.SOUTH, Dir.SOUTH, 0, ac.x, ac.y));
+    this.creatures.set(c.id, c);
     return c;
   }
 }

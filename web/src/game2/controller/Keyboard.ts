@@ -1,7 +1,7 @@
 import { HotKey } from '../../game/Slot';
 import { Traits } from '../../game/Trait';
 import { Game } from '../engine/Game';
-import { KeyboardMoving } from './KeyboardMoving';
+import { KeyboardMoving, Orientation } from './KeyboardMoving';
 
 export class Key {
   constructor(
@@ -51,12 +51,16 @@ export const Buttons: { [index: number]: Key } = {
 export class Keyboard {
   private moving: KeyboardMoving;
 
-  constructor(private readonly game: Game) {
+  constructor() {
     window.addEventListener('keypress', e => this.onKeypress(e));
     window.addEventListener('keyup', e => this.onKeyup(e));
     window.addEventListener('keydown', e => this.onKeydown(e));
 
     this.moving = new KeyboardMoving()
+  }
+
+  listenOrientation(handler: (o: Orientation) => any) {
+
   }
 
   private onKeypress(e: KeyboardEvent) {
@@ -65,9 +69,9 @@ export class Keyboard {
 
   private onKeyup(e: KeyboardEvent) {
 
-    const btn = Buttons[e.keyCode]
+    const btn = Buttons[e.keyCode];
     if (btn == undefined) return;
-    console.log('UP   ', btn)
+    console.log('UP   ', btn);
 
     if (MovingButtons.contains(btn.code)) {
       this.moving.add(btn.code)
@@ -75,9 +79,9 @@ export class Keyboard {
   }
 
   private onKeydown(e: KeyboardEvent) {
-    const btn = Buttons[e.keyCode]
+    const btn = Buttons[e.keyCode];
     if (btn == undefined) return;
-    console.log('DOWN ', e.key, e.keyCode)
+    console.log('DOWN ', e.key, e.keyCode);
 
 
     if (MovingButtons.contains(btn.code)) {

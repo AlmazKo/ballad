@@ -30,7 +30,7 @@ export class LocalServer implements Api {
             "creature": {
               "id"          : 4,
               "isPlayer"    : true,
-              "x"           : -18,
+              "x"           : 18,
               "y"           : 0,
               "direction"   : 2,
               "metrics"     : {"name": "4", "life": 50, "maxLife": 50},
@@ -39,11 +39,10 @@ export class LocalServer implements Api {
 
           }
         } as ApiMessage]
-    } as Package
+    } as Package;
 
 
     handler(pkg)
-
   }
 
   sendAction(action

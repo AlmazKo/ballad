@@ -1,5 +1,6 @@
 import { Animators } from '../../anim/Animators';
 import { CanvasContext } from '../../draw/CanvasContext';
+import { ProtoArrival } from '../engine/actions/ProtoArrival';
 import { Game } from '../engine/Game';
 import { Camera } from './Camera';
 import { LandsLayer } from './LandsLayer';
@@ -18,7 +19,7 @@ export class Render {
   constructor(
     private readonly game: Game,
     private readonly lands: LandsLayer) {
-    this.camera = new Camera(0, -18, 1);
+    this.camera = new Camera(0, -4, 1);
   }
 
 
@@ -34,20 +35,29 @@ export class Render {
   onFrame(time: DOMHighResTimeStamp) {
 
     const player = this.game.getProto();
+    const camera = this.camera;
     if (!player) return;
 
 
-    // const actions = this.game.getActions();
+    const actions = this.game.getActions();
     // if (actions.length > 0) return;
 
 
     //start actions
 
     //?
+
+    for (const action of actions) {
+
+      if (action instanceof ProtoArrival) {
+        camera.x = action.creature.orientation.x;
+        camera.y = action.creature.orientation.y;
+      }
+    }
+
     this.animators.run(time);
 
     if (this.p) this.p.clear();
-    const camera = this.camera;
 
     camera.absoluteX = this.width / 2;
     camera.absoluteY = this.height / 2;
@@ -55,9 +65,6 @@ export class Render {
     this.lands.draw(time, camera)
     //draw lands
     //draw creatures
-
-
-
 
 
     //draw effects

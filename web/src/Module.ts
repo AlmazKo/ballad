@@ -1,3 +1,4 @@
+import { Keyboard } from './game2/controller/Keyboard';
 import { Game } from './game2/engine/Game';
 import { GameCanvas } from './game2/render/GameCanvas';
 import { LandsLayer } from './game2/render/LandsLayer';
@@ -48,8 +49,9 @@ export function get<T>(c: Constructor<T> | string): T {
 Module.setCached('api', () => new LocalServer());
 Module.setCached('images', () => new LocalImages(HOST));
 Module.setCached(LocalServer, () => new LocalServer());
+Module.setCached(Keyboard, () => new Keyboard());
 Module.setCached(World, () => new World(get('api')));
-Module.setCached(Game, () => new Game(get('api'), get(World)));
+Module.setCached(Game, () => new Game(get('api'), get(World), get(Keyboard)));
 Module.setCached(LandsLayer, () => new LandsLayer(get(World), get(TilesMng), get('images')));
 Module.setCached(TilesMng, () => new TilesMng(get('api')));
 Module.setCached(Render, () => new Render(get(Game), get(LandsLayer)));

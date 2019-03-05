@@ -1,7 +1,7 @@
 import { Dir } from '../render/constants';
 
 
-interface Orientation {
+export interface Orientation {
   moving: Dir,
   sight: Dir
 }
