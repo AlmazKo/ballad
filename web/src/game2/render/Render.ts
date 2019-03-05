@@ -18,7 +18,7 @@ export class Render {
   constructor(
     private readonly game: Game,
     private readonly lands: LandsLayer) {
-    this.camera = new Camera(0, 20, 20);
+    this.camera = new Camera(0, -18, 1);
   }
 
 
@@ -26,7 +26,8 @@ export class Render {
     this.width  = width;
     this.height = height;
     this.p      = new CanvasContext(ctx);
-    this.lands.init(this.p)
+    this.lands.init(this.p);
+    this.lands.changeSize(width, height);
   }
 
 
@@ -46,10 +47,19 @@ export class Render {
     this.animators.run(time);
 
     if (this.p) this.p.clear();
+    const camera = this.camera;
 
-    this.lands.draw(time, this.camera)
+    camera.absoluteX = this.width / 2;
+    camera.absoluteY = this.height / 2;
+
+    this.lands.draw(time, camera)
     //draw lands
     //draw creatures
+
+
+
+
+
     //draw effects
     //draw fog
 

@@ -1,22 +1,33 @@
 import { CanvasContext } from '../../draw/CanvasContext';
 import { Layer } from '../../game/layers/Layer';
 import { Images } from '../Images';
-import { Land } from '../world/Land';
-import { World } from '../world/World';
+import { floor, Piece, World } from '../world/World';
 import { Camera } from './Camera';
-import { CELL, HCELL } from './constants';
-
+import { CELL } from './constants';
 import { TilesMng } from './TilesMng';
 
 
-const TILE_SIZE: px    = 32;//fixme remove. take from api
-const TILESET_SIZE: px = 23;//fixme remove. take from api
+const PIECE_SIZE: px                   = 512;//fixme remove. take from api
+const TILE_SIZE: px                    = 32;//fixme remove. take from api
+const TILESET_SIZE: px                 = 23;//fixme remove. take from api
+const offCanvas                        = new (window as any).OffscreenCanvas(PIECE_SIZE, PIECE_SIZE) as any;
+const offCtx: CanvasRenderingContext2D = offCanvas.getContext('2d', {alpha: true})!!;
+offCtx.imageSmoothingEnabled           = false;
+// offCtx.scale(2, 2);
+const ctx                              = new CanvasContext(offCtx);
+
+
+ctx.fillRect(0, 0, PIECE_SIZE, PIECE_SIZE, '#999');
+ctx.text("NO DATA", 512, 512, {style: '#ccc', font: "bold 60px sans-serif", align: "right", baseline: "bottom"});
+
+const NO_DATA: ImageBitmap = offCanvas.transferToImageBitmap();
 
 
 export class LandsLayer implements Layer {
 
   // @ts-ignore
   private ctx: CanvasContext;
+  private cache = new Map<any, ImageBitmap>();
 
   constructor(
     private readonly world: World,
@@ -28,51 +39,60 @@ export class LandsLayer implements Layer {
 
   draw(time: DOMHighResTimeStamp, camera: Camera) {
 
-
     this.world.iterateLands(camera.x, camera.y, 20, piece => {
+
       if (piece) {
-        piece.data.forEach(land => this.drawTile(land, camera))
+        const img = this.getPieceImage(piece);
+        const x   = camera.toX(piece.x);
+        const y   = camera.toY(piece.y);
+        if (img) this.ctx.ctx.drawImage(img, 0, 0, PIECE_SIZE, PIECE_SIZE, x, y, PIECE_SIZE, PIECE_SIZE);
+        this.ctx.rect(x, y, PIECE_SIZE, PIECE_SIZE, {style: 'black'});
 
+        this.ctx.text(`${piece.x}x${piece.y}`, x + 2, y + 2, {style: 'red'});
 
-        const x = camera.toX(piece.x);
-        const y = camera.toY(piece.y);
-
-        this.ctx.rect(x, y, CELL*16, CELL*16, {style: 'black'});
-        this.ctx.text(`${piece.x}x${piece.y}`, x+1, y+1, {style: 'red'});
       }
-
-
-
     });
 
 
-    const x = camera.toX(camera.x) - HCELL;
-    const y = camera.toY(camera.y) - HCELL;
+    const x = camera.toX(camera.x);
+    const y = camera.toY(camera.y);
 
-    this.ctx.rect(x, y, CELL, CELL, {style: 'red'})
-
+    this.ctx.rect(x, y, CELL, CELL, {style: 'red'});
+    this.ctx.text(`${camera.x};${camera.y}`, x + 2, y + 2, {style: 'red'});
   }
 
+  getPieceImage(piece: Piece): ImageBitmap {
+    // return NO_DATA;
+    const tileSet = this.images.get('map1');
+    if (!tileSet || piece.data.length == 0) return NO_DATA;
 
-  drawTile(land: Land, camera: Camera) {
+    let img = this.cache.get(piece);
 
-    const img = this.images.get('map1');
-    if (!img) return;
-
-    const x = camera.toX(land.x);
-    const y = camera.toY(land.y);
-
-
-    // if (x < -TILE_SIZE || y < -TILE_SIZE) return;
-    // if (x > p.width + TILE_SIZE || y > p.height + TILE_SIZE) return;
-
-    const b = this.tiles.get(land.basis-1);
-    if (b) {
-      this.ctx.drawImage(img, b.sx, b.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-      this.ctx.rect(x, y, CELL, CELL, {style: 'grey', dash:[2,4]})
+    if (img === undefined) {
+      img = this.renderPiece2(piece, tileSet);
+      if (img === undefined) return NO_DATA;
+      this.cache.set(piece, img);
     }
-      this.ctx.text("" +land.basis, x+1, y+1, {style: 'black'})
 
+    return img;
+  }
+
+  private renderPiece2(piece: Piece, img: HTMLImageElement): ImageBitmap | undefined {
+    ctx.clear();
+
+    for (let i = 0; i < piece.data.length; i++) {
+      const land = piece.data[i];
+      const b    = this.tiles.get(land.basis - 1);
+      if (!b) return;
+
+      const x = (i % 16) * CELL;
+      const y = floor(i / 16) * CELL;
+      if (b) ctx.drawImage(img, b.sx, b.sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+      ctx.rect(x, y, CELL, CELL, {style: '#000000', dash: [1, 4]});
+      ctx.text("" + land.basis, x + 1, y + 1, {style: 'black'});
+    }
+
+    return offCanvas.transferToImageBitmap();
   }
 
   changeSize(width: px, height: px): void {

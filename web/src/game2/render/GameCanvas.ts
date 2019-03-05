@@ -16,8 +16,7 @@ export class GameCanvas implements CanvasComposer {
   }
 
   changeSize(width: px, height: px): void {
-    this.width  = width;
-    this.height = height;
+
 
   }
 

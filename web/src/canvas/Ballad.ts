@@ -15,6 +15,8 @@ class FpsMeter {
   }
 }
 
+export const STOP_RENDER = "STOP_RENDER";
+
 let DEV       = true;//process.env.NODE_ENV === 'development';
 let INC: uint = 0;
 
@@ -76,6 +78,7 @@ export class Ballad {
     const context = <CanvasRenderingContext2D>this.canvas.getContext('2d', {alpha: true});
     if (context === null) throw new Error('Fail create context');
     this.ctx = context;
+    this.ctx.imageSmoothingEnabled = false;
 
     this.updateCanvasSize();
   }
@@ -121,6 +124,8 @@ export class Ballad {
         this.tryCallEndFrame(now);
       } catch (e) {
         this.error('Fail render the frame', e);
+        if (e == STOP_RENDER) return;
+
         this.tryCallEndFrame(now, e);
       }
 

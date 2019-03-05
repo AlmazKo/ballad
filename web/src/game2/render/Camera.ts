@@ -1,6 +1,8 @@
 import { CELL } from './constants';
 
 export class Camera {
+  absoluteX: px = 100;
+  absoluteY: px = 100;
 
   constructor(
     public offset: floatShare,
@@ -10,11 +12,11 @@ export class Camera {
   }
 
   toX(pos: pos): px {
-    return CELL * pos - this.x;//fixme
+    return (pos - this.x) * CELL + this.absoluteX;
   }
 
   toY(pos: pos): px {
-    return CELL * pos - this.y;//fixme
+    return (pos - this.y) * CELL + this.absoluteY;
   }
 
 

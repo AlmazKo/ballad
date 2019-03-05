@@ -16,7 +16,7 @@ export enum Loading {
   REQUESTING = 1, FAIL, ABSENCE
 }
 
-class Piece {
+export class Piece {
   constructor(
     readonly x: pos,
     readonly y: pos,
@@ -86,17 +86,16 @@ export class World {
 
   loadPiece(x: piecePos, y: piecePos): Promise<Piece> {
 
-    return this.api.getMapPiece(x, y).map((d: MapPiece) => {
-
+    return this.api.getMapPiece(x, y).map((p: MapPiece) => {
       const lands = [];
-      const b1    = d.terrain;
-      const b2    = d.objects1;
+      const b1    = p.terrain;
+      const b2    = p.objects1;
 
-      for (let i = 0; i < d.terrain.length; i++) {
-        lands[i] = new Land(b1[i], b2[i], d.x + i % d.height, d.y + floor(i / d.width))
+      for (let i = 0; i < p.terrain.length; i++) {
+        lands[i] = new Land(b1[i], b2[i], p.x + i % p.height, p.y + floor(i / p.width))
       }
 
-      return new Piece(d.x, d.y, lands)
+      return new Piece(p.x, p.y, lands)
     })
   }
 
