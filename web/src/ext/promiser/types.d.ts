@@ -3,9 +3,9 @@ declare type NP<T> = Exclude<T, Promise<any>>;
 interface PromiseConstructor {
   of<T>(value: NP<TO>): Promise<T>;
 
-  zip<T1, T2, R>(v1: Promise<T1>, v2: Promise<T2>, accum: (p1: T1, p: T2) => R): Promise<R>;
-
-  zip<T1, T2, T3, R>(v1: Promise<T1>, v2: Promise<T2>, v3: Promise<T3>, accum: (p1: T1, p2: T2, p3: T3) => R): Promise<R>;
+  // zip<T1, T2, R>(v1: Promise<T1>, v2: Promise<T2>, accum: (p1: T1, p: T2) => R): Promise<R>;
+  //
+  // zip<T1, T2, T3, R>(v1: Promise<T1>, v2: Promise<T2>, v3: Promise<T3>, accum: (p1: T1, p2: T2, p3: T3) => R): Promise<R>;
 
   timer(ms: number): Promise<void>;
 

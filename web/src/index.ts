@@ -1,7 +1,8 @@
 import { Ballad } from './canvas/Ballad';
 import { get } from './Module';
 import { GameCanvas } from './game2/render/GameCanvas';
-import './promiser/ext';
+import './ext/promiser/ext';
+import './ext/array/ext';
 
 export const HOST    = "http://localhost";
 export const WS_HOST = "ws://localhost";

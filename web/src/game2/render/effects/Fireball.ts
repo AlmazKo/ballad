@@ -4,9 +4,10 @@ import { FireballSpell } from '../../../game/actions/FireballSpell';
 import { Effect } from '../../../game/Effect';
 import { TilePainter } from '../../../game/TilePainter';
 import { get } from '../../../Module';
+import { Dir } from '../../constants';
 import { Images } from '../../Images';
 import { World } from '../../world/World';
-import { CELL, Dir } from '../constants';
+import { CELL } from '../constants';
 
 export const RES: Images = get('images');
 

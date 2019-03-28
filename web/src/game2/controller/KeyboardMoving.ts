@@ -1,7 +1,7 @@
-import { Dir } from '../render/constants';
+import { Dir } from '../constants';
 
 
-export interface Orientation {
+export interface Focus {
   moving: Dir,
   sight: Dir
 }
@@ -10,7 +10,7 @@ export class KeyboardMoving {
 
   private currentMoving: Dir = 0;
   private currentSight: Dir  = 0;
-  private _next?: Orientation;
+  private _next?: Focus;
 
   add(direction: Dir) {
     this.currentSight  = this.currentMoving;
@@ -29,7 +29,7 @@ export class KeyboardMoving {
     }
   }
 
-  next(): Orientation | undefined {
+  next(): Focus | undefined {
 
     if (!this._next) return undefined;
 

@@ -1,7 +1,6 @@
 import { HotKey } from '../../game/Slot';
 import { Traits } from '../../game/Trait';
-import { Game } from '../engine/Game';
-import { KeyboardMoving, Orientation } from './KeyboardMoving';
+import { Focus, KeyboardMoving } from './KeyboardMoving';
 
 export class Key {
   constructor(
@@ -50,6 +49,9 @@ export const Buttons: { [index: number]: Key } = {
 
 export class Keyboard {
   private moving: KeyboardMoving;
+  private handler: (o: Focus) => any = () => {
+  };
+
 
   constructor() {
     window.addEventListener('keypress', e => this.onKeypress(e));
@@ -59,7 +61,8 @@ export class Keyboard {
     this.moving = new KeyboardMoving()
   }
 
-  listenOrientation(handler: (o: Orientation) => any) {
+  listenFocus(handler: (o: Focus) => any) {
+    this.handler = handler;
 
   }
 
@@ -74,7 +77,16 @@ export class Keyboard {
     console.log('UP   ', btn);
 
     if (MovingButtons.contains(btn.code)) {
-      this.moving.add(btn.code)
+      this.moving.add(btn.code);
+      this.onChanged();
+    }
+  }
+
+  private onChanged() {
+    const f = this.moving.next();
+    if (f !== undefined) {
+      console.log('Focus: ' , f);
+      this.handler(f);
     }
   }
 
@@ -85,9 +97,9 @@ export class Keyboard {
 
 
     if (MovingButtons.contains(btn.code)) {
-      this.moving.add(btn.code)
+      this.moving.add(btn.code);
+      this.onChanged();
     }
-
   }
 
 }

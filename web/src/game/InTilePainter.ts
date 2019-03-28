@@ -1,4 +1,5 @@
 import { BasePainter } from '../draw/BasePainter';
+import { CanvasContext } from '../draw/CanvasContext';
 import { FillStyle } from '../draw/FillStyle';
 import { FontStyle } from '../draw/FontStyleAcceptor';
 import { Painter, StringStokeStyle } from '../draw/Painter';
@@ -8,7 +9,7 @@ export class InTilePainter implements Painter {
   currentX: px = 0;
   currentY: px = 0;
 
-  constructor(private readonly bp: BasePainter) {
+  constructor(private readonly bp: CanvasContext) {
   }
 
   text(text: string, x: px, y: px, style?: Partial<FontStyle>, maxWidth?: px) {

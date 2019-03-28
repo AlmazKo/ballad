@@ -1,5 +1,5 @@
+import { Dir } from '../../game2/constants';
 import { Creature } from '../../game2/engine/Creature';
-import { Dir } from '../../game2/render/constants';
 import { Action } from './Action';
 
 export class Step implements Action {

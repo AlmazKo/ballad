@@ -54,7 +54,6 @@ class App(vertx: Vertx) {
 
         initCors(router)
 
-
         router.route("/admin").handler { ctx ->
             val ws = ctx.request().upgrade()
             game.onEndTick {
@@ -70,19 +69,16 @@ class App(vertx: Vertx) {
             PlayerSession(p, ws, game)
         }
 
-
         router.route("/res/*").handler(StaticHandler.create("../resources"))
 
-        router.get("/map").handler { req ->
-            val vp = ViewMap(lands.width, lands.height, lands.offsetX, lands.offsetY, lands.basis, lands.objects)
+        router.get("/map-piece").handler { req ->
+
+            val x = req.pathParam("x").toInt()
+            val y = req.pathParam("y").toInt()
+            val vp = MapPiece(lands.width, lands.height, lands.offsetX, lands.offsetY, lands.basis, lands.objects)
             req.response().putHeader("content-type", "application/json; charset=utf-8")
             req.response()
-                .end(
-                    """{"width":${vp.width}, "height":${vp.heigt},"offsetX":${vp.offsetX}, "offsetY":${vp.offsetY},
-                    |"terrain":[${vp.terrain.joinToString(",")}],
-                    |"objects1":[${vp.objects1.joinToString(",")}]}
-                    |""".trimMargin()
-                )
+                .end(vp.toString())
         }
 
         router.get("/tiles").handler { req ->

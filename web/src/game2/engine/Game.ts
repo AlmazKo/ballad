@@ -2,24 +2,27 @@ import { Package } from '../../game/actions/Package';
 import { ApiArrival } from '../../game/api/ApiArrival';
 import { ApiCreature } from '../../game/api/ApiCreature';
 import { Metrics } from '../../game/Metrics';
+import { Dir } from '../constants';
 import { Keyboard } from '../controller/Keyboard';
-import { Dir } from '../render/constants';
+import { Focus } from '../controller/KeyboardMoving';
 import { Api } from '../server/Api';
 import { World } from '../world/World';
 import { Act } from './Act';
 import { ProtoArrival } from './actions/ProtoArrival';
+import { StartMoving } from './actions/StartMoving';
 import { Creature } from './Creature';
 import { Orientation } from './Orientation';
 import { Player } from './Player';
 
 
 const NOTHING: Act[] = [];
-
+let ID               = 1;
 
 export class Game {
 
   private lastTick       = 0;
-  private proto: Player | undefined;
+  // @ts-ignore
+  private proto: Player;
   private creatures      = new Map<uint, Creature>();
   private actions: Act[] = NOTHING;
 
@@ -29,7 +32,7 @@ export class Game {
     private readonly keyboard: Keyboard,
   ) {
     api.listen(p => this.onData(p))
-    // keyboard.listenOrientation(o => this.on)
+    keyboard.listenFocus(o => this.onChangedOrientation(o))
   }
 
 
@@ -39,7 +42,7 @@ export class Game {
 
   private onData(pkg: Package) {
 
-    console.log("onData", pkg)
+    console.log("onData", pkg);
     // if (p.tick > this.lastTick) {
     //
     // }
@@ -48,7 +51,7 @@ export class Game {
       const arrival = pkg.messages[0].data as ApiArrival;
       this.proto    = this.addCreature(arrival.creature);
 
-      this.actions.push(new ProtoArrival(1, this.proto, Date.now()))
+      this.actions.push(new ProtoArrival(ID++, this.proto, Date.now()))
     }
 
     pkg.messages.forEach(msg => {
@@ -60,7 +63,6 @@ export class Game {
   private onTick() {
 
   }
-
 
   getActions(): Act[] {
     return this.actions.splice(0);
@@ -81,5 +83,15 @@ export class Game {
     const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(Dir.SOUTH, Dir.SOUTH, 0, ac.x, ac.y));
     this.creatures.set(c.id, c);
     return c;
+  }
+
+  private onChangedOrientation(f: Focus) {
+    const p = this.proto!!;
+
+    p.orientation.moving = f.moving;
+    p.orientation.sight  = f.sight;
+
+    this.actions.push(new StartMoving(ID++, this.proto, Date.now(), 200, f.moving))
+
   }
 }

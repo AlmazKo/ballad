@@ -5,9 +5,10 @@ import { MapPiece } from '../../game/api/MapPiece';
 import { Tiles } from '../../game/api/Tiles';
 import { Api } from './Api';
 import { MOCK_TILES } from './map';
+import { ResourcesApi } from './ResourcesApi';
 
 
-export class LocalServer implements Api {
+export class LocalServer implements Api, ResourcesApi {
   private handler: ((msg: Package) => void) | undefined;
 
 

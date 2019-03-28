@@ -1,4 +1,4 @@
-import { Dir } from '../game2/render/constants';
+import { Dir } from '../game2/constants';
 
 export interface Trait {
   readonly resName: string

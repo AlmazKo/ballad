@@ -1,5 +1,5 @@
 import { Tiles } from '../../game/api/Tiles';
-import { Api } from '../server/Api';
+import { ResourcesApi } from '../server/ResourcesApi';
 import { floor, Loading } from '../world/World';
 import { Tile } from './Tile';
 
@@ -11,7 +11,7 @@ export class TilesMng {
 
   private readonly data = Array<Map<index, Tile> | Loading>();
 
-  constructor(private readonly api: Api) {
+  constructor(private readonly api: ResourcesApi) {
 
   }
 

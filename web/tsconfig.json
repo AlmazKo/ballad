@@ -9,7 +9,7 @@
     "traceResolution": true,
     "removeComments": true,
     "baseUrl": "./src",
-    "target": "es2016",
+    "target": "es2018",
     "lib": [ "es6", "dom"]
   },
   "include": ["./src/**/*"],

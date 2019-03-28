@@ -1,12 +1,14 @@
-import { Animator, Delay } from '../../anim/Animator';
+import { Animator, Delay, LoopAnimator } from '../../anim/Animator';
 import { Animators } from '../../anim/Animators';
-import { get } from '../../Module';
 import { TileDrawable } from '../../game/TileDrawable';
 import { TilePainter, toX1, toY1 } from '../../game/TilePainter';
+import { get } from '../../Module';
+import { Dir } from '../constants';
+import { StartMoving } from '../engine/actions/StartMoving';
 import { Creature } from '../engine/Creature';
 import { Orientation } from '../engine/Orientation';
 import { Images } from '../Images';
-import { CELL, Dir, QCELL } from './constants';
+import { CELL, QCELL } from './constants';
 
 
 export const RES = get<Images>('images');
@@ -69,7 +71,57 @@ export class DrawableCreature implements TileDrawable {
       sx = Math.floor(this.meleeFactor * 4) * 32 + 8;
     }
 
-    bp.drawTile(RES.get("character"), sx, sy, sw, sh, x + QCELL, y);
+    bp.draw("character", sx, sy, sw, sh, x + QCELL, y);
+
+  }
+
+  startMoving(a: StartMoving) {
+    this.animators.interrupt("step");
+    const dr       = a.dir;
+    const o        = this.orientation;
+    o.moving       = dr;
+    const movement = new LoopAnimator(a.speed, (f, i) => {
+      if (f >= 1) {
+        switch (dr) {
+          case Dir.WEST:
+            o.x--;
+            break;
+          case Dir.EAST:
+            o.x++;
+            break;
+          case Dir.NORTH:
+            o.y--;
+            break;
+          case Dir.SOUTH:
+            o.y++;
+            break;
+        }
+        o.shift = f - 1;
+      } else {
+        o.shift = f;
+      }
+
+      return true;
+    });
+
+    this.animators.set("step", movement);
+  }
+
+  stopMoving() {
+    this.animators.interrupt("step");
+  }
+
+  // onRotated(rotated: boolean) {
+  //   this.rotated = rotated;
+  // }
+  //
+  //
+  // onStep(step: Step): void {
+  //
+  //   //todo add server sync
+  // }
+
+  move() {
 
   }
 
