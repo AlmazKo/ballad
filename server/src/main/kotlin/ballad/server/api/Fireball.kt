@@ -1,6 +1,5 @@
 package ballad.server.api
 
-import ballad.server.game.Direction
 import ballad.server.game.actions.Fireball
 import kotlinx.serialization.Serializable
 
