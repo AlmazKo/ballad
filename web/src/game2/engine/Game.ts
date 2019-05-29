@@ -3,13 +3,13 @@ import { ApiArrival } from '../../game/api/ApiArrival';
 import { ApiCreature } from '../../game/api/ApiCreature';
 import { Metrics } from '../../game/Metrics';
 import { Dir } from '../constants';
-import { Keyboard } from '../controller/Keyboard';
 import { Focus } from '../controller/KeyboardMoving';
 import { Api } from '../server/Api';
 import { World } from '../world/World';
 import { Act } from './Act';
 import { ProtoArrival } from './actions/ProtoArrival';
 import { StartMoving } from './actions/StartMoving';
+import { ControlEventsListener } from './ControlEventsListener';
 import { Creature } from './Creature';
 import { Orientation } from './Orientation';
 import { Player } from './Player';
@@ -18,7 +18,11 @@ import { Player } from './Player';
 const NOTHING: Act[] = [];
 let ID               = 1;
 
-export class Game {
+export class Game implements ControlEventsListener {
+
+  onAction(f: Focus): void {
+    throw new Error("Method not implemented.");
+  }
 
   private lastTick       = 0;
   // @ts-ignore
@@ -28,11 +32,9 @@ export class Game {
 
   constructor(
     private readonly api: Api,
-    private readonly world: World,
-    private readonly keyboard: Keyboard,
+    private readonly world: World
   ) {
     api.listen(p => this.onData(p))
-    keyboard.listenFocus(o => this.onChangedOrientation(o))
   }
 
 
@@ -85,7 +87,7 @@ export class Game {
     return c;
   }
 
-  private onChangedOrientation(f: Focus) {
+  onChangedOrientation(f: Focus) {
     const p = this.proto!!;
 
     p.orientation.moving = f.moving;

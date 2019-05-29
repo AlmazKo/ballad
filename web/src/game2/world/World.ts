@@ -1,5 +1,4 @@
-import { MapPiece } from '../../game/api/MapPiece';
-import { Api } from '../server/Api';
+import { MapApi } from '../server/MapApi';
 import { Land } from './Land';
 
 
@@ -29,7 +28,7 @@ export class World {
   private peices: Array<Array<Piece | Loading>> = [[]];
 
 
-  constructor(private readonly api: Api) {
+  constructor(private readonly api: MapApi) {
 
   }
 
@@ -86,16 +85,16 @@ export class World {
 
   loadPiece(x: piecePos, y: piecePos): Promise<Piece> {
 
-    return this.api.getMapPiece(x, y).map((p: MapPiece) => {
+    return this.api.getMapPiece(x, y).map(p => {
       const lands = [];
-      const b1    = p.terrain;
-      const b2    = p.objects1;
+      let pair: [uint, uint];
 
-      for (let i = 0; i < p.terrain.length; i++) {
-        lands[i] = new Land(b1[i], b2[i], p.x + i % p.height, p.y + floor(i / p.width))
+      for (let i = 0; i < p.length; i++) {
+        pair     = p[i];
+        lands[i] = new Land(pair[0], pair[1], x * 16 + i % 16, y * 16 + floor(i / 16))
       }
 
-      return new Piece(p.x, p.y, lands)
+      return new Piece(x * 16, y * 16, lands)
     })
   }
 

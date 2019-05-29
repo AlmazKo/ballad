@@ -2,13 +2,14 @@ import { Action } from '../../game/actions/Action';
 import { ApiMessage } from '../../game/actions/ApiMessage';
 import { Package } from '../../game/actions/Package';
 import { MapPiece } from '../../game/api/MapPiece';
+import { MapPieceRaw } from '../../game/api/MapPieceRaw';
 import { Tiles } from '../../game/api/Tiles';
 import { Api } from './Api';
 import { MOCK_TILES } from './map';
-import { ResourcesApi } from './ResourcesApi';
+import { MapApi } from './MapApi';
 
 
-export class LocalServer implements Api, ResourcesApi {
+export class LocalServer implements Api, MapApi {
   private handler: ((msg: Package) => void) | undefined;
 
 
@@ -72,7 +73,7 @@ export class LocalServer implements Api, ResourcesApi {
 
   }
 
-  getMapPiece(x: int, y: int): Promise<MapPiece> {
+  getMapPiece(x: int, y: int): Promise<MapPieceRaw> {
 
     // ajax('file:///Users/almaz/ballad/resources/map.json')
 

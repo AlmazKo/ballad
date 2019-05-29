@@ -3,7 +3,7 @@
 // import { ApiCreature } from './api/ApiCreature';
 // import { CELL, Dir, QCELL } from '../game2/render/constants';
 // import { DrawableCreature, drawName } from './Creature';
-// import { RES } from './layers/GameCanvas';
+// import { IMG } from './layers/GameCanvas';
 // import { Metrics } from './Metrics';
 // import { Orientation } from '../game2/engine/Orientation';
 // import { TilePainter, toX1, toY1 } from './TilePainter';
@@ -90,7 +90,7 @@
 //       sx = Math.floor(this.meleeFactor * 4) * 32 + 8;
 //     }
 //
-//     bp.drawTile(RES.get("character"), sx, sy, sw, sh, x + QCELL, y);
+//     bp.drawTile(IMG.get("character"), sx, sy, sw, sh, x + QCELL, y);
 //
 //     drawName(bp.toInDirect(x, y), this);
 //   }

@@ -31,8 +31,9 @@ export class DamageEffect implements Effect {
 
     this.anim.run(time);
     const shiftY = this.f * 10;
-    p.toInTile(this.posX, this.posY).text("" + this.amount, HCELL, -shiftY, style.dmgText2);
-    p.toInTile(this.posX, this.posY).text("" + this.amount, HCELL, -shiftY, style.dmgText);
+    //fixme: implement
+    // p.toInTile(this.posX, this.posY).text("" + this.amount, HCELL, -shiftY, style.dmgText2);
+    // p.toInTile(this.posX, this.posY).text("" + this.amount, HCELL, -shiftY, style.dmgText);
 
   }
 

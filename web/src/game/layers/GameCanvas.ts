@@ -9,7 +9,7 @@
 // import { Resources } from '../Resources';
 // import { Buttons } from '../Slot';
 //
-// export const RES = new Resources();
+// export const IMG = new Resources();
 // const moving     = new KeyboardMoving();
 //
 // export class GameCanvas implements CanvasComposer, Pressable {
@@ -28,7 +28,7 @@
 //
 //
 //   constructor() {
-//     Promise.zip(RES.loadBasic(), ajax('/map'), ajax('/tiles'), (_, map, tiles) => {
+//     Promise.zip(IMG.loadBasic(), ajax('/map'), ajax('/tiles'), (_, map, tiles) => {
 //
 //         const lands  = new Lands(map as MapPiece, tiles as Tiles);
 //         this.game    = new Game(lands, moving);

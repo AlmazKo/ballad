@@ -4,8 +4,8 @@ import { GameCanvas } from './game2/render/GameCanvas';
 import './ext/promiser/ext';
 import './ext/array/ext';
 
-export const HOST    = "http://localhost";
-export const WS_HOST = "ws://localhost";
+export const HOST    = "https://localhost";
+export const WS_HOST = "wss://localhost";
 
 window.onload = () => {
   let div = document.getElementById("game")!!;

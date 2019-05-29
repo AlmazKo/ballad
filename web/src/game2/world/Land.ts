@@ -1,7 +1,9 @@
+import { TileType } from '../constants';
+
 export class Land {
   constructor(
-    readonly basis: uint,
-    readonly basis2: uint,
+    readonly tileId: uint,
+    readonly type: TileType,
     readonly x: pos,
     readonly y: pos
   ) {

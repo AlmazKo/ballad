@@ -1,20 +1,12 @@
-import { MapPiece } from '../../game/api/MapPiece';
-import { Tiles } from '../../game/api/Tiles';
+import { MapPieceRaw } from '../../game/api/MapPieceRaw';
 import { HOST } from '../../index';
-import { ResourcesApi } from './ResourcesApi';
+import { MapApi } from './MapApi';
 
-export class ResourcesServer implements ResourcesApi{
+export class ResourcesServer implements MapApi {
 
-
-
-  getMapPiece(x: int, y: int): Promise<MapPiece> {
-    return this.ajax(`/map-piece?x=${x}&y=${y}`) as Promise<MapPiece> ;
+  getMapPiece(x: int, y: int): Promise<MapPieceRaw> {
+    return this.ajax(`/map?x=${x}&y=${y}`) as Promise<MapPieceRaw>;
   }
-
-  getTileSet(id: int): Promise<Tiles> {
-    return this.ajax('/tile-set?id=' + id) as Promise<Tiles> ;
-  }
-
 
   private ajax(url: string): Promise<object> {
     return new Promise((resolve, reject) => {

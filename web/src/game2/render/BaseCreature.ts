@@ -11,7 +11,9 @@ import { Images } from '../Images';
 import { CELL, QCELL } from './constants';
 
 
-export const RES = get<Images>('images');
+export const IMG = function (res: string): HTMLImageElement | undefined {
+  return get<Images>('images').get(res);
+};
 
 export class DrawableCreature implements TileDrawable {
 

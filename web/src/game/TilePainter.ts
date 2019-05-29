@@ -1,7 +1,6 @@
-import { BasePainter } from '../draw/BasePainter';
 import { CanvasContext } from '../draw/CanvasContext';
 import { Orientation } from '../game2/engine/Orientation';
-import { RES } from '../game2/render/BaseCreature';
+import { IMG } from '../game2/render/BaseCreature';
 import { coord } from '../game2/render/constants';
 
 
@@ -31,7 +30,7 @@ export class TilePainter {
 
 
   draw(tileSet: string, sx: px, sy: px, sw: px, sh: px, x: px, y: px) {
-    const img = RES.get(tileSet);
+    const img = IMG(tileSet);
     if (!img) return;
 
     this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw, sh)
@@ -39,7 +38,7 @@ export class TilePainter {
 
   closure(tileSet: string, sx: px, sy: px, sw: px, sh: px): Closure {
     return (sx: px, sy: px, x: px, y: coord) => {
-      const img = RES.get(tileSet);
+      const img = IMG(tileSet);
       if (!img) return;
 
       this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw, sh)
