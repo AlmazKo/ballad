@@ -4,8 +4,10 @@ import { TilePainter } from '../../game/TilePainter';
 import { ProtoArrival } from '../engine/actions/ProtoArrival';
 import { StartMoving } from '../engine/actions/StartMoving';
 import { Game } from '../engine/Game';
+import { Images } from '../Images';
 import { DrawableCreature } from './BaseCreature';
 import { Camera } from './Camera';
+import { CELL } from './constants';
 import { LandsLayer } from './LandsLayer';
 
 
@@ -25,7 +27,9 @@ export class Render {
 
   constructor(
     private readonly game: Game,
-    private readonly lands: LandsLayer) {
+    private readonly lands: LandsLayer,
+    private readonly images: Images
+  ) {
     this.camera = new Camera(0, -4, 1);
   }
 
@@ -34,7 +38,7 @@ export class Render {
     this.width  = width;
     this.height = height;
     this.p      = new CanvasContext(ctx);
-    this.tp     = new TilePainter(this.p);
+    this.tp     = new TilePainter(this.p, this.images);
     this.lands.init(this.p);
     this.lands.changeSize(width, height);
   }
@@ -58,13 +62,13 @@ export class Render {
     for (const action of actions) {
 
       if (action instanceof ProtoArrival) {
-        camera.x    = action.creature.orientation.x;
-        camera.y    = action.creature.orientation.y;
+        camera.setTarget(action.creature.orientation);
         this.player = new DrawableCreature(action.creature)
       }
 
       if (action instanceof StartMoving) {
-        this.player!!.startMoving(action)
+        //fixme
+        // this.player!!.startMoving(action)
       }
 
     }
@@ -76,10 +80,18 @@ export class Render {
     camera.absoluteX = this.width / 2;
     camera.absoluteY = this.height / 2;
 
-    this.lands.draw(time, camera)
+    this.lands.draw(time, camera);
+
+    const p = this.player!!;
+    p.draw2(time, this.tp, camera);
 
 
-    this.player!!.draw(time, this.tp)
+    const x = camera.toX(p.orientation.x);
+    const y = camera.toY(p.orientation.y);
+
+    this.p!!.rect(x, y, CELL, CELL, {style: 'red'});
+    // this.p!!.text(`${camera.x};${camera.y + CELL}`, x + 2, CELL + y + 2, {style: 'black'});
+    this.p!!.text(`${p.orientation.shift.toFixed(3)}`, 10, 100, {style: 'black'});
 
     //draw lands
     //draw creatures

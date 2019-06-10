@@ -1,3 +1,5 @@
+export const NOPE = 0;
+
 export enum Dir {
   // NOPE = 0,
   NORTH = 1,
@@ -6,6 +8,21 @@ export enum Dir {
   EAST  = 4
 }
 
+
+export const debugDir = (d: Dir) => {
+  switch (d) {
+    case Dir.NORTH:
+      return "NORTH";
+    case Dir.SOUTH:
+      return "SOUTH";
+    case Dir.WEST:
+      return "WEST";
+    case Dir.EAST:
+      return "EAST";
+    default:
+      return "NOPE";
+  }
+};
 
 export enum TileType {
   NOTHING    = 0,

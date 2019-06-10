@@ -1,14 +1,6 @@
 import { CanvasContext } from '../draw/CanvasContext';
-import { Orientation } from '../game2/engine/Orientation';
-import { IMG } from '../game2/render/BaseCreature';
+import { Images } from '../game2/Images';
 import { coord } from '../game2/render/constants';
-
-
-export var toX: (pos: coord) => px = (pos: coord) => 0;
-export var toY: (pos: coord) => px = (pos: coord) => 0;
-export var toX1                    = (o: Orientation) => 0;
-export var toY1                    = (o: Orientation) => 0;
-
 
 export interface Closure {
   (sx: px, sy: px, x: px, y: coord): void;
@@ -21,8 +13,9 @@ export class TilePainter {
   height: px;
 
 
-  constructor(
-    private readonly p: CanvasContext) {
+  constructor(private readonly p: CanvasContext,
+              private readonly images: Images) {
+
     this.ctx    = p.ctx;
     this.width  = p.ctx.canvas.width;
     this.height = p.ctx.canvas.height;
@@ -30,7 +23,7 @@ export class TilePainter {
 
 
   draw(tileSet: string, sx: px, sy: px, sw: px, sh: px, x: px, y: px) {
-    const img = IMG(tileSet);
+    const img = this.images.get(tileSet);
     if (!img) return;
 
     this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw, sh)
@@ -38,7 +31,7 @@ export class TilePainter {
 
   closure(tileSet: string, sx: px, sy: px, sw: px, sh: px): Closure {
     return (sx: px, sy: px, x: px, y: coord) => {
-      const img = IMG(tileSet);
+      const img = this.images.get(tileSet);
       if (!img) return;
 
       this.ctx.drawImage(img, sx, sy, sw, sh, x, y, sw, sh)

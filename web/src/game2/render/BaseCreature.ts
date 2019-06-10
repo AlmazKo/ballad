@@ -1,19 +1,20 @@
 import { Animator, Delay, LoopAnimator } from '../../anim/Animator';
 import { Animators } from '../../anim/Animators';
 import { TileDrawable } from '../../game/TileDrawable';
-import { TilePainter, toX1, toY1 } from '../../game/TilePainter';
-import { get } from '../../Module';
-import { Dir } from '../constants';
-import { StartMoving } from '../engine/actions/StartMoving';
+import { TilePainter } from '../../game/TilePainter';
+import { debugDir, Dir, NOPE } from '../constants';
 import { Creature } from '../engine/Creature';
 import { Orientation } from '../engine/Orientation';
-import { Images } from '../Images';
-import { CELL, QCELL } from './constants';
+import { Camera } from './Camera';
+import { QCELL } from './constants';
 
 
-export const IMG = function (res: string): HTMLImageElement | undefined {
-  return get<Images>('images').get(res);
-};
+const map: px[] = [];
+
+map[Dir.NORTH] = 64;
+map[Dir.SOUTH] = 0;
+map[Dir.EAST]  = 32;
+map[Dir.WEST]  = 96;
 
 export class DrawableCreature implements TileDrawable {
 
@@ -22,46 +23,38 @@ export class DrawableCreature implements TileDrawable {
   private animators          = new Animators();
   private showInstantSpell   = false;
   private meleeFactor: float = 0;
+  private f: floatShare      = 0;
 
   constructor(c: Creature) {
     this.orientation = c.orientation;
+
+
   }
 
   draw(time: DOMHighResTimeStamp, bp: TilePainter) {
 
-    this.animators.run(time);
+  }
 
-    let s: float, sx: px, sy: px;
+  draw2(time: DOMHighResTimeStamp, bp: TilePainter, camera: Camera) {
+
+
     const o = this.orientation;
-    switch (o.sight) {
-      case Dir.NORTH:
-        sy = 64;
-        s  = -o.shift / CELL;
-        break;
 
-      case Dir.SOUTH:
-        sy = 0;
-        s  = o.shift / CELL;
-        break;
-
-      case Dir.EAST:
-        sy = 32;
-        s  = o.shift / CELL;
-        break;
-
-      case Dir.WEST:
-        sy = 96;
-        s  = -o.shift / CELL;
-        break;
-
-      default:
-        return;
+    if (o.moving !== NOPE && !this.animators.has("step")) {
+      this.startMoving()
     }
 
+    // if (this.orientation.moving === 0 && this.animators.has("step")) {
+    //   this.stopMoving();
+    // }
 
-    const x = toX1(o);
-    const y = toY1(o);
-    sx      = Math.floor(s / 0.25) * 16;
+    this.animators.run(time);
+
+
+    const x = camera.absoluteX;
+    const y = camera.absoluteY;
+    let sy  = map[o.sight];
+    let sx  = Math.floor(this.f / 0.25) * 16;
     // drawLifeLine(bp.toInDirect(x, y), this);
 
     let sw = 16, sh = 32;
@@ -74,43 +67,51 @@ export class DrawableCreature implements TileDrawable {
     }
 
     bp.draw("character", sx, sy, sw, sh, x + QCELL, y);
-
   }
 
-  startMoving(a: StartMoving) {
+  startMoving() {
+    console.log("startMoving", debugDir(this.orientation.moving));
     this.animators.interrupt("step");
-    const dr       = a.dir;
+    const dr       = this.orientation.moving;
     const o        = this.orientation;
     o.moving       = dr;
-    const movement = new LoopAnimator(a.speed, (f, i) => {
-      if (f >= 1) {
+    const movement = new LoopAnimator(200, (f, i, isNew) => {
+
+      this.f = f;
+
+      if (isNew && o.requestStop) {
+        o.requestStop = false;
+        o.moving      = NOPE;
+
         switch (dr) {
           case Dir.WEST:
-            o.x--;
+            o.x -= i;
             break;
           case Dir.EAST:
-            o.x++;
+            o.x += i;
             break;
           case Dir.NORTH:
-            o.y--;
+            o.y -= i;
             break;
           case Dir.SOUTH:
-            o.y++;
+            o.y += i;
             break;
         }
-        o.shift = f - 1;
-      } else {
-        o.shift = f;
+
+        o.shift = 0;
+        return true
       }
 
-      return true;
+      if (dr === Dir.NORTH || dr === Dir.EAST) {
+        o.shift = i + f;
+      } else {
+        o.shift = -i - f;
+      }
+
+      return false;
     });
 
     this.animators.set("step", movement);
-  }
-
-  stopMoving() {
-    this.animators.interrupt("step");
   }
 
   // onRotated(rotated: boolean) {

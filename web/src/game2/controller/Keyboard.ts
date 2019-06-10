@@ -1,6 +1,7 @@
 import { HotKey } from '../../game/Slot';
-import { Traits } from '../../game/Trait';
-import { Focus, KeyboardMoving } from './KeyboardMoving';
+import { Traits, TraitStep } from '../../game/Trait';
+import { MovingListener } from '../engine/MovingListener';
+import { MovingAggregator } from './MovingAggregator';
 
 export class Key {
   constructor(
@@ -48,58 +49,56 @@ export const Buttons: { [index: number]: Key } = {
 
 
 export class Keyboard {
-  private moving: KeyboardMoving;
-  private handler: (o: Focus) => any = () => {
-  };
 
-
-  constructor() {
-    window.addEventListener('keypress', e => this.onKeypress(e));
-    window.addEventListener('keyup', e => this.onKeyup(e));
+  constructor(
+    private readonly moving: MovingAggregator,
+    private readonly listener: MovingListener
+  ) {
+    // window.addEventListener('keypress', e => this.onKeypress(e));
     window.addEventListener('keydown', e => this.onKeydown(e));
-
-    this.moving = new KeyboardMoving()
+    window.addEventListener('keyup', e => this.onKeyup(e));
   }
 
-  listenFocus(handler: (o: Focus) => any) {
-    this.handler = handler;
+  // private onKeypress(e: KeyboardEvent) {
+  //   console.log('PRESS', e.key, e.keyCode)
+  // }
 
-  }
 
-  private onKeypress(e: KeyboardEvent) {
-    console.log('PRESS', e.key, e.keyCode)
+  private onKeydown(e: KeyboardEvent) {
+    const btn = Buttons[e.keyCode];
+    if (btn == undefined) return;
+    // console.log('DOWN ', e.key, e.keyCode);
+
+    // if (MovingButtons.contains(btn.code)) {
+
+    const t = hotKeys.get(btn)!!.trait;
+    if (t instanceof TraitStep) {
+      this.moving.press(t.dir);
+    }
+    //fixme return the code
+    // this.moving.press(btn.code);
+
   }
 
   private onKeyup(e: KeyboardEvent) {
 
     const btn = Buttons[e.keyCode];
     if (btn == undefined) return;
-    console.log('UP   ', btn);
+    console.log('onKeyup   ', e.keyCode, btn);
 
-    if (MovingButtons.contains(btn.code)) {
-      this.moving.add(btn.code);
-      this.onChanged();
+    const t = hotKeys.get(btn)!!.trait;
+    if (t instanceof TraitStep) {
+      this.moving.release(t.dir);
     }
   }
 
   private onChanged() {
-    const f = this.moving.next();
-    if (f !== undefined) {
-      console.log('Focus: ' , f);
-      this.handler(f);
-    }
+    // const f = this.moving.next();
+    // if (f !== undefined) {
+    //   console.log('Focus: ', f);
+    //   this.listener.onStartMoving(f);
+    // }
   }
 
-  private onKeydown(e: KeyboardEvent) {
-    const btn = Buttons[e.keyCode];
-    if (btn == undefined) return;
-    console.log('DOWN ', e.key, e.keyCode);
-
-
-    if (MovingButtons.contains(btn.code)) {
-      this.moving.add(btn.code);
-      this.onChanged();
-    }
-  }
 
 }

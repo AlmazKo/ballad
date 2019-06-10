@@ -1,16 +1,16 @@
 import { CanvasContext } from '../../draw/CanvasContext';
 import { Layer } from '../../game/layers/Layer';
-import { debugTile } from '../constants';
 import { Images } from '../Images';
 import { floor, Piece, World } from '../world/World';
 import { Camera } from './Camera';
-import { CELL } from './constants';
 
 
-const PIECE_SIZE: px                   = 1024;//fixme remove. take from api
+const ratio                            = 2;
+const CELL                             = 32 * ratio;
+const PIECE_SIZE: px                   = 512;//fixme remove. take from api
 const TILE_SIZE: px                    = 32;//fixme remove. take from api
 const TILESET_SIZE: px                 = 23;//fixme remove. take from api
-const offCanvas                        = new (window as any).OffscreenCanvas(PIECE_SIZE, PIECE_SIZE) as any;
+const offCanvas                        = new (window as any).OffscreenCanvas(PIECE_SIZE * ratio, PIECE_SIZE * ratio) as any;
 const offCtx: CanvasRenderingContext2D = offCanvas.getContext('2d', {alpha: true})!!;
 offCtx.imageSmoothingEnabled           = false;
 offCtx.imageSmoothingQuality           = "high";
@@ -18,7 +18,7 @@ const ctx                              = new CanvasContext(offCtx);
 
 
 ctx.fillRect(0, 0, PIECE_SIZE, PIECE_SIZE, '#999');
-ctx.text("NO DATA", 512, 512, {style: '#ccc', font: "bold 60px sans-serif", align: "right", baseline: "bottom"});
+ctx.text("NO DATA", PIECE_SIZE, PIECE_SIZE, {style: '#ccc', font: "bold 60px sans-serif", align: "right", baseline: "bottom"});
 
 const NO_DATA: ImageBitmap = offCanvas.transferToImageBitmap();
 
@@ -44,20 +44,15 @@ export class LandsLayer implements Layer {
         const img = this.getPieceImage(piece);
         const x   = camera.toX(piece.x);
         const y   = camera.toY(piece.y);
-        if (img) this.ctx.ctx.drawImage(img, 0, 0, PIECE_SIZE, PIECE_SIZE, x, y, 1024, 1024);
-        this.ctx.rect(x, y, PIECE_SIZE, PIECE_SIZE, {style: 'black'});
 
-        this.ctx.text(`${piece.x}x${piece.y}`, x + 2, y + 2, {style: 'red'});
+        if (img) this.ctx.ctx.drawImage(img, 0, 0, PIECE_SIZE * ratio, PIECE_SIZE * ratio, x, y, PIECE_SIZE, PIECE_SIZE);
+
+        // this.ctx.rect(x, y, 1024, 1024, {style: 'black'});
+
+        // this.ctx.text(`${piece.x}x${piece.y}`, x + 2, y + 2, {style: 'red'});
 
       }
     });
-
-
-    const x = camera.toX(camera.x);
-    const y = camera.toY(camera.y);
-
-    this.ctx.rect(x, y, CELL, CELL, {style: 'red'});
-    this.ctx.text(`${camera.x};${camera.y}`, x + 2, y + 2, {style: 'red'});
   }
 
   getPieceImage(piece: Piece): ImageBitmap {
@@ -91,10 +86,11 @@ export class LandsLayer implements Layer {
       const sx    = TILE_SIZE * tileX;
       const sy    = TILE_SIZE * tileY;
 
-
-      ctx.drawImage(img, sx, sy, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+      //
+      ctx.drawImage(img, sx, sy, TILE_SIZE, TILE_SIZE, x, y, CELL, CELL);
       ctx.rect(x, y, CELL, CELL, {style: '#000000', dash: [1, 4]});
-      ctx.text("" + debugTile(land.type), x + 1, y + 1, {style: 'black'});
+      // ctx.text("" + debugTile(land.type), x + 1, y + 1, {style: 'black'});
+      // ctx.text(x + "", x + 1, y + 1, {style: 'black'});
     }
 
     return offCanvas.transferToImageBitmap();

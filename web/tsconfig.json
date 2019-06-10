@@ -3,11 +3,9 @@
     "outDir": "./static/js",
     "noImplicitAny": true,
     "strict": true,
-    "module": "commonjs",
+    "module": "esnext",
     "skipLibCheck": true,
     "sourceMap": true,
-    "traceResolution": true,
-    "removeComments": true,
     "baseUrl": "./src",
     "target": "es2018",
     "lib": [ "es6", "dom"]

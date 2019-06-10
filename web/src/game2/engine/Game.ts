@@ -2,15 +2,14 @@ import { Package } from '../../game/actions/Package';
 import { ApiArrival } from '../../game/api/ApiArrival';
 import { ApiCreature } from '../../game/api/ApiCreature';
 import { Metrics } from '../../game/Metrics';
-import { Dir } from '../constants';
-import { Focus } from '../controller/KeyboardMoving';
+import { Dir, NOPE } from '../constants';
 import { Api } from '../server/Api';
 import { World } from '../world/World';
 import { Act } from './Act';
 import { ProtoArrival } from './actions/ProtoArrival';
-import { StartMoving } from './actions/StartMoving';
-import { ControlEventsListener } from './ControlEventsListener';
 import { Creature } from './Creature';
+import { Focus, Moving } from './Moving';
+import { MovingListener } from './MovingListener';
 import { Orientation } from './Orientation';
 import { Player } from './Player';
 
@@ -18,11 +17,7 @@ import { Player } from './Player';
 const NOTHING: Act[] = [];
 let ID               = 1;
 
-export class Game implements ControlEventsListener {
-
-  onAction(f: Focus): void {
-    throw new Error("Method not implemented.");
-  }
+export class Game implements MovingListener {
 
   private lastTick       = 0;
   // @ts-ignore
@@ -32,9 +27,11 @@ export class Game implements ControlEventsListener {
 
   constructor(
     private readonly api: Api,
-    private readonly world: World
+    private readonly world: World,
+    private readonly mvg: Moving,
   ) {
     api.listen(p => this.onData(p))
+    mvg.listen(this)
   }
 
 
@@ -82,18 +79,29 @@ export class Game implements ControlEventsListener {
   private addCreature(ac: ApiCreature): Creature {
 
     //fixme
-    const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(Dir.SOUTH, Dir.SOUTH, 0, ac.x, ac.y));
+    const c = new Player(ac.id, new Metrics(10, 10, "Test1"), new Orientation(NOPE, Dir.SOUTH, 0, ac.x, ac.y));
     this.creatures.set(c.id, c);
     return c;
   }
 
-  onChangedOrientation(f: Focus) {
-    const p = this.proto!!;
-
+  onStartMoving(f: Focus) {
+    const p              = this.proto!!;
     p.orientation.moving = f.moving;
     p.orientation.sight  = f.sight;
 
-    this.actions.push(new StartMoving(ID++, this.proto, Date.now(), 200, f.moving))
 
+    console.log("Start moving:", f, p.orientation);
+
+    // this.actions.push(new StartMoving(ID++, this.proto, Date.now(), 200, f.moving))
+
+  }
+
+  onChangeSight(dir: Dir): void {
+  }
+
+  onStopMoving(): void {
+    console.log("Stop moving");
+    const p                   = this.proto!!;
+    p.orientation.requestStop = true;
   }
 }

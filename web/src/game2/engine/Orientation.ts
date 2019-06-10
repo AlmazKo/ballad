@@ -1,6 +1,7 @@
 import { Dir } from '../constants';
 
 export class Orientation {
+  requestStop = false;
   constructor(
     public moving: Dir,
     public sight: Dir,

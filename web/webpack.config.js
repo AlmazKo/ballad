@@ -5,7 +5,7 @@ module.exports = {
         index: './src/index.ts',
         admin: './src/admin.ts'
     },
-
+    // mode: 'development',
     resolve: {
         extensions: ['.ts']
     },
@@ -23,6 +23,6 @@ module.exports = {
     },
     optimization: {
         minimize: true
-    },
-    devtool: 'source-map'
+    }/*,
+    devtool: 'inline-sourcemap'*/
 };
